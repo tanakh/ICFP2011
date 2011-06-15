@@ -21,32 +21,28 @@ public:
   void mousePressed(int x, int y, int button);
   void mouseReleased(int x, int y, int button);
   void windowResized(int w, int h);
-		
-  ofTrueTypeFont  verdana;
-};
 
-struct nfLabel {
-  float x, y, fontsize;
-  std::string text;
-	
-  nfLabel (float x, float y, float fontsize, const std::string &text) :
-    x(x), y(y), fontsize(fontsize), text(text) {}
+  ofImage testImage;
+  ofTrueTypeFont  verdana;
 };
 
 struct nfStamp {
   float x, y, zoom;
   int pattern;
-  nfStamp (float x, float y, float zoom, int pattern) :
-    x(x), y(y), zoom(zoom), pattern(pattern) {}
+  float fontsize;
+  string text;
+  nfStamp (float x, float y, float zoom, int pattern,
+           float fontsize = -1, string text = "") :
+    x(x), y(y), zoom(zoom), pattern(pattern),
+    fontsize(fontsize), text(text) {}
 };
 
 struct nfWorld {
   int generation;
-  std::vector<nfLabel> labels;
   std::vector<nfStamp> stamps;
   nfWorld () : generation(0) {}
   void clear () {
-    labels.clear(); stamps.clear();
+    stamps.clear();
   }
 };
 
