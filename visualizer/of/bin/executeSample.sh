@@ -1,1 +1,1 @@
-runhaskell ../../client/TestLabelClient.hs | ./visualizer.app/Contents/MacOS/emptyExample 
+runhaskell ../../client/CellAutomataClient.hs | ./visualizer.app/Contents/MacOS/emptyExample 

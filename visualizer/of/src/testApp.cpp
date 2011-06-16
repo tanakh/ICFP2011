@@ -8,8 +8,8 @@ using namespace std;
 
 
 nfWorld *fgWorld, *bgWorld, *drawnWorld;
-pthread_mutex_t worldMutex;
-pthread_mutex_t dictMutex;
+pthread_mutex_t worldMutex; // lock when swapping worlds
+pthread_mutex_t dictMutex; // lock when touching patternDict or filenameDict
 
 map<string, int> patternDict;
 vector<string> filenameDict;
@@ -25,22 +25,6 @@ int filenameToPattern (const string &fn) {
     filenameDict.push_back(fn);
   } pthread_mutex_unlock(&dictMutex);
   return ret;
-  /*
-  cerr << "will load : " << fn << endl;
-  const int ret = images.size();
-  patternTable[fn] = ret;
-  //  pthread_mutex_lock(&imagesMutex); {
-  cerr << "new" << ret << endl;
-  ofImage *newImg = new ofImage();
-  //images.push_back();
-  cerr << "lpush" << endl;
-  //} pthread_mutex_unlock(&imagesMutex);
-  cerr << "load" << endl;
-  newImg->loadImage(fn);
-  //images[ret]->loadImage(fn);
-  cerr << "load : " << fn << endl;
-  return ret;*/
-  return 0;
 }
 
 //========================================================================
@@ -57,7 +41,9 @@ void* inputter (void* args) {
     getline(cin, linestr);
     istringstream iss(linestr);
     iss >> cmd;
-    if (cmd == "flush") {
+    if (cmd == "") {
+	  continue;
+	} else if (cmd == "flush") {
       pthread_mutex_lock(&worldMutex); {
         swap(fgWorld, bgWorld);
       } pthread_mutex_unlock(&worldMutex);
@@ -126,7 +112,6 @@ void testApp::draw(){
     while (filenameDict.size() > images.size()) {
       int i = images.size();
       images.push_back(new ofImage());
-      cerr << "loading " << i << " " << filenameDict[i] << endl;
       images[i]->loadImage(filenameDict[i]);
     }
   } pthread_mutex_unlock(&dictMutex);
