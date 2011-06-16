@@ -8,8 +8,7 @@
 
 class testApp : public ofBaseApp{
 	
-public:
-		
+public:		
   void setup();
   void update();
   void draw();
@@ -22,10 +21,10 @@ public:
   void mouseReleased(int x, int y, int button);
   void windowResized(int w, int h);
 
-  ofImage testImage;
   ofTrueTypeFont  verdana;
 };
 
+// an Image coupled with text drawn on the screen.
 struct nfStamp {
   float x, y, zoom;
   int pattern;
@@ -37,6 +36,7 @@ struct nfStamp {
     fontsize(fontsize), text(text) {}
 };
 
+// a set of objects that is to be drawn.
 struct nfWorld {
   int generation;
   std::vector<nfStamp> stamps;
@@ -47,7 +47,6 @@ struct nfWorld {
 };
 
 void* inputter (void* args);
-
 
 #endif	
 
