@@ -112,13 +112,13 @@ revive_sayasaya f1 f2 = do
 
   clear 145
   145    $< Zero
-  145    $< Succ
+  Succ   $> 145
   Revive $> 145
 
   clear 145
   145    $< Zero
-  145    $< Succ
-  145    $< Succ
+  Succ   $> 145
+  Succ   $> 145
   Revive $> 145
 
   get_closure f2 f1 f2
