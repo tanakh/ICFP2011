@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 
+import Control.Monad
 import Data.Vector ((!))
 import qualified Data.Vector as V
 import LTG
@@ -12,9 +13,18 @@ import System.Random
 
 main :: IO ()  
 main = do
-  (slotRange:seed:_) <- fmap (map read) getArgs
+  (slotRange:seed:side:_) <- fmap (map read) getArgs
   setStdGen $ mkStdGen seed
+  when (side==1) skip
   play slotRange
+  
+
+skip :: IO ()
+skip = do
+  _ <- getLine
+  _ <- getLine
+  _ <- getLine
+  return ()
 
 play :: Int -> IO ()
 play slotRange = do
@@ -25,5 +35,6 @@ play slotRange = do
   if lr == 0 
   then (s $< c)
   else (c $> s)
+  skip
   play slotRange
 
