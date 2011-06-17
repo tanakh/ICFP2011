@@ -1,5 +1,20 @@
 {-# OPTIONS -Wall #-}
-import LTG
+import LTG hiding(($<), ($>))
+
+skip :: IO ()
+skip = do
+  _ <- getLine
+  _ <- getLine
+  _ <- getLine
+  return ()
+
+($<) x y = do
+  right x y
+  skip
+  
+($>) x y = do
+  left x y
+  skip
 
 -- Love me do
 apply0 :: Int -> IO ()
@@ -50,30 +65,43 @@ copytozero field = do
   Get $> 0
 
 -- inject zombie that attack
-inject_sayasaya :: Int -> IO ()
-inject_sayasaya dmg = do
-  -- v[7] <- S (K (attack 0 0))
-  7 $< Attack
-  7 $< Zero
-  7 $< Zero
-  K $> 7
-  S $> 7
-  -- v[0] <- K 256
-  num 0 256
+inject_sayasaya :: Int -> Int -> Int -> IO ()
+inject_sayasaya f1 f2 dmg = do
+  -- v[f1] <- S (K (attack 0 0))
+  f1 $< Attack
+  f1 $< Zero
+  f1 $< Zero
+  K $> f1
+  S $> f1
+  -- v[0] <- K dmg
+  num 0 dmg
   K $> 0
   -- Sayasaya ready
-  apply0 7
+  apply0 f1
   -- Inject!
-  8 $< Zero
-  Zombie $> 8
-  copytozero 7
-  apply0 8
+  f2 $< Zero
+  Zombie $> f2
+  copytozero f1
+  apply0 f2
+
+sittingDuck :: IO()
+sittingDuck = do
+  I $> 0
+  sittingDuck
+  
+attackloop :: Int -> Int -> IO()
+attackloop v k = do
+  attack v k 8192
+  attack (v+1) k 8192
+  inject_sayasaya (v+2) (v+3) 8192
+  if v > 250 
+    then return () 
+    else attackloop (v + 4) (k+1)
 
 main :: IO()
 main = do
-  attack 3 0 8192
-  attack 4 0 8192
-  inject_sayasaya 256
+  attackloop 2 0
+  sittingDuck
 
 
 
