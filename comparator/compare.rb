@@ -33,6 +33,18 @@ def diff(fns)
   t = 1
   hands0.length.times{|i|
     if hands0[i] != hands1[i]
+      unless hands0[i] && hands1[i]
+        return <<MSG
+hand number mismatch in #{p} turn #{t} 
+---
+#{hands0[i].inspect}
+---
+#{hands1[i].inspect}
+---
+
+MSG
+      end
+        
       return <<MSG
 wrong hand in player #{p} turn #{t} 
 ---
