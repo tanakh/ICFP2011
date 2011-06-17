@@ -192,23 +192,28 @@ input my (_, Just inp, _, _) (Just out, _, _, _) = do
   putStrLn "(1) apply card to slot, or (2) apply slot to card?"
   typ <- read <$> hGetLine inp
   hPrint out $ show typ
+  hFlush out
   case typ of
     1 -> do
       putStrLn "card name?"
       cname <- hGetLine inp
       hPutStrLn out cname
+      hFlush out
       putStrLn "slot no?"
       pos <- read <$> hGetLine inp
       hPutStrLn out $ show pos
+      hFlush out
       val <- MV.read (field my) pos
       return (VApp (getCard cname) val, pos)
     2 -> do
       putStrLn "slot no?"
       pos <- readLn
       hPutStrLn out $ show pos
+      hFlush out
       putStrLn "card name?"
       cname <- getLine
       hPutStrLn out cname
+      hFlush out
       val <- MV.read (field my) pos
       return (VApp val (getCard cname), pos)
 
