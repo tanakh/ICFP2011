@@ -4,9 +4,11 @@ import Control.Applicative
 import qualified Control.Exception as E
 import Control.Monad
 import qualified Data.Vector.Mutable as MV
+import Data.IORef
 import System.Environment
 import System.Exit
 import System.IO
+import System.IO.Unsafe
 import System.Process
 
 data Value
@@ -72,121 +74,129 @@ printState stat = go 0 where
             putStrLn $ show ix ++ "={" ++ show vi ++ "," ++ showValue fl ++ "}"
         go (ix+1)
 
-eval :: Int -> Value -> State -> State -> IO Value
-eval !cnt !v my opp
-  | cnt >= 1000 = error "TLE"
-  | otherwise = case v of 
-  VApp (VFun "I") a ->
-    return a
-  VApp (VFun "succ") a ->
-    case a of
-      VInt n ->
-        return $ VInt $ min 65535 $ n + 1
-      _ ->
-        error "succ: argument is not integer"
-  VApp (VFun "dbl") a ->
-    case a of
-      VInt n ->
-        return $ VInt $ min 65535 $ n * n
-      _ ->
-        error "dbl: argument is not integer"
-  VApp (VFun "get") a ->
-    case a of
-      VInt i -> do
-        when (not (i >= 0 && i <= 255)) $ do
-          error "get: invalid slot number"
-        hp <- MV.read (vital my) i
-        when (hp <= 0) $ do
-          error "get: slot is dead"
-        MV.read (field my) i
-      _ -> do
-        error "get: argument is not integer"
-  VApp (VFun "put") _ ->
-    return $ VFun "I"
-  VApp (VApp (VApp (VFun "S") f) g) x ->
-    eval (cnt+1) (VApp (VApp f x) (VApp g x)) my opp
-  VApp (VApp (VFun "K") x) _ -> 
-    return x
-  VApp (VFun "inc") a -> do
-    case a of
-      VInt i | i >= 0 && i <= 255 -> do
-        vv <- MV.read (vital my) i
-        when (vv >= 1 && vv <= 65534) $ do
-          MV.write (vital my) i (vv + 1)
-      _ ->
-        error "inc: invalid slot number"
-    return $ VFun "I"
-  VApp (VFun "dec") a -> do
-    case a of
-      VInt i | i >= 0 && i <= 255 -> do
-        vv <- MV.read (vital opp) (255 - i)
-        when (vv >= 1 && vv <= 65535) $ do
-          MV.write (vital opp) (255 - i) (vv - 1)
-      _ ->
-        error "dec: invalid slot number"
-    return $ VFun "I"
-  VApp (VApp (VApp (VFun "attack") i) j) n -> do
-    case (i, n) of
-      (VInt ii, VInt nn) | ii >= 0 && ii <= 255 -> do
-        vi <- MV.read (vital my) ii
-        when (nn > vi) $ do
-          error "attack: n is greater then vital"
-        MV.write (vital my) ii (vi - nn)
-        case j of
-          VInt jj | jj >= 0 && jj <= 255 -> do
-            vj <- MV.read (vital opp) (255 - jj)
-            MV.write (vital opp) (255 - jj) (max 0 $ vj - (nn * 9 `div` 10))
-          _ -> do
-            error "attack: j is not slot number"
-      _ ->
-        error "attack: i is not slot number or n is not number"
-    return $ VFun "I"
-  VApp (VApp (VApp (VFun "help") i) j) n -> do
-    case (i, n) of
-      (VInt ii, VInt nn) | ii >= 0 && ii <= 255 -> do
-        vi <- MV.read (vital my) ii
-        when (nn > vi) $ do
-          error "help: n is greater then vital"
-        MV.write (vital my) ii (vi - nn)
-        case j of
-          VInt jj | jj >= 0 && jj <= 255 -> do
-            vj <- MV.read (vital my) jj
-            MV.write (vital my) jj (min 65535 $ vj + (nn * 11 `div` 10))
-          _ -> do
-            error "help: j is not slot number"
-      _ ->
-        error "help: i is not slot number or n is not number"
-    return $ VFun "I"
-  VApp (VFun "copy") i -> do
-    case i of
-      VInt ii | ii >= 0 && ii <= 255 -> do
-        MV.read (field opp) ii
-      _ -> do
-        error "copy: argument is not valid slot number"
-  VApp (VFun "revive") i -> do
-    case i of
-      VInt ii | ii >= 0 && ii <= 255 -> do
-        vi <- MV.read (vital my) ii
-        when (vi == 0) $ do
-          MV.write (vital my) ii 1
-        return $ VFun "I"
-      _ -> do
-        error "revive: argument is not valid slot number"
-  VApp (VApp (VFun "zombie") i) x -> do
-    case i of
-      VInt ii | ii >= 0 && ii <= 255 -> do
-        vi <- MV.read (vital opp) ii
-        when (vi > 0) $ do
-          error "zombie: slot is not dead"
-        MV.write (field opp) ii x
-        MV.write (vital opp) ii (-1)
-        return $ VFun "I"
-      _ -> do
-        error "zombie: argument is not valid slot number"
-  VApp (VInt _) _ -> do
-    error "Native.Error"
-  _ ->
-    return v
+gcnt :: IORef Int
+gcnt = unsafePerformIO $ newIORef 0
+
+eval :: Value -> State -> State -> IO Value
+eval !v my opp = do
+  cur <- readIORef gcnt
+  when (cur >= 1000) $ do
+    error "TLE"
+  writeIORef gcnt (cur + 1)
+  case v of 
+    VApp (VFun "I") a ->
+      return a
+    VApp (VFun "succ") a ->
+      case a of
+        VInt n ->
+          return $ VInt $ min 65535 $ n + 1
+        _ ->
+          error "succ: argument is not integer"
+    VApp (VFun "dbl") a ->
+      case a of
+        VInt n ->
+          return $ VInt $ min 65535 $ n * n
+        _ ->
+          error "dbl: argument is not integer"
+    VApp (VFun "get") a ->
+      case a of
+        VInt i -> do
+          when (not (i >= 0 && i <= 255)) $ do
+            error "get: invalid slot number"
+          hp <- MV.read (vital my) i
+          when (hp <= 0) $ do
+            error "get: slot is dead"
+          MV.read (field my) i
+        _ -> do
+          error "get: argument is not integer"
+    VApp (VFun "put") _ ->
+      return $ VFun "I"
+    VApp (VApp (VApp (VFun "S") f) g) x -> do
+      f' <- eval (VApp f x) my opp
+      a' <- eval (VApp g x) my opp
+      eval (VApp f' a') my opp
+    VApp (VApp (VFun "K") x) _ -> 
+      return x
+    VApp (VFun "inc") a -> do
+      case a of
+        VInt i | i >= 0 && i <= 255 -> do
+          vv <- MV.read (vital my) i
+          when (vv >= 1 && vv <= 65534) $ do
+            MV.write (vital my) i (vv + 1)
+        _ ->
+          error "inc: invalid slot number"
+      return $ VFun "I"
+    VApp (VFun "dec") a -> do
+      case a of
+        VInt i | i >= 0 && i <= 255 -> do
+          vv <- MV.read (vital opp) (255 - i)
+          when (vv >= 1 && vv <= 65535) $ do
+            MV.write (vital opp) (255 - i) (vv - 1)
+        _ ->
+          error "dec: invalid slot number"
+      return $ VFun "I"
+    VApp (VApp (VApp (VFun "attack") i) j) n -> do
+      case (i, n) of
+        (VInt ii, VInt nn) | ii >= 0 && ii <= 255 -> do
+          vi <- MV.read (vital my) ii
+          when (nn > vi) $ do
+            error "attack: n is greater then vital"
+          MV.write (vital my) ii (vi - nn)
+          case j of
+            VInt jj | jj >= 0 && jj <= 255 -> do
+              vj <- MV.read (vital opp) (255 - jj)
+              MV.write (vital opp) (255 - jj) (max 0 $ vj - (nn * 9 `div` 10))
+            _ -> do
+              error "attack: j is not slot number"
+        _ ->
+          error "attack: i is not slot number or n is not number"
+      return $ VFun "I"
+    VApp (VApp (VApp (VFun "help") i) j) n -> do
+      case (i, n) of
+        (VInt ii, VInt nn) | ii >= 0 && ii <= 255 -> do
+          vi <- MV.read (vital my) ii
+          when (nn > vi) $ do
+            error "help: n is greater then vital"
+          MV.write (vital my) ii (vi - nn)
+          case j of
+            VInt jj | jj >= 0 && jj <= 255 -> do
+              vj <- MV.read (vital my) jj
+              MV.write (vital my) jj (min 65535 $ vj + (nn * 11 `div` 10))
+            _ -> do
+              error "help: j is not slot number"
+        _ ->
+          error "help: i is not slot number or n is not number"
+      return $ VFun "I"
+    VApp (VFun "copy") i -> do
+      case i of
+        VInt ii | ii >= 0 && ii <= 255 -> do
+          MV.read (field opp) ii
+        _ -> do
+          error "copy: argument is not valid slot number"
+    VApp (VFun "revive") i -> do
+      case i of
+        VInt ii | ii >= 0 && ii <= 255 -> do
+          vi <- MV.read (vital my) ii
+          when (vi == 0) $ do
+            MV.write (vital my) ii 1
+          return $ VFun "I"
+        _ -> do
+          error "revive: argument is not valid slot number"
+    VApp (VApp (VFun "zombie") i) x -> do
+      case i of
+        VInt ii | ii >= 0 && ii <= 255 -> do
+          vi <- MV.read (vital opp) ii
+          when (vi > 0) $ do
+            error "zombie: slot is not dead"
+          MV.write (field opp) ii x
+          MV.write (vital opp) ii (-1)
+          return $ VFun "I"
+        _ -> do
+          error "zombie: argument is not valid slot number"
+    VApp (VInt _) _ -> do
+      error "Native.Error"
+    _ ->
+      return v
     
 type Proc = (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle)
 
@@ -251,7 +261,7 @@ play !turn !pid my opp p1 p2 = do
   putStrLn "(slots {10000,I} are omitted)"
 
   (val, pos) <- input my p1 p2
-  eres <- E.try $ eval 0 val my opp
+  eres <- E.try $ eval val my opp
   case eres of
     Left (E.SomeException e) -> do
       print e
