@@ -1,3 +1,4 @@
+#!/usr/bin/env runhaskell
 {-# Language BangPatterns #-}
 
 import Control.Applicative
@@ -281,11 +282,13 @@ play !turn !pid my opp p1 p2 = do
   putStrLn "(slots {10000,I} are omitted)"
 
   (val, pos) <- input my p1 p2
+  -- print (val, pos)
   
   forM_ [0..255] $ \i -> do
     vi <- MV.read (vital my) i
     fi <- MV.read (field my) i
     when (vi == -1) $ do
+      -- print "*** ZOMBIE ***"
       writeIORef gcnt 0
       es <- E.try $ eval True (VApp fi (VFun "I")) my opp
       case es of
@@ -296,14 +299,19 @@ play !turn !pid my opp p1 p2 = do
       MV.write (field my) i (VFun "I")
       MV.write (vital my) i 0
   
-  writeIORef gcnt 0
-  eres <- E.try $ eval False val my opp
-  case eres of
-    Left (E.SomeException e) -> do
-      print e
+  vi <- MV.read (vital my) pos
+  if vi > 0
+    then do
+    writeIORef gcnt 0
+    eres <- E.try $ eval False val my opp
+    case eres of
+      Left (E.SomeException e) -> do
+        print e
+        MV.write (field my) pos (VFun "I")
+      Right res ->
+        MV.write (field my) pos res
+    else do
       MV.write (field my) pos (VFun "I")
-    Right res ->
-      MV.write (field my) pos res
   play (turn+1) (1-pid) opp my p2 p1
 
 main :: IO ()
