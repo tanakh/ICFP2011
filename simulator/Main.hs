@@ -77,8 +77,8 @@ printState stat = go 0 where
 gcnt :: IORef Int
 gcnt = unsafePerformIO $ newIORef 0
 
-eval :: Value -> State -> State -> IO Value
-eval !v my opp = do
+eval :: Bool -> Value -> State -> State -> IO Value
+eval !z !v my opp = do
   cur <- readIORef gcnt
   when (cur >= 1000) $ do
     error "TLE"
@@ -112,26 +112,34 @@ eval !v my opp = do
     VApp (VFun "put") _ ->
       return $ VFun "I"
     VApp (VApp (VApp (VFun "S") f) g) x -> do
-      f' <- eval (VApp f x) my opp
-      a' <- eval (VApp g x) my opp
-      eval (VApp f' a') my opp
+      f' <- eval z (VApp f x) my opp
+      a' <- eval z (VApp g x) my opp
+      eval z (VApp f' a') my opp
     VApp (VApp (VFun "K") x) _ -> 
       return x
     VApp (VFun "inc") a -> do
-      case a of
-        VInt i | i >= 0 && i <= 255 -> do
+      case (a, z) of
+        (VInt i, False) | i >= 0 && i <= 255 -> do
           vv <- MV.read (vital my) i
           when (vv >= 1 && vv <= 65534) $ do
             MV.write (vital my) i (vv + 1)
+        (VInt i, True) | i >= 0 && i <= 255 -> do
+          vv <- MV.read (vital my) i
+          when (vv >= 1 && vv <= 65535) $ do
+            MV.write (vital my) i (vv - 1)
         _ ->
           error "inc: invalid slot number"
       return $ VFun "I"
     VApp (VFun "dec") a -> do
-      case a of
-        VInt i | i >= 0 && i <= 255 -> do
+      case (a, z) of
+        (VInt i, False) | i >= 0 && i <= 255 -> do
           vv <- MV.read (vital opp) (255 - i)
           when (vv >= 1 && vv <= 65535) $ do
             MV.write (vital opp) (255 - i) (vv - 1)
+        (VInt i, True) | i >= 0 && i <= 255 -> do
+          vv <- MV.read (vital opp) (255 - i)
+          when (vv >= 1 && vv <= 65534) $ do
+            MV.write (vital opp) (255 - i) (vv + 1)
         _ ->
           error "dec: invalid slot number"
       return $ VFun "I"
@@ -145,7 +153,7 @@ eval !v my opp = do
           case j of
             VInt jj | jj >= 0 && jj <= 255 -> do
               vj <- MV.read (vital opp) (255 - jj)
-              MV.write (vital opp) (255 - jj) (max 0 $ vj - (nn * 9 `div` 10))
+              MV.write (vital opp) (255 - jj) (max 0 $ vj - (if z then -1 else 1) * (nn * 9 `div` 10))
             _ -> do
               error "attack: j is not slot number"
         _ ->
@@ -161,7 +169,7 @@ eval !v my opp = do
           case j of
             VInt jj | jj >= 0 && jj <= 255 -> do
               vj <- MV.read (vital my) jj
-              MV.write (vital my) jj (min 65535 $ vj + (nn * 11 `div` 10))
+              MV.write (vital my) jj (min 65535 $ vj + (if z then -1 else 1) *(nn * 11 `div` 10))
             _ -> do
               error "help: j is not slot number"
         _ ->
@@ -261,8 +269,23 @@ play !turn !pid my opp p1 p2 = do
   putStrLn "(slots {10000,I} are omitted)"
 
   (val, pos) <- input my p1 p2
+  
+  forM_ [0..255] $ \i -> do
+    vi <- MV.read (vital my) i
+    fi <- MV.read (field my) i
+    when (vi == -1) $ do
+      writeIORef gcnt 0
+      es <- E.try $ eval True (VApp fi (VFun "I")) my opp
+      case es of
+        Left (E.SomeException e) -> do
+          print e
+        _ ->
+          return ()
+      MV.write (field my) i (VFun "I")
+      MV.write (vital my) i 0
+  
   writeIORef gcnt 0
-  eres <- E.try $ eval val my opp
+  eres <- E.try $ eval False val my opp
   case eres of
     Left (E.SomeException e) -> do
       print e
