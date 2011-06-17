@@ -71,8 +71,10 @@ printState stat = go 0 where
           _ -> do
             putStrLn $ show ix ++ "={" ++ show vi ++ "," ++ showValue fl ++ "}"
 
-eval :: Value -> State -> State -> IO Value
-eval v my opp = case v of 
+eval :: Int -> Value -> State -> State -> IO Value
+eval !cnt !v my opp
+  | cnt >= 1000 = error "TLE"
+  | otherwise = case v of 
   VApp (VFun "I") a ->
     return a
   VApp (VFun "succ") a ->
@@ -101,7 +103,7 @@ eval v my opp = case v of
   VApp (VApp (VFun "put") _) y ->
     return y
   VApp (VApp (VApp (VFun "S") f) g) x ->
-    eval (VApp (VApp f x) (VApp g x)) my opp
+    eval (cnt+1) (VApp (VApp f x) (VApp g x)) my opp
   VApp (VApp (VFun "K") x) _ -> 
     return x
   VApp (VFun "inc") a -> do
@@ -248,7 +250,7 @@ play !turn !pid my opp p1 p2 = do
   putStrLn "(slots {10000,I} are omitted)"
 
   (val, pos) <- input my p1 p2
-  eres <- E.try $ eval val my opp
+  eres <- E.try $ eval 0 val my opp
   case eres of
     Left (E.SomeException e) ->
       print e
