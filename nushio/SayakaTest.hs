@@ -199,7 +199,9 @@ attackloop v k s = do
   attack (v+1) k 8192
   inject_sayasaya 3 4 s s 10000
   if v > 240 
-    then attackloop 5 (k+1) 0
+    then do
+      revive_sayasaya 1 2
+      attackloop 5 (k+1) 0
     else attackloop (v+2) (k+1) (s+1)
 
 main :: IO()
@@ -208,7 +210,6 @@ main = do
   let b = (read arg :: Int) -- 0: Sente, 1: Gote
   if b == 1 then skip else return ()
   attackloop 5 0 0
-  revive_sayasayaloop
   sittingDuck
 
 
