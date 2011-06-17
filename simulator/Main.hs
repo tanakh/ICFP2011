@@ -225,19 +225,19 @@ play !turn !pid my opp p1 p2 = do
   od <- allDead opp
   
   when (md && od) $ do
-    putStrLn "*** draw"
+    putStrLn "!! draw"
     exitSuccess
   
   when md $ do
-    putStrLn $ "*** player " ++ (show $ 1-pid) ++ " win"
+    putStrLn $ "!! player " ++ (show $ 1-pid) ++ " win"
     exitSuccess
 
   when od $ do
-    putStrLn $ "*** player " ++ (show $ pid) ++ " win"
+    putStrLn $ "!! player " ++ (show $ pid) ++ " win"
     exitSuccess
   
   when (turn >= 200000) $ do
-    putStrLn "*** draw"
+    putStrLn "!! draw"
     exitSuccess
   
   when (turn `mod` 2 == 0) $ do
