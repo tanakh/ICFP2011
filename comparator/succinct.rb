@@ -35,6 +35,7 @@ def succinct_fp(fp, verbose = false)
       else
         hands << hand
         hand = []
+        STDERR.puts "omitted"
         flag = false
       end
     end

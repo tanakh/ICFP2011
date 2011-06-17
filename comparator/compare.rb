@@ -37,6 +37,7 @@ if ./ai1 or ./ai2 is not specified, ./Random is used.
 ./ai1 or ./ai2 shall take random number seed as its last argument,
 which the comparator will append automatically.
 USAGE
+exit
 end
 
 system("ln -s ../nushio/Random Random")
