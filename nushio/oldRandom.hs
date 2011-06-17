@@ -9,11 +9,12 @@ import System.Environment
 import System.Random
 
 
-slotRange = 8
+
 
 main :: IO ()  
 main = do
-  (side:_) <- fmap (map read) getArgs
+  (slotRange:seed:side:_) <- fmap (map read) getArgs
+  setStdGen $ mkStdGen seed
   when (side==1) skip
   play slotRange
   

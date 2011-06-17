@@ -3,7 +3,7 @@
 
 if ARGV.length < 2
   STDERR.puts <<USAGE
-./recorder log-filename ./program
+./record.rb log-filename ./program
 
 excecute the ./program, and records its standard output to log-filename.
 USAGE
