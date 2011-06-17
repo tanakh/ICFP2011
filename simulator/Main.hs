@@ -153,7 +153,13 @@ eval !z !v my opp = do
           case j of
             VInt jj | jj >= 0 && jj <= 255 -> do
               vj <- MV.read (vital opp) (255 - jj)
-              MV.write (vital opp) (255 - jj) (max 0 $ vj - (if z then -1 else 1) * (nn * 9 `div` 10))
+              if not z
+                then do
+                when (vj > 0) $ do
+                  MV.write (vital opp) (255 - jj) (max 0 $ vj - (nn * 9 `div` 10))
+                else do
+                when (vj > 0) $ do
+                  MV.write (vital opp) (255 - jj) (min 65535 $ vj + (nn * 9 `div` 10))
             _ -> do
               error "attack: j is not slot number"
         _ ->
@@ -169,7 +175,13 @@ eval !z !v my opp = do
           case j of
             VInt jj | jj >= 0 && jj <= 255 -> do
               vj <- MV.read (vital my) jj
-              MV.write (vital my) jj (min 65535 $ vj + (if z then -1 else 1) *(nn * 11 `div` 10))
+              if not z
+                then do
+                when (vj > 0) $ do
+                  MV.write (vital my) jj (min 65535 $ vj + (nn * 11 `div` 10))
+                else do
+                when (vj > 0) $ do
+                  MV.write (vital my) jj (max 0 $ vj - (nn * 11 `div` 10))
             _ -> do
               error "help: j is not slot number"
         _ ->
