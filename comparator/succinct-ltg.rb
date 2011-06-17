@@ -19,12 +19,16 @@ sh "mkdir /tmp/out/"
 tmpfn = "/tmp/out/#{rand(2**30)}"
 sh("../bin/ltg match '#{ARGV[1]}' '#{ARGV[2]}' &> #{tmpfn}")
 
+p = 0
+t = 1
 succinct(open(tmpfn,'r').read).each{|hand|
-  STDERR.puts "***"
+  STDERR.puts "*** player #{p} turn #{t}"
   hand.each{|line|
     STDERR.puts line
   }
   STDERR.puts "omitted"
+  p = 1-p
+  t += 1 if p == 0
 }
 
 
