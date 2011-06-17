@@ -1,47 +1,29 @@
 #!/usr/bin/env ruby
 
 
-if ARGV.length < 2
+if ARGV.length < 1
   STDERR.puts <<USAGE
-./record.rb log-filename ./program
+./replay.rb log-filename
 
-excecute the ./program, and records its standard output to log-filename.
+behave exactly as is recorded in log-filename
 USAGE
   exit
 end
 
-require 'open3'
-
-LogFn = ARGV[0]
-Prog  = ARGV[1..-1].join(' ')
-
-Open3.popen3(Prog) {|stdin, stdout, stderr|
-  ti = Thread.new do
-    while line = STDIN.gets
-      stdin.puts line
-      stdin.flush
-    end
-    stdin.close
-  end
-
-  to = Thread.new do
-    open(LogFn, 'w') {|fp|
-      while line = stdout.gets
-        fp.puts line
-        STDOUT.puts line
-        STDOUT.flush
+open(ARGV[0], 'r') {|fp|
+  while log = fp.gets
+    cmd = log[0]
+    line = log[1..-1]
+    case cmd
+    when ">"
+      puts line
+      STDOUT.flush
+    when "<"
+      line2 = STDIN.gets
+      unless line == line2
+        throw "input mismatch : expected '#{line[0..-2]}' : actual '#{line2[0..-2]}'"
       end
-    }
-  end
-
-  te = Thread.new do
-    while line = stderr.gets
-      STDERR.puts line
-      STDERR.flush
     end
   end
-
-  ti.join
-  to.join
-  te.join
 }
+
