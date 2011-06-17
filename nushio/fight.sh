@@ -1,1 +1,0 @@
-../bin/ltg match 0P 0P

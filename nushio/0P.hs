@@ -1,4 +1,6 @@
 {-# OPTIONS -Wall #-}
+import System.IO
+
 data Card = I | Zero | Succ | Dbl | Get | Put | S | K | Inc | Dec | Attack | Help | Copy | Revive | Zombie
 
 cardName :: Card -> String
@@ -24,13 +26,14 @@ right s c = do
   putStrLn "2"
   putStrLn $ cardName c
   print s
+  hFlush stdout
   
 left s c = do
   putStrLn "1"
   putStrLn $ cardName c
   print s
-  
+  hFlush stdout
+
 main :: IO ()  
 main = do
-  right 0 Zero
-  left  0 Succ
+  left 0 I
