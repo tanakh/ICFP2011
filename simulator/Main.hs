@@ -241,7 +241,7 @@ play !turn !pid my opp p1 p2 = do
     exitSuccess
   
   when (turn `mod` 2 == 0) $ do
-    putStrLn $ "##### turn " ++ (show $ (turn `div` 2) + 1)
+    putStrLn $ "###### turn " ++ (show $ (turn `div` 2) + 1)
   
   putStrLn $ "*** player " ++ (show pid) ++ "'s turn, with slots:"
   
