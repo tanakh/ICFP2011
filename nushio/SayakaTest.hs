@@ -92,10 +92,106 @@ inject_sayasaya f1 f2 fdmg fgain dmg = do
   copytozero f1
   apply0 f2
 
+get_closure :: Int -> Int -> Int -> IO ()
+get_closure target f1 f2 = do -- (S (K Get) (K target)) = (\x -> get target) to f1
+  clear f1
+  f1   $< Get
+  K    $> f1
+  S    $> f1
+  num f2 target
+  K    $> f2
+  copytozero f2
+  apply0 f1
+
+-- I want to revive Sayaka!
+revive_sayasaya :: Int -> Int -> IO ()
+revive_sayasaya f1 f2 = do
+  clear 145
+  145    $< Zero
+  Revive $> 145
+
+  clear 145
+  145    $< Zero
+  145    $< Succ
+  Revive $> 145
+
+  clear 145
+  145    $< Zero
+  145    $< Succ
+  145    $< Succ
+  Revive $> 145
+
+  get_closure f2 f1 f2
+  S    $> f1
+  f1   $< Succ
+  clear f2
+  f2   $< Revive -- the function you wish to execute!
+  S    $> f2
+  copytozero f1
+  apply0 f2
+  copytozero f2
+  0   $< Zero
+  num 0 128
+  num f1 f2
+  Get $> f1
+  apply0 f1
+
+-- (S f) ((S (K (get zero))) succ)
+-- (S f) ((S (S (K get) (K zero))) succ) / 8
+-- \x (f x) ((\y -> get zero) (succ x))
+-- \x -> (get zero) (succ x)
+-- \x -> S (get zero) (succ x)
+-- \x -> S (get zero) (succ) x
+-- \x -> (get (first zero \x)) (succ \x)
+-- S (get zero) succ
+-- \x -> (f x; ((\y -> get zero) x) (succ x))
+-- F x y = F (succ x) (f x)
+-- F x = F (succ ((f x) x))
+-- (\x -> get zero) (succ x) (f x)
+
+{-
+heal_sayasaya :: Int -> Int -> IO ()
+heal_sayasaya f1 f2 = do
+  clear f1
+  f1   $< Get
+  K    $> f1
+  S    $> f1
+  clear f2
+  f2   $< Zero
+  K    $> f2
+  copytozero f2
+  apply0 f1
+  S    $> f1
+
+  clear f2
+  f2   $< S
+  f2   $< Inc
+  f2   $< Succ
+  copytozero f2
+  apply0 f1
+  copytozero f1
+  f1   $< Zero
+-- (S f) ((S (S (K get) (K zero))) succ) / 8
+-- S (\x -> get zero) (S f succ)
+-- (S (K get) (K zero)) (S f succ) / 6
+-- (\x -> get zero)
+-- (S f hoge) = \x (hoge x)
+-- S (\x -> get zero) (\x -> succ ((f x) x)) x
+-- => (get 0) (f x; succ x)
+-}
+
+
+
+
 sittingDuck :: IO()
 sittingDuck = do
   I $> 0
   sittingDuck
+
+revive_sayasayaloop :: IO()
+revive_sayasayaloop = do
+  revive_sayasaya 1 2
+  revive_sayasayaloop
   
 attackloop :: Int -> Int -> Int -> IO()
 attackloop v k s = do
@@ -112,6 +208,7 @@ main = do
   let b = (read arg :: Int) -- 0: Sente, 1: Gote
   if b == 1 then skip else return ()
   attackloop 5 0 0
+  revive_sayasayaloop
   sittingDuck
 
 
