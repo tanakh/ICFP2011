@@ -70,6 +70,7 @@ printState stat = go 0 where
             return ()
           _ -> do
             putStrLn $ show ix ++ "={" ++ show vi ++ "," ++ showValue fl ++ "}"
+        go (ix+1)
 
 eval :: Int -> Value -> State -> State -> IO Value
 eval !cnt !v my opp
