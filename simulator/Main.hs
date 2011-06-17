@@ -4,7 +4,10 @@ import Control.Applicative
 import qualified Control.Exception as E
 import Control.Monad
 import qualified Data.Vector.Mutable as MV
+import System.Environment
 import System.Exit
+import System.IO
+import System.Process
 
 data Value
   = VInt Int
@@ -68,8 +71,10 @@ printState stat = go 0 where
           _ -> do
             putStrLn $ show ix ++ "={" ++ show vi ++ "," ++ showValue fl ++ "}"
 
-eval :: Value -> State -> State -> IO Value
-eval v my opp = case v of 
+eval :: Int -> Value -> State -> State -> IO Value
+eval !cnt !v my opp
+  | cnt >= 1000 = error "TLE"
+  | otherwise = case v of 
   VApp (VFun "I") a ->
     return a
   VApp (VFun "succ") a ->
@@ -98,7 +103,7 @@ eval v my opp = case v of
   VApp (VApp (VFun "put") _) y ->
     return y
   VApp (VApp (VApp (VFun "S") f) g) x ->
-    eval (VApp (VApp f x) (VApp g x)) my opp
+    eval (cnt+1) (VApp (VApp f x) (VApp g x)) my opp
   VApp (VApp (VFun "K") x) _ -> 
     return x
   VApp (VFun "inc") a -> do
@@ -181,9 +186,41 @@ eval v my opp = case v of
     error "Native.Error"
   _ ->
     return v
+    
+type Proc = (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle)
 
-play :: Int -> Int -> State -> State -> IO ()
-play !turn !pid my opp = do
+input :: State -> Proc -> Proc -> IO (Value, Int)
+input my (_, Just inp, _, _) (Just out, _, _, _) = do
+  putStrLn "(1) apply card to slot, or (2) apply slot to card?"
+  typ <- read <$> hGetLine inp
+  hPrint out $ show typ
+  hFlush out
+  case typ of
+    1 -> do
+      putStrLn "card name?"
+      cname <- hGetLine inp
+      hPutStrLn out cname
+      hFlush out
+      putStrLn "slot no?"
+      pos <- read <$> hGetLine inp
+      hPutStrLn out $ show pos
+      hFlush out
+      val <- MV.read (field my) pos
+      return (VApp (getCard cname) val, pos)
+    2 -> do
+      putStrLn "slot no?"
+      pos <- read <$> hGetLine inp
+      hPutStrLn out $ show pos
+      hFlush out
+      putStrLn "card name?"
+      cname <- hGetLine inp
+      hPutStrLn out cname
+      hFlush out
+      val <- MV.read (field my) pos
+      return (VApp val (getCard cname), pos)
+
+play :: Int -> Int -> State -> State -> Proc -> Proc -> IO ()
+play !turn !pid my opp p1 p2 = do
   md <- allDead my
   od <- allDead opp
   
@@ -199,12 +236,12 @@ play !turn !pid my opp = do
     putStrLn $ "*** player " ++ (show $ pid) ++ " win"
     exitSuccess
   
-  when (turn >= 200002) $ do
+  when (turn >= 200000) $ do
     putStrLn "*** draw"
     exitSuccess
   
   when (turn `mod` 2 == 0) $ do
-    putStrLn $ "##### turn " ++ (show $ turn `div` 2)
+    putStrLn $ "##### turn " ++ (show $ (turn `div` 2) + 1)
   
   putStrLn $ "*** player " ++ (show pid) ++ "'s turn, with slots:"
   
@@ -212,45 +249,25 @@ play !turn !pid my opp = do
   
   putStrLn "(slots {10000,I} are omitted)"
 
-  putStrLn "(1) apply card to slot, or (2) apply slot to card?"
-  typ <- readLn
-  case typ of
-    1 -> do
-      putStrLn "card name?"
-      cname <- getLine
-      putStrLn "slot no?"
-      pos <- readLn
-      val <- MV.read (field my) pos
-      eres <- E.try $ eval (VApp (getCard cname) val) my opp
-      case eres of
-        Left (E.SomeException e) ->
-          print e
-        Right res ->
-          MV.write (field my) pos res
-      play (turn+1) (1-pid) opp my
-    2 -> do
-      putStrLn "slot no?"
-      pos <- readLn
-      putStrLn "card name?"
-      cname <- getLine
-      val <- MV.read (field my) pos
-      eres <- E.try $ eval (VApp val (getCard cname)) my opp
-      case eres of
-        Left (E.SomeException e) ->
-          print e
-        Right res ->
-          MV.write (field my) pos res
-      play (turn+1) (1-pid) opp my
-    _ -> do
-      putStrLn "input 1 or 2"
-      play turn pid my opp
+  (val, pos) <- input my p1 p2
+  eres <- E.try $ eval 0 val my opp
+  case eres of
+    Left (E.SomeException e) ->
+      print e
+    Right res ->
+      MV.write (field my) pos res
+  play (turn+1) (1-pid) opp my p2 p1
 
 main :: IO ()
 main = do
+  ["match", prog1, prog2] <- getArgs
   
+  proc1 <- createProcess (shell $ prog1 ++ " 0") { std_in = CreatePipe, std_out = CreatePipe}
+  proc2 <- createProcess (shell $ prog1 ++ " 1") { std_in = CreatePipe, std_out = CreatePipe}
+
   a <- newState
   b <- newState
   
-  play 0 0 a b
+  play 0 0 a b proc1 proc2
   
   return ()
