@@ -62,13 +62,19 @@ exit
 end
 
 system("ln -s ../nushio/Random Random")
+system("ln -s ../nushio/UnstableSayaka UnstableSayaka")
 `mkdir -p #{LogDir}`
 `mkdir -p #{SampleDir}`
 
 sims = ARGV[0..1]
 
 def randomAI()
-  "./Random #{randSlot} #{randSeed()}" 
+  if rand() < 0.5
+    return "./Random #{randSlot} #{randSeed()}" 
+  else
+    rr = 10.0 ** (-5.0*rand())
+    return "./UnstableSayaka #{rr} #{randSlot} #{randSeed()}" 
+  end
 end
 
 def make_ai

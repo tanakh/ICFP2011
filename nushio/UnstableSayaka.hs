@@ -30,9 +30,11 @@ unstable = do
     lr <- randomRIO (0, 1::Int)
     let c = cards ! ci
     if lr == 0 
-    then (s $< c)
-    else (c $> s)
+    then (s `right` c)
+    else (c `left` s)
     skip
+    unstable
+
 
 skip :: IO ()
 skip = do
