@@ -252,8 +252,9 @@ play !turn !pid my opp p1 p2 = do
   (val, pos) <- input my p1 p2
   eres <- E.try $ eval 0 val my opp
   case eres of
-    Left (E.SomeException e) ->
+    Left (E.SomeException e) -> do
       print e
+      MV.write (field my) pos (VFun "I")
     Right res ->
       MV.write (field my) pos res
   play (turn+1) (1-pid) opp my p2 p1
