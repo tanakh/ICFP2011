@@ -1,5 +1,7 @@
 {-# OPTIONS -Wall #-}
 import Data.IORef
+import Data.Vector ((!))
+import qualified Data.Vector as V
 import LTG hiding(($<), ($>))
 import System.Environment
 import System.IO
@@ -10,6 +12,27 @@ import System.Random
 
 randRatio :: IORef Double
 randRatio = unsafePerformIO (newIORef 0)
+
+slotRange :: IORef Int
+slotRange = unsafePerformIO (newIORef 0)
+
+unstable :: IO ()
+unstable = do
+  rr <- readIORef randRatio
+  drand <- randomRIO (0,1)
+  if rr < drand 
+  then return ()
+  else do
+    sr <- readIORef slotRange
+    ci <- randomRIO (0, V.length cards-1)
+    s  <- randomRIO (0, sr-1)
+    lr <- randomRIO (0, 1::Int)
+    let c = cards ! ci
+    if lr == 0 
+    then (s $< c)
+    else (c $> s)
+    skip
+  
 
 skip :: IO ()
 skip = do
@@ -22,13 +45,20 @@ skip = do
     _ <- getLine
     return ()
 
+infix 3 $<
+infix 3 $>
+
+($<) :: Int -> Card -> IO ()
 ($<) x y = do
   right x y
   skip
+  unstable
   
+($>) :: Card -> Int -> IO ()  
 ($>) x y = do
   left x y
   skip
+  unstable
 
 -- Love me do
 apply0 :: Int -> IO ()
@@ -60,6 +90,7 @@ num field n = do
         else (Succ $> field) >> (return ())
 
 -- Example: attack 3 4 10
+attack :: Int -> Int -> Int -> IO ()  
 attack from to value = do
   -- v[1] <- (Attack from)
   num 1 from
@@ -155,7 +186,8 @@ revive_sayasayaloop :: IO()
 revive_sayasayaloop = do
   revive_sayasaya 1 2
   revive_sayasayaloop
-  
+
+
 attackloop :: Int -> Int -> Int -> IO()
 attackloop v k s = do
   attack v k 8192
@@ -169,8 +201,10 @@ attackloop v k s = do
 
 main :: IO()
 main = do
-  (rr: arg: _) <- getArgs
+  (rr: sr: seed: arg: _) <- getArgs
+  setStdGen $ mkStdGen (read seed)
   writeIORef randRatio (read rr)
+  writeIORef slotRange (read sr)
   let b = (read arg :: Int) -- 0: Sente, 1: Gote
   if b == 1 then skip else return ()
   attackloop 5 0 0
