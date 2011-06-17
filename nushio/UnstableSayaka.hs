@@ -17,12 +17,12 @@ slotRange :: IORef Int
 slotRange = unsafePerformIO (newIORef 0)
 
 unstable :: IO ()
-unstable = return ()
-{-do
+unstable = do
   rr <- readIORef randRatio
-  drand <- randomRIO (0,1)
-  if drand <= rr
-  then return ()
+  drand <- randomRIO (0,1::Double)
+  if drand >= rr
+  then do
+    return ()
   else do
     sr <- readIORef slotRange
     ci <- randomRIO (0, V.length cards-1)
@@ -33,7 +33,6 @@ unstable = return ()
     then (s $< c)
     else (c $> s)
     skip
-  -}
 
 skip :: IO ()
 skip = do
