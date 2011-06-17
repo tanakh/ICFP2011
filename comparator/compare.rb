@@ -33,6 +33,18 @@ def diff(fns)
   t = 1
   hands0.length.times{|i|
     if hands0[i] != hands1[i]
+      unless hands0[i] && hands1[i]
+        return <<MSG
+hand number mismatch in #{p} turn #{t} 
+---
+#{hands0[i].inspect}
+---
+#{hands1[i].inspect}
+---
+
+MSG
+      end
+        
       return <<MSG
 wrong hand in player #{p} turn #{t} 
 ---
@@ -100,9 +112,10 @@ loop {
   }
 
   if reason = diff(fns)
-    msg = "BAD!! #{cmds[0]} != #{cmds[1]} \n #{reason}"
+    msg = "BAD!! #{cmds[0]} != #{cmds[1]}\n#{reason}"
     STDERR.puts msg
     open(BadFn, 'a') {|fp|
+      fp.puts Time::now
       fp.puts msg
     }
     sh "cp #{fns[0]} #{fns[1]} #{SampleDir}"
@@ -110,6 +123,7 @@ loop {
     msg = "good. #{cmds[0]} == #{cmds[1]}"
     STDERR.puts msg
     open(GoodFn, 'a') {|fp|
+      fp.puts Time::now
       fp.puts msg
     }
   end
