@@ -17,10 +17,11 @@ slotRange :: IORef Int
 slotRange = unsafePerformIO (newIORef 0)
 
 unstable :: IO ()
-unstable = do
+unstable = return ()
+{-do
   rr <- readIORef randRatio
   drand <- randomRIO (0,1)
-  if rr < drand 
+  if drand <= rr
   then return ()
   else do
     sr <- readIORef slotRange
@@ -32,7 +33,7 @@ unstable = do
     then (s $< c)
     else (c $> s)
     skip
-  
+  -}
 
 skip :: IO ()
 skip = do
@@ -202,13 +203,10 @@ attackloop v k s = do
 main :: IO()
 main = do
   (rr: sr: seed: arg: _) <- getArgs
-  setStdGen $ mkStdGen (read seed)
   writeIORef randRatio (read rr)
   writeIORef slotRange (read sr)
+  setStdGen $ mkStdGen (read seed)
   let b = (read arg :: Int) -- 0: Sente, 1: Gote
   if b == 1 then skip else return ()
   attackloop 5 0 0
   sittingDuck
-
-
-
