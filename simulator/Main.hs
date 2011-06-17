@@ -207,11 +207,11 @@ input my (_, Just inp, _, _) (Just out, _, _, _) = do
       return (VApp (getCard cname) val, pos)
     2 -> do
       putStrLn "slot no?"
-      pos <- readLn
+      pos <- read <$> hGetLine inp
       hPutStrLn out $ show pos
       hFlush out
       putStrLn "card name?"
-      cname <- getLine
+      cname <- hGetLine inp
       hPutStrLn out cname
       hFlush out
       val <- MV.read (field my) pos
