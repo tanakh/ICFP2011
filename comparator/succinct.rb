@@ -7,7 +7,7 @@ def succinct(str)
   str.split(/\n/).each {|line|
     if flag
       if line.index('=')
-        hand << line.strip
+        hand << line.strip.gsub('zero','0')
       else
         hands << hand
         hand = []
@@ -35,7 +35,6 @@ def succinct_fp(fp, verbose = false)
       else
         hands << hand
         hand = []
-        STDERR.puts "omitted"
         flag = false
       end
     end
