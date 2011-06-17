@@ -81,5 +81,5 @@ else
 end
 
 fns.each{|fn|
-  # sh "rm #{fn}"
+  sh "rm #{fn}"
 }
