@@ -1,24 +1,5 @@
 #!/usr/bin/env ruby
 
-def succinct(str)
-  hands = []
-  flag = false
-  hand = []
-  str.split(/\n/).each {|line|
-    if flag
-      if line.index('=')
-        hand << line.strip.gsub('zero','0')
-      else
-        hands << hand
-        hand = []
-        flag = false
-      end
-    end
-    flag = true if line.index('***')
-  }
-  return hands
-end
-
 def succinct_fp(fp, verbose = false)
   hands = []
   flag = false
@@ -31,7 +12,7 @@ def succinct_fp(fp, verbose = false)
     if flag
       if line.index('=')
         STDERR.puts line if verbose
-        hand << line.strip
+        hand << line.strip.gsub('zero','0')
       else
         hands << hand
         hand = []

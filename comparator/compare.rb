@@ -23,11 +23,11 @@ def randSeed()
 end
 
 def diff(fns)
-  str0 = open(fns[0],'r').read
-  str1 = open(fns[1],'r').read
-  
-  hands0 = succinct(str0)
-  hands1 = succinct(str1)
+  hands0 = nil
+  hands1 = nil
+
+  open(fns[0],'r'){|fp| hands0 = succinct_fp(fp) }
+  open(fns[1],'r'){|fp| hands1 = succinct_fp(fp) }
   
   if hands0.length != hands1.length
     return "wrong turn number"
@@ -37,7 +37,14 @@ def diff(fns)
   t = 1
   hands0.length.times{|i|
     if hands0[i] != hands1[i]
-      return "wrong hand in player #{p} turn #{t} :\n---\n#{hands0[i].join(' ')}\n---\n#{hands1[i].join(' ')}\n---\n"
+      return <<MSG
+wrong hand in player #{p} turn #{t} 
+---
+#{hands0[i].join(' ')}
+---
+#{hands1[i].join(' ')}
+---
+MSG
     end
     p = 1-p
     t+=1 if p==0
