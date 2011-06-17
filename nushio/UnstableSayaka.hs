@@ -1,8 +1,40 @@
 {-# OPTIONS -Wall #-}
+import Data.IORef
+import Data.Vector ((!))
+import qualified Data.Vector as V
 import LTG hiding(($<), ($>))
 import System.Environment
 import System.IO
+import System.IO.Unsafe
 import System.Exit
+import System.Random
+
+
+randRatio :: IORef Double
+randRatio = unsafePerformIO (newIORef 0)
+
+slotRange :: IORef Int
+slotRange = unsafePerformIO (newIORef 0)
+
+unstable :: IO ()
+unstable = do
+  rr <- readIORef randRatio
+  drand <- randomRIO (0,1::Double)
+  if drand >= rr
+  then do
+    return ()
+  else do
+    sr <- readIORef slotRange
+    ci <- randomRIO (0, V.length cards-1)
+    s  <- randomRIO (0, sr-1)
+    lr <- randomRIO (0, 1::Int)
+    let c = cards ! ci
+    if lr == 0 
+    then (s `right` c)
+    else (c `left` s)
+    skip
+    unstable
+
 
 skip :: IO ()
 skip = do
@@ -15,13 +47,20 @@ skip = do
     _ <- getLine
     return ()
 
+infix 3 $<
+infix 3 $>
+
+($<) :: Int -> Card -> IO ()
 ($<) x y = do
   right x y
   skip
+  unstable
   
+($>) :: Card -> Int -> IO ()  
 ($>) x y = do
   left x y
   skip
+  unstable
 
 -- Love me do
 apply0 :: Int -> IO ()
@@ -53,6 +92,7 @@ num field n = do
         else (Succ $> field) >> (return ())
 
 -- Example: attack 3 4 10
+attack :: Int -> Int -> Int -> IO ()  
 attack from to value = do
   -- v[1] <- (Attack from)
   num 1 from
@@ -136,50 +176,6 @@ revive_sayasaya f1 f2 = do
   Get $> f1
   apply0 f1
 
--- (S f) ((S (K (get zero))) succ)
--- (S f) ((S (S (K get) (K zero))) succ) / 8
--- \x (f x) ((\y -> get zero) (succ x))
--- \x -> (get zero) (succ x)
--- \x -> S (get zero) (succ x)
--- \x -> S (get zero) (succ) x
--- \x -> (get (first zero \x)) (succ \x)
--- S (get zero) succ
--- \x -> (f x; ((\y -> get zero) x) (succ x))
--- F x y = F (succ x) (f x)
--- F x = F (succ ((f x) x))
--- (\x -> get zero) (succ x) (f x)
-
-{-
-heal_sayasaya :: Int -> Int -> IO ()
-heal_sayasaya f1 f2 = do
-  clear f1
-  f1   $< Get
-  K    $> f1
-  S    $> f1
-  clear f2
-  f2   $< Zero
-  K    $> f2
-  copytozero f2
-  apply0 f1
-  S    $> f1
-
-  clear f2
-  f2   $< S
-  f2   $< Inc
-  f2   $< Succ
-  copytozero f2
-  apply0 f1
-  copytozero f1
-  f1   $< Zero
--- (S f) ((S (S (K get) (K zero))) succ) / 8
--- S (\x -> get zero) (S f succ)
--- (S (K get) (K zero)) (S f succ) / 6
--- (\x -> get zero)
--- (S f hoge) = \x (hoge x)
--- S (\x -> get zero) (\x -> succ ((f x) x)) x
--- => (get 0) (f x; succ x)
--}
-
 
 
 
@@ -192,7 +188,8 @@ revive_sayasayaloop :: IO()
 revive_sayasayaloop = do
   revive_sayasaya 1 2
   revive_sayasayaloop
-  
+
+
 attackloop :: Int -> Int -> Int -> IO()
 attackloop v k s = do
   attack v k 8192
@@ -206,11 +203,11 @@ attackloop v k s = do
 
 main :: IO()
 main = do
-  [arg] <- getArgs
+  (rr: sr: seed: arg: _) <- getArgs
+  writeIORef randRatio (read rr)
+  writeIORef slotRange (read sr)
+  setStdGen $ mkStdGen (read seed)
   let b = (read arg :: Int) -- 0: Sente, 1: Gote
   if b == 1 then skip else return ()
   attackloop 5 0 0
   sittingDuck
-
-
-

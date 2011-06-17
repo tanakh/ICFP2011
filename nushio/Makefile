@@ -1,4 +1,4 @@
-all: SittingDuck BCombi 255 Random
+all: SittingDuck BCombi 255 Random UnstableSayaka
 
 SittingDuck: SittingDuck.hs LTG.hs
 	ghc --make SittingDuck.hs
@@ -8,6 +8,9 @@ BCombi: BCombi.hs LTG.hs
 
 255: 255.hs LTG.hs
 	ghc --make 255.hs
+
+UnstableSayaka: UnstableSayaka.hs LTG.hs
+	ghc --make UnstableSayaka.hs
 
 Random: Random.hs LTG.hs
 	ghc --make Random.hs

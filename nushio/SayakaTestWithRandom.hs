@@ -3,6 +3,7 @@ import LTG hiding(($<), ($>))
 import System.Environment
 import System.IO
 import System.Exit
+import System.Random
 
 skip :: IO ()
 skip = do
@@ -71,21 +72,45 @@ copytozero field = do
   num 0 field
   Get $> 0
 
+attackCode :: Int -> IO ()
+attackCode f = do
+  clear f
+  r <- randomRIO (0, 2 :: Int)
+  target <- randomRIO (0, 255 :: Int)
+  drainfrom <- randomRIO (0, 255 :: Int)
+  value <- randomRIO (0,13 :: Int)
+  let q = 2 ^ value
+  let arity3 card = do
+        num f target
+        card $> f
+        num 0 drainfrom
+        apply0 f
+        K $> f
+        S $> f
+        num 0 q
+        K $> 0
+        apply0 f
+  let arity1 card = do
+        num 0 target
+        K $> 0
+        f $< card
+        K $> f
+        S $> f
+        apply0 f
+  case r of
+    0 ->
+      arity3 Help
+    1 -> 
+      arity3 Attack
+    2 ->
+      arity1 Dec
+    3 ->
+      arity1 Inc
+
 -- inject zombie that attack
-inject_sayasaya :: Int -> Int -> Int -> Int -> Int -> IO ()
-inject_sayasaya f1 f2 fdmg fgain dmg = do
-  -- v[f1] <- S (K (attack fdmg fgain))
-  num f1 fdmg
-  Attack $> f1
-  num 0 (255 - fgain)
-  apply0 f1
-  K $> f1
-  S $> f1
-  -- v[0] <- K dmg
-  num 0 dmg
-  K $> 0
-  -- Sayasaya ready
-  apply0 f1
+inject_sayasaya :: Int -> Int -> IO ()
+inject_sayasaya f1 f2 = do
+  attackCode f1
   -- Inject!
   f2 $< Zero
   Zombie $> f2
@@ -197,7 +222,7 @@ attackloop :: Int -> Int -> Int -> IO()
 attackloop v k s = do
   attack v k 8192
   attack (v+1) k 8192
-  inject_sayasaya 3 4 s s 10000
+  inject_sayasaya 3 4
   if v > 240 
     then do
       revive_sayasaya 1 2
