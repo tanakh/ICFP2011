@@ -22,8 +22,8 @@ cardName Copy    = "copy"
 cardName Revive  = "revive"    
 cardName Zombie  = "zombie"  
 
-infix 0 $<
-infix 0 $>
+infix 1 $<
+infix 1 $>
 
 right, ($<) :: Int -> Card -> IO ()
 right s c = do

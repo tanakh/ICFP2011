@@ -1,5 +1,4 @@
 {-# OPTIONS -Wall #-}
-import System.Posix.Unistd
 import LTG
 
 main :: IO ()  
@@ -10,7 +9,7 @@ main = do
   S $> 0
   0 $< K
   0 $< Get
-  0 $< Inc
+  0 $< Succ
   return ()
 
     
