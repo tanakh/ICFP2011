@@ -21,7 +21,7 @@ def succinct_fp(fp, verbose = false)
     end
     if line.index('***')
       flag = true
-      STDERR.puts "*** player #{p} turn #{t}" if verbose || (t&(t-1)==0)
+      STDERR.puts "*** player #{p} turn #{t}" if verbose || ((t&(t-1)==0) && p==0)
       p = 1-p
       t += 1 if p == 0
     end

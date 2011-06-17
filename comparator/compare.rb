@@ -28,11 +28,7 @@ def diff(fns)
 
   open(fns[0],'r'){|fp| hands0 = succinct_fp(fp) }
   open(fns[1],'r'){|fp| hands1 = succinct_fp(fp) }
-  
-  if hands0.length != hands1.length
-    return "wrong turn number"
-  end
-  
+    
   p = 0
   t = 1
   hands0.length.times{|i|
