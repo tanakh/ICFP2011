@@ -1,5 +1,6 @@
 {-# OPTIONS -Wall #-}
 import LTG hiding(($<), ($>))
+import System.Environment
 
 skip :: IO ()
 skip = do
@@ -100,6 +101,9 @@ attackloop v k = do
 
 main :: IO()
 main = do
+  [arg] <- getArgs
+  let b = (read arg :: Int) -- 0: Sente, 1: Gote
+  
   attackloop 2 0
   sittingDuck
 
