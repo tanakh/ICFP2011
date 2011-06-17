@@ -52,34 +52,37 @@ def make_ai
   return ret
 end
 
-ais = make_ai
 
-uniquetag = "#{rand(2**30)}"
-cmds = []
-fns = []
-(0..1).each{|simid|
-  fn = "#{LogDir}#{uniquetag}-#{simid}"
-  cmd = "#{sims[simid]} match '#{ais[0]}' '#{ais[1]}' &> #{fn}"
-  sh cmd
-  cmds << cmd
-  fns << fn
-}
-
-if diff(fns)
-  msg = "BAD!! #{cmds[0]} != #{cmds[1]}"
-  STDERR.puts msg
-  open(BadFn, 'a') {|fp|
-    fp.puts msg
+loop {
+  ais = make_ai
+  
+  uniquetag = "#{rand(2**30)}"
+  cmds = []
+  fns = []
+  (0..1).each{|simid|
+    fn = "#{LogDir}#{uniquetag}-#{simid}"
+    cmd = "#{sims[simid]} match '#{ais[0]}' '#{ais[1]}' &> #{fn}"
+    sh cmd
+    cmds << cmd
+    fns << fn
   }
-  sh "cp #{fns[0]} #{fns[1]} #{SampleDir}"
-else
-  msg = "good. #{cmds[0]} == #{cmds[1]}"
-  STDERR.puts msg
-  open(GoodFn, 'a') {|fp|
-    fp.puts msg
-  }
-end
 
-fns.each{|fn|
-  sh "rm #{fn}"
+  if diff(fns)
+    msg = "BAD!! #{cmds[0]} != #{cmds[1]}"
+    STDERR.puts msg
+    open(BadFn, 'a') {|fp|
+      fp.puts msg
+    }
+    sh "cp #{fns[0]} #{fns[1]} #{SampleDir}"
+  else
+    msg = "good. #{cmds[0]} == #{cmds[1]}"
+    STDERR.puts msg
+    open(GoodFn, 'a') {|fp|
+      fp.puts msg
+    }
+  end
+
+  fns.each{|fn|
+    sh "rm #{fn}"
+  }
 }
