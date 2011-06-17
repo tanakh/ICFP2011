@@ -276,7 +276,7 @@ main = do
   ["match", prog1, prog2] <- getArgs
   
   proc1 <- createProcess (shell $ prog1 ++ " 0") { std_in = CreatePipe, std_out = CreatePipe}
-  proc2 <- createProcess (shell $ prog1 ++ " 1") { std_in = CreatePipe, std_out = CreatePipe}
+  proc2 <- createProcess (shell $ prog2 ++ " 1") { std_in = CreatePipe, std_out = CreatePipe}
 
   a <- newState
   b <- newState
