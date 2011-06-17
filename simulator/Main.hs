@@ -95,7 +95,7 @@ eval !v my opp = do
     VApp (VFun "dbl") a ->
       case a of
         VInt n ->
-          return $ VInt $ min 65535 $ n * n
+          return $ VInt $ min 65535 $ n * 2
         _ ->
           error "dbl: argument is not integer"
     VApp (VFun "get") a ->
