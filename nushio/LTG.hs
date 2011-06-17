@@ -1,5 +1,5 @@
 {-# OPTIONS -Wall #-}
-module LTG(Card(..), right, left) where
+module LTG(Card(..), right, left, ($<), ($>)) where
 
 import System.IO
 
@@ -22,16 +22,24 @@ cardName Copy    = "copy"
 cardName Revive  = "revive"    
 cardName Zombie  = "zombie"  
 
+infix 0 $<
+infix 0 $>
 
-right, left :: Int -> Card -> IO ()
+right, ($<) :: Int -> Card -> IO ()
 right s c = do
   putStrLn "2"
-  putStrLn $ cardName c
   print s
+  putStrLn $ cardName c
   hFlush stdout
+
+($<) = right
   
-left s c = do
+
+left, ($>) :: Card -> Int -> IO ()
+left c s = do
   putStrLn "1"
   putStrLn $ cardName c
   print s
   hFlush stdout
+
+($>) = left

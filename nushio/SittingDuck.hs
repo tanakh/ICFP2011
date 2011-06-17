@@ -3,5 +3,5 @@ import LTG
 
 main :: IO ()  
 main = do
-  left 0 I
+  I $> 0
   main
