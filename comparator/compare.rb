@@ -112,9 +112,10 @@ loop {
   }
 
   if reason = diff(fns)
-    msg = "BAD!! #{cmds[0]} != #{cmds[1]} \n #{reason}"
+    msg = "BAD!! #{cmds[0]} != #{cmds[1]}\n#{reason}"
     STDERR.puts msg
     open(BadFn, 'a') {|fp|
+      fp.puts Time::now
       fp.puts msg
     }
     sh "cp #{fns[0]} #{fns[1]} #{SampleDir}"
@@ -122,6 +123,7 @@ loop {
     msg = "good. #{cmds[0]} == #{cmds[1]}"
     STDERR.puts msg
     open(GoodFn, 'a') {|fp|
+      fp.puts Time::now
       fp.puts msg
     }
   end
