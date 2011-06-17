@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << '.'
+$: << '../comparator/'
 require 'succinct'
 
 if ARGV.length <= 0 || ARGV[0] != 'match'
