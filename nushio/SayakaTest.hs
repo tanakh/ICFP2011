@@ -66,12 +66,13 @@ copytozero field = do
   Get $> 0
 
 -- inject zombie that attack
-inject_sayasaya :: Int -> Int -> Int -> IO ()
-inject_sayasaya f1 f2 dmg = do
-  -- v[f1] <- S (K (attack 0 0))
-  f1 $< Attack
-  f1 $< Zero
-  f1 $< Zero
+inject_sayasaya :: Int -> Int -> Int -> Int -> Int -> IO ()
+inject_sayasaya f1 f2 fdmg fgain dmg = do
+  -- v[f1] <- S (K (attack fdmg fgain))
+  num f1 fdmg
+  Attack $> f1
+  num 0 (255 - fgain)
+  apply0 f1
   K $> f1
   S $> f1
   -- v[0] <- K dmg
@@ -90,21 +91,21 @@ sittingDuck = do
   I $> 0
   sittingDuck
   
-attackloop :: Int -> Int -> IO()
-attackloop v k = do
+attackloop :: Int -> Int -> Int -> IO()
+attackloop v k s = do
   attack v k 8192
   attack (v+1) k 8192
-  inject_sayasaya (v+2) (v+3) 8192
-  if v > 250 
-    then return () 
-    else attackloop (v + 4) (k+1)
+  inject_sayasaya 3 4 s s 10000
+  if v > 240 
+    then attackloop 5 (k+1) 0
+    else attackloop (v+2) (k+1) (s+1)
 
 main :: IO()
 main = do
   [arg] <- getArgs
   let b = (read arg :: Int) -- 0: Sente, 1: Gote
-  
-  attackloop 2 0
+  if b == 1 then skip else return ()
+  attackloop 5 0 0
   sittingDuck
 
 
