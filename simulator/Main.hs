@@ -100,8 +100,8 @@ eval !cnt !v my opp
         MV.read (field my) i
       _ -> do
         error "get: argument is not integer"
-  VApp (VApp (VFun "put") _) y ->
-    return y
+  VApp (VFun "put") _ ->
+    return $ VFun "I"
   VApp (VApp (VApp (VFun "S") f) g) x ->
     eval (cnt+1) (VApp (VApp f x) (VApp g x)) my opp
   VApp (VApp (VFun "K") x) _ -> 
