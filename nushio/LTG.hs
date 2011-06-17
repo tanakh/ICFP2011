@@ -1,4 +1,6 @@
 {-# OPTIONS -Wall #-}
+module LTG(Card(..), right, left) where
+
 import System.IO
 
 data Card = I | Zero | Succ | Dbl | Get | Put | S | K | Inc | Dec | Attack | Help | Copy | Revive | Zombie
@@ -33,7 +35,3 @@ left s c = do
   putStrLn $ cardName c
   print s
   hFlush stdout
-
-main :: IO ()  
-main = do
-  left 0 I
