@@ -8,13 +8,15 @@ import Prelude hiding (putStrLn)
 import System.Environment
 import System.Random
 
-
+slotRange :: Int
 slotRange = 8
 
 main :: IO ()  
 main = do
+  -- uncomment next line to fix the seed
+  -- setStdGen $ mkStdGen 0x9b
   (side:_) <- fmap (map read) getArgs
-  when (side==1) skip
+  when (side==(1::Int)) skip
   play slotRange
   
 
@@ -26,9 +28,9 @@ skip = do
   return ()
 
 play :: Int -> IO ()
-play slotRange = do
+play slotRange' = do
   ci <- randomRIO (0, V.length cards-1)
-  s  <- randomRIO (0, slotRange-1)
+  s  <- randomRIO (0, slotRange'-1)
   lr <- randomRIO (0, 1::Int)
   let c = cards ! ci
   if lr == 0 

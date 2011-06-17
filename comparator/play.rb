@@ -3,7 +3,7 @@
 
 if ARGV.length < 1
   STDERR.puts <<USAGE
-./replay.rb log-filename
+./play.rb log-filename
 
 behave exactly as is recorded in log-filename
 USAGE
