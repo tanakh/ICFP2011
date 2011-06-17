@@ -261,6 +261,7 @@ play !turn !pid my opp p1 p2 = do
   putStrLn "(slots {10000,I} are omitted)"
 
   (val, pos) <- input my p1 p2
+  writeIORef gcnt 0
   eres <- E.try $ eval val my opp
   case eres of
     Left (E.SomeException e) -> do
