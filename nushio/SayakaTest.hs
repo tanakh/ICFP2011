@@ -1,13 +1,19 @@
 {-# OPTIONS -Wall #-}
 import LTG hiding(($<), ($>))
 import System.Environment
+import System.IO
+import System.Exit
 
 skip :: IO ()
 skip = do
-  _ <- getLine
-  _ <- getLine
-  _ <- getLine
-  return ()
+  iseof <- hIsEOF stdin 
+  if iseof 
+    then exitSuccess 
+    else do
+    _ <- getLine
+    _ <- getLine
+    _ <- getLine
+    return ()
 
 ($<) x y = do
   right x y
