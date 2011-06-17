@@ -193,11 +193,11 @@ eval !z !v my opp = do
     VApp (VApp (VFun "zombie") i) x -> do
       case i of
         VInt ii | ii >= 0 && ii <= 255 -> do
-          vi <- MV.read (vital opp) ii
+          vi <- MV.read (vital opp) (255-ii)
           when (vi > 0) $ do
             error "zombie: slot is not dead"
-          MV.write (field opp) ii x
-          MV.write (vital opp) ii (-1)
+          MV.write (field opp) (255-ii) x
+          MV.write (vital opp) (255-ii) (-1)
           return $ VFun "I"
         _ -> do
           error "zombie: argument is not valid slot number"
