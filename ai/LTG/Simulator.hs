@@ -10,6 +10,7 @@ module LTG.Simulator (
   printState,
   
   Hand,
+  State(..)
   ) where
 
 import qualified Control.Exception as E

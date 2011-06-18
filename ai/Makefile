@@ -1,6 +1,7 @@
 all: Test \
 	SittingDuck  Random \
-	CompactSayaka
+	CompactSayaka \
+	Watcher
 
 CompactSayaka: CompactSayaka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 CompactSayaka.hs
@@ -14,4 +15,6 @@ SittingDuck: SittingDuck.hs  LTG.hs LTG/*.hs
 Test: Test.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Test.hs
 
+Watcher: Watcher.hs  LTG.hs LTG/*.hs
+	ghc --make -O3 Watcher.hs
 
