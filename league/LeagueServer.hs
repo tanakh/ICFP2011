@@ -100,7 +100,7 @@ recordMatch :: Bool -> Match -> IO ()
 recordMatch isNew match = when valid $ do  
   atomically $ do
     bd <- readTVar scoreBoard
-    writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd 
+    writeTVar scoreBoard $ modify2 i0 i1 (+(100*s0+1)) bd 
 
     --mc <- readTVar matchCount
     --writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
