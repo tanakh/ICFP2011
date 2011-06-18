@@ -102,6 +102,7 @@ loop {
   uniquetag = "#{rand(2**30)}"
   cmds = []
   fns = []
+  fnRec = []
   fnRec[0] = "#{LogDir}#{uniquetag}-p0.rec"
   fnRec[1] = "#{LogDir}#{uniquetag}-p1.rec"
 

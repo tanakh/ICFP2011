@@ -1,4 +1,4 @@
-all: SittingDuck BCombi 255 Random UnstableSayaka SayakaTestWithRandom
+all: SittingDuck BCombi 255 Random UnstableSayaka SayakaTestWithRandom oldRandom
 
 SittingDuck: SittingDuck.hs LTG.hs
 	ghc --make -O3 SittingDuck.hs
@@ -8,6 +8,7 @@ BCombi: BCombi.hs LTG.hs
 
 255: 255.hs LTG.hs
 	ghc --make -O3 255.hs
+
 SayakaTestWithRandom: SayakaTestWithRandom.hs LTG.hs
 	ghc --make -O3 SayakaTestWithRandom.hs
 
@@ -16,6 +17,9 @@ UnstableSayaka: UnstableSayaka.hs LTG.hs
 
 Random: Random.hs LTG.hs
 	ghc --make -O3 Random.hs
+
+oldRandom: oldRandom.hs LTG.hs
+	ghc --make -O3 oldRandom.hs
 
 
 clean:
