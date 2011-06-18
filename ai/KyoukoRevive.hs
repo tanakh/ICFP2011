@@ -124,14 +124,18 @@ getMaxEnemy = do
 kyoukoMain :: LTG()
 kyoukoMain = do
   dmg <- getEasyInt <$> getMaxEnemy
-  alives <- filterM (\x -> do v <- getVital True x; return $ v > dmg) [1..255]
+  zombifySlotVital <- getVital False 255
+  let zombifySlotV = getEasyInt zombifySlotVital
+  alives <- filterM (\x -> do 
+                        v <- getVital True x
+                        return $ v > zombifySlotV)
+            [1..255]
   -- TODO: raise error to increase vitality
   if length alives < 2 
     then return ()
     else do
-    attack      (alives !! 0) 0 dmg
-    attack      (alives !! 1) 0 dmg
-
+    attack      (alives !! 0) 0 zombifySlotV
+    attack      (alives !! 1) 0 zombifySlotV
 
     -- v[5] <- S (S help I) (lazyApply Copy 6)
 
