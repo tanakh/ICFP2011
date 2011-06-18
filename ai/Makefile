@@ -4,7 +4,8 @@ all: Test \
 	Watcher \
 	SayakaRevive \
 	KuroMadoka Kyouko \
-	Watcher
+	Clone \
+	FastZombie
 
 CompactSayaka: CompactSayaka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 CompactSayaka.hs
@@ -34,3 +35,8 @@ Test: Test.hs  LTG.hs LTG/*.hs
 Watcher: Watcher.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Watcher.hs
 
+Clone: Clone.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Clone.hs
+
+FastZombie: FastZombie.hs LTG.hs LTG/*.hs
+	ghc --make -O3 FastZombie.hs
