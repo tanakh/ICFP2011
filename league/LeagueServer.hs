@@ -100,7 +100,8 @@ recordMatch :: Bool -> Match -> IO ()
 recordMatch isNew match = when valid $ do  
   atomically $ do
     bd <- readTVar scoreBoard
-    writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
+    writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd 
+
     --mc <- readTVar matchCount
     --writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
   when isNew rec
@@ -116,11 +117,11 @@ recordMatch isNew match = when valid $ do
           h <- openFile resultFile AppendMode
           hPutStrLn h $ show match
           hClose h
+          let goal = matchLimit * aiSize * (aiSize-1)
+          when (count >= goal - 5) $ printHoshitori
           atomically $ putTMVar recordMatchMutex (count+1)
           hPutStrLn stderr $ show count ++ " / " ++ show (matchLimit * aiSize * (aiSize-1))
           hFlush stderr
-          let goal = matchLimit * aiSize * (aiSize-1)
-          when (count == goal || count == goal - 5) $ printHoshitori
 
 printHoshitori :: IO ()
 printHoshitori = do
