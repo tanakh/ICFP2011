@@ -10,6 +10,7 @@ module LTG.Monad (
   isAlive,
   getVital,
   getField,
+  getMonitor,
   getState,
   
   nop, 
@@ -140,6 +141,12 @@ getField :: Bool -> Int -> LTG Value
 getField my ix = do
   st <- getState my
   liftIO $ MV.read (field st) ix
+
+getMonitor :: Bool -> Int -> LTG Monitor
+getMonitor my ix = do
+  st <- getState my
+  liftIO $ MV.read (monitor st) ix
+
 
 getState :: Bool -> LTG State
 getState my = do

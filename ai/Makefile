@@ -1,5 +1,5 @@
 all: Test \
-	SittingDuck  Random \
+	SpyDuck SittingDuck  Random \
 	CompactSayaka NonZeroCompactSayaka \
 	Watcher \
 	SayakaRevive \
@@ -78,6 +78,9 @@ SayakaRD2: SayakaRD2.hs  LTG.hs LTG/*.hs
 
 SittingDuck: SittingDuck.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 SittingDuck.hs
+
+SpyDuck: SpyDuck.hs  LTG.hs LTG/*.hs
+	ghc --make -O3 SpyDuck.hs
 
 
 

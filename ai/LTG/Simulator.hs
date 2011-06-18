@@ -12,6 +12,7 @@ module LTG.Simulator (
   Hand,
   State(..),
   Value(..),
+  Monitor(..)
   ) where
 
 import qualified Control.Exception as E
@@ -26,7 +27,7 @@ import LTG.Exception
 data Simulator
   = Simulator
     { turnCnt :: !Int
-    , phase   :: !Bool
+    , phase   :: !Bool -- sente turn : True, gote turn : False
     , p1State :: State
     , p2State :: State
     }
@@ -49,9 +50,11 @@ oppState Simulator { p1State = stat } = stat
 
 execStep :: Hand -> Simulator -> IO (Simulator, String)
 execStep (typ, pos, name) s = do
-  em <- allDead my
+  em <- allDead my   -- proponent in phase s
   eo <- allDead opp
-  
+  monAtPos <- MV.read (monitor my) pos
+  MV.write (monitor my) pos $ monAtPos { propHandCount = 1 + propHandCount monAtPos }
+
   case (em, eo) of
     (True, True) -> do
       return (s, "!! draw")
@@ -115,10 +118,20 @@ showValue v = case v of
   VFun s -> s
   VApp x y -> showValue x ++ "(" ++ showValue y ++ ")"
 
+data Monitor = Monitor {
+      propHandCount :: Int 
+    }
+  deriving (Eq, Show)
+
+initialMonitor :: Monitor
+initialMonitor = Monitor { propHandCount = 0 }
+
+
 data State
   = State
     { field :: MV.IOVector Value
     , vital :: MV.IOVector Int
+    , monitor :: MV.IOVector Monitor
     }
 
 cards :: [String]
@@ -131,14 +144,17 @@ getCard name
   | otherwise =
     error $ "card " ++ show name ++ " is invalud"
 
+
 newState :: IO State
 newState = do
   f <- MV.new 256
   v <- MV.new 256
+  mon <- MV.new 256
   forM_ [0..255] $ \i -> do
     MV.write f i (VFun "I")
     MV.write v i 10000
-  return $ State f v
+    MV.write mon i initialMonitor
+  return $ State f v mon
 
 allDead :: State -> IO Bool
 allDead stat = go 0 where
