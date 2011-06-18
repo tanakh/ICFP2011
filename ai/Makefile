@@ -41,8 +41,8 @@ KyoukoFARocket: KyoukoFARocket.hs LTG.hs LTG/*.hs
 KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFADash.hs
 
-KyoukoReviveFirstAttack: KyoukoReviveFirstAttack LTG.hs LTG/*.hs
-	ghc --make -O3 KyoukoReviveFirstAttack
+KyoukoReviveFirstAttack: KyoukoReviveFirstAttack.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoReviveFirstAttack.hs
 
 
 Random: Random.hs  LTG.hs LTG/*.hs
