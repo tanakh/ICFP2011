@@ -34,11 +34,12 @@ getTotalDamage d i total = do
 getOptimumDamage :: Int -> Int -> Int -> Int -> LTG (Int, Int)
 getOptimumDamage i d bestD bestTotal = do
   t <- getTotalDamage d i 0
-  if d >= 10000 || t == 0
+  let d' = max (d+1) (2*d)
+  if d >= 30000 || t == 0
     then return (t, bestD)
     else if t >= bestTotal
-      then getOptimumDamage i (d+1) d     t
-      else getOptimumDamage i (d+1) bestD bestTotal
+      then getOptimumDamage i d' d     t
+      else getOptimumDamage i d' bestD bestTotal
 
 
 
