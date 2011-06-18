@@ -2,11 +2,13 @@
 import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
+import Control.Monad.Trans
 import Data.List
 import Data.Maybe
 
 import LTG 
 import LTG.SoulGems
+import System.Environment
 
 isDead :: Bool -> Int -> LTG Bool
 isDead my ix = not <$> isAlive my ix
@@ -170,7 +172,8 @@ speedo x
 
 main :: IO ()
 main = runLTG $ do
-  let binbin = map snd $ sort $[(speedo i, i) | i<-[0..255]]
+  (range:_) <- lift $ getArgs
+  let binbin = take (read range) $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
   forever $ do
     ds <- filterM (isDead True) binbin
     if null ds
