@@ -137,7 +137,7 @@ printHoshitori = do
     nakami i = [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ] ++ [ketsu i]
     ketsu i = htmlTag "center" $ show(numerator i) ++ "/" ++ show(denominator i)
 
-    numerator   i =   100*sum [bd!j!i | j <- [0..aiSize-1] ]
+    numerator   i =       sum [bd!j!i | j <- [0..aiSize-1] ]
     denominator i = 1+100*sum [mc!j!i | j <- [0..aiSize-1] ]
 
     strongness :: Int -> Double    
