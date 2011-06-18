@@ -4,11 +4,10 @@
 ../ai/CompactSayaka
 ../ai/FastZombie
 ../ai/Kyouko
+../ai/KyoukoBinBin
 ../ai/KyoukoRevive
 ../ai/KyoukoFA
-#../ai/KyoukoFADash
 ../ai/SayakaRevive
-#../ai/SayakaRD2
 ../ai/Random
 
 
