@@ -40,10 +40,11 @@ KyoukoSort: KyoukoSort.hs LTG.hs LTG/*.hs
 
 
 KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
+	rm -fr KyoukoRevive.o
 	ghc --make -O3 KyoukoRevive.hs
 
 KamijoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
-	rm KyoukoRevive.o
+	rm -fr KyoukoRevive.o
 	ghc --make -O3 KyoukoRevive.hs -DKAMIJO -o KamijoRevive
 
 KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs

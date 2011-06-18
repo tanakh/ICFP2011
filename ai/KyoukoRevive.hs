@@ -121,6 +121,7 @@ getEasyInt x =
 debugTag::String
 debugTag = "kamijo"
 
+
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
   oppAlives <- filterM (isAlive False) [0..255]
