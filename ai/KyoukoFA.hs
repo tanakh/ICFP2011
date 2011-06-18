@@ -2,12 +2,63 @@
 import LTG 
 import LTG.SoulGems
 
-zombieLoopFA :: Int -> Int -> Int -> LTG ()
-zombieLoopFA f2 f3 f7 = do
-  num f7 0
+findFirstAlive :: Int -> LTG Int
+findFirstAlive i = do
+  if i >= 256
+    then return (-1)
+    else do
+      v <- getVital False i
+      if v > 0
+        then return i
+        else findFirstAlive (i+1)
+
+getTotalDamage :: Int -> Int -> Int -> LTG Int
+getTotalDamage d i total = do
+  if i >= 256
+    then return total
+    else do
+      v <- getVital False i
+      if v < d
+        then return total
+        else if v <= d * 2
+          then getTotalDamage d (i+1) (total+v)
+          else getTotalDamage d (i+1) (total+d+d)
+
+getOptimumDamage :: Int -> Int -> Int -> Int -> LTG Int
+getOptimumDamage i d bestD bestTotal = do
+  t <- getTotalDamage d i 0
+  if d >= 10000 || t == 0
+    then return bestD
+    else if t >= bestTotal
+      then getOptimumDamage i (d+1) d     t
+      else getOptimumDamage i (d+1) bestD bestTotal
+
+{-
+findDamage :: Int Int Int -> LTG Int
+findDamage pos0 i lowestV bestV bestProd = do
+  if i >= 256
+    then return bestV
+    else do
+      v <- getVital False i
+      let lowestV2   = if v >= lowestV then lowestV else v
+      let bestProdV2 = lowestV2 * (i+1-pos0)
+      if bestProd < lowestV * (i+1-pos0)
+      
+        then findDamage pos0 (i+1) lowestV ( then bestV
+        else findDamage pos0 (i+1) v       bestV
+-}
+
+zombieLoopFA :: Int -> Int -> Int -> Int -> LTG ()
+zombieLoopFA f2 f3 f6 f7 = do
+  firstI <- findFirstAlive 0
+  dmg    <- getOptimumDamage firstI 1 1 0
+  num f6 dmg
+  num f7 firstI
+
   copyTo f3 f2
   f3 $< I
 
+{-
   num f7 58
   copyTo f3 f2
   f3 $< I
@@ -23,8 +74,9 @@ zombieLoopFA f2 f3 f7 = do
   num f7 232
   copyTo f3 f2
   f3 $< I
+-}
 
-  zombieLoopFA f2 f3 f7
+  zombieLoopFA f2 f3 f6 f7
 
 
 kyokoAnAnFA :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
@@ -81,7 +133,7 @@ kyokoAnAnFA i1 i2 ffa f1 f2 f3 f4 f6 f7 target = do
   Zombie $> f2
 
   lazyApplyFA i1 i2 ffa f2 f1
-  zombieLoopFA f2 f3 f7
+  zombieLoopFA f2 f3 f6 f7
 
 
 sittingDuck :: LTG()
@@ -97,8 +149,6 @@ main = runLTG $ do
   attack      2 0 8192
 
 -- v[5] <- S (S help I) (lazyApply Copy 6)
-
-  num 6 8192
 
   kyokoAnAnFA 1 2 4 3 5 9 8 6 7 255
 
