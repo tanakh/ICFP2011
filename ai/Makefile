@@ -7,6 +7,7 @@ all: Test \
 	KuroMadoka Kyouko KyoukoRevive KyoukoFA \
 	KyoukoFADash \
 	KyoukoFARocket \
+	KyoukoSort \
 	Clone \
 	FastZombie
 
@@ -21,6 +22,11 @@ KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
 
 Kyouko: Kyouko.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Kyouko.hs
+
+KyoukoSort: KyoukoSort.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoSort.hs
+
+
 
 KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoRevive.hs
