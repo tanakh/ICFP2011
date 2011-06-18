@@ -2,7 +2,7 @@
 # One AI per line.
   
 ../ai/CompactSayaka
-../ai/Random
+# ../ai/Random
 ../ai/SittingDuck
 
 

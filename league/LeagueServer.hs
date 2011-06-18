@@ -80,15 +80,14 @@ selectMatch ratio matchCount' = (ret0, ret1)
 
 
 
-recordMatchMutex :: TMVar ()
-recordMatchMutex = unsafePerformIO $ newTMVarIO ()
+recordMatchMutex :: TMVar Int
+recordMatchMutex = unsafePerformIO $ newTMVarIO 1
 
 recordMatch :: Bool -> Match -> IO ()
 recordMatch isNew match = do
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
-  atomically $ do
     bd <- readTVar matchCount
     writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) bd
   when isNew rec
@@ -97,11 +96,25 @@ recordMatch isNew match = do
         i1 = aiIndex $ p1 match
         s0 = score0 match
         rec = do
-          _ <- atomically $ takeTMVar recordMatchMutex
+          count <- atomically $ takeTMVar recordMatchMutex
           h <- openFile resultFile AppendMode
           hPutStrLn h $ show match
           hClose h
-          atomically $ putTMVar recordMatchMutex ()
+          atomically $ putTMVar recordMatchMutex (count+1)
+          when (mod count 10 == 0) $ printHoshitori
+
+printHoshitori :: IO ()
+printHoshitori = do
+  (bd,mc) <- atomically $ do
+                   bd <- readTVar scoreBoard
+                   mc <- readTVar matchCount
+                   return (bd,mc)
+  let
+    printHoshitoriLine i = do
+      putStrLn $ command (ais!i) ++ "\t" ++     
+               unwords [ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ]
+  forM_ [0..aiSize-1] printHoshitoriLine
+
 
 main :: IO ()
 main = do
@@ -112,6 +125,7 @@ main = do
   let matches :: [Match]
       matches = map read results
   mapM_ (recordMatch False) matches
+  printHoshitori
   putStrLn "ready."
   serve port [ ("suggestMatch", fun suggestMatch),
                ("reportMatch" , fun reportMatch )]
