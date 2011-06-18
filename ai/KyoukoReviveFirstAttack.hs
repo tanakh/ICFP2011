@@ -17,10 +17,36 @@ getFirstWorthEnemy dmg = do
             (\ix -> do
                 al <- isAlive False ix
                 vt <- getVital False ix
-                return (al && vt >= dmg))
+                return (al && vt > dmg))
             [0..255]
   if null alives then return Nothing
     else return $ Just $ head alives
+
+getTotalDamage :: Int -> Int -> Int -> Int -> LTG Int
+getTotalDamage pos0 d i total = do
+  if i >= 256 || i >= pos0 + 58
+    then return total
+    else do
+      v <- getVital False i
+      if v < d
+        then return total
+        else if v <= d * 21 `div` 10
+          then getTotalDamage pos0 d (i+1) (total+1)
+          else getTotalDamage pos0 d (i+1) (total)
+{-
+          then getTotalDamage pos0 d (i+1) (total+v)
+          else getTotalDamage pos0 d (i+1) (total+d+d)
+-}
+getOptimumDamage :: Int -> Int -> Int -> Int -> LTG Int
+getOptimumDamage i d bestD bestTotal = do
+  t <- getTotalDamage i d i 0
+  if d >= 10000 || t == 0
+    then return bestD
+    else if t >= bestTotal
+      then getOptimumDamage i (d+1) d     t
+      else getOptimumDamage i (d+1) bestD bestTotal
+
+
 
 zombieLoop :: Int -> Int -> LTG ()
 zombieLoop f2 dmg = do
@@ -102,6 +128,90 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
   copyTo 0 f2
   zombieLoop f2 dmg
 
+kyokoFirstAttack :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
+kyokoFirstAttack f1 f2 f3 f4 f5 f7 target dmg = do
+  -- \x -> (copy f4) (succ x)
+  -- next = v[f2] <- S (lazy_apply Copy f4) succ
+  num f1 f4
+  clear f2
+  f2 $< Copy
+  lazyApply f2 f1
+  S $> f2
+  f2 $< Succ
+
+  -- f = v[f4] <- S (lazy_apply Copy f5) I
+  -- S (S help I) (S (K copy) (K 6))
+
+-- S (S(S help I)(K 8192)) (S (S(K copy)(K 4)) succ)
+-- \x -> help x x 8192 x; (copy 4) (succ x)
+
+{-
+  num f1 f5
+  clear f4
+  f4 $< Copy
+  lazyApply f4 f1
+  S  $> f4
+  f4 $< I
+-}
+
+ -- v[f4] <- S f next
+  S  $> f4
+  copyTo 0 f2
+  apply0 f4
+
+  -- v[f1] <- S (lazyApply Copy f4) (lazyApply Copy f7)
+  -- this is zombie!
+  clear f1
+  f1 $< Copy
+  num f2 f4
+  lazyApply f1 f2
+  S $> f1
+
+{-
+  clear f2
+  f2 $< Copy
+  num f3 f7
+  lazyApply f2 f3
+  copyTo 0 f2
+-}
+  clear 0
+  0 $< Zero
+  K $> 0
+  apply0 f1
+--  lazyApply2 f1 f2 f3
+
+  num f2 (255-target)
+  Zombie $> f2
+
+  clear f4
+  f4 $< S
+  f4 $< Help
+  f4 $< I
+  S $> f4
+
+  dmg2 <- getOptimumDamage 0 1 1 0
+
+  num 0 dmg2
+  K $> 0
+{-
+  clear f3
+  f3 $< Copy
+  num f1 6
+  lazyApply f3 f1
+  copyTo 0 f3
+-}
+
+  apply0 f4
+
+
+  copyTo 0 f1
+  apply0 f2
+{-
+  lazyApply f2 f1
+  copyTo 0 f2
+  zombieLoop f2 dmg
+-}
+
 sittingDuck :: LTG()
 sittingDuck = do
   I $> 0
@@ -113,7 +223,7 @@ getEasyInt x =
   max (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
   where
     twos = map (2^) [(0::Int)..]
-    threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
+    threep = map (\n -> 3*(2^n)) [(0::Int)..]
 
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
@@ -152,6 +262,8 @@ kyoukoMain = do
   copyTo 0 6
   apply0 5
 -}
+
+    kyokoFirstAttack 1 2 3 4 5 7 255 8192
 
     num 6 dmg
     kyokoAnAn 1 2 3 4 5 7 255 dmg

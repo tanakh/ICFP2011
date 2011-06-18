@@ -1,6 +1,7 @@
 # List AI's in this file.
 # One AI per line.
   
+
 #../ai/CompactSayaka
 #../ai/FastZombie
 #../ai/Kyouko
@@ -9,6 +10,7 @@
 #../ai/KyoukoFA
 #../ai/SayakaRevive
 #../ai/Random
+#../ai/KyoukoReviveFirstAttack
 ../ai/Mamisan 4
 ../ai/Mamisan 8
 ../ai/Mamisan 16
@@ -16,6 +18,5 @@
 ../ai/Mamisan 64
 ../ai/Mamisan 128
 ../ai/Mamisan 192
-
 
 

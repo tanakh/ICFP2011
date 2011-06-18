@@ -8,6 +8,7 @@ all: Test \
 	KyoukoFADash \
 	KyoukoFARocket \
 	KyoukoSort \
+	KyoukoReviveFirstAttack \
 	Clone \
 	Mamisan \
 	FastZombie
@@ -48,6 +49,8 @@ KyoukoFARocket: KyoukoFARocket.hs LTG.hs LTG/*.hs
 KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFADash.hs
 
+KyoukoReviveFirstAttack: KyoukoReviveFirstAttack LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoReviveFirstAttack
 
 Mamisan: Mamisan.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Mamisan.hs
