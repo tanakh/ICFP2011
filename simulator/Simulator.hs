@@ -54,7 +54,7 @@ execStep (typ, pos, name) s = do
       return (s, "!! player" ++ show (if phase s then 1 else 0) ++ " win")
     (_, True) -> do
       return (s, "!! player" ++ show (if phase s then 0 else 1) ++ " win")
-    _ | turnCnt s >= 10000 -> do
+    _ | turnCnt s >= 100000 -> do
       return (s, "!! draw")
     _ -> do
       forM_ [0..255] $ \i -> do
