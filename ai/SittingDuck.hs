@@ -1,3 +1,4 @@
+#!/usr/bin/env runhaskell
 import LTG
 
 import Control.Monad
