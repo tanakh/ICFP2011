@@ -1,0 +1,3 @@
+./CompactSayaka
+./Random
+./Watcher
