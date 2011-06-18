@@ -1,6 +1,6 @@
 {-# Language BangPatterns #-}
 
-module Simulator (
+module LTG.Simulator (
   Simulator(..),
   newSimulator,
   execStep,
