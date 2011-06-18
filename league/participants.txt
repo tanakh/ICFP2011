@@ -1,12 +1,11 @@
 # List AI's in this file.
 # One AI per line.
   
-../ai/Random
 ../ai/CompactSayaka
-../ai/SayakaRevive
+../ai/FastZombie
 ../ai/Kyouko
 ../ai/KyoukoFA
-../ai/Clone
-../ai/FastZombie
+../ai/SayakaRevive
+../ai/Random
 
 
