@@ -6,6 +6,7 @@ module League
        aiIndex, ais, aiSize
     ) where
 
+import Data.Char
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import System.IO.Unsafe
@@ -31,5 +32,10 @@ aiSize = V.length ais
 
 ais :: Vector AI
 ais = unsafePerformIO $ do
-        ps <- fmap (map makeAI . lines) $ readFile "participants.txt"     
+        ps <- fmap (map makeAI . filter good . lines) $ readFile "participants.txt"     
         return $ V.fromList ps
+    where
+      good line
+          | all isSpace line                     = False
+          | (dropWhile isSpace line) !! 0 == '#' = False
+          | True                                 = True

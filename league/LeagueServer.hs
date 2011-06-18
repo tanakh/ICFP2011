@@ -2,49 +2,30 @@
 {-# OPTIONS -Wall #-}
 
 import Control.Concurrent.STM
-import Control.Monad
 import Data.Vector (Vector, (!), (//))
-import Debug.Trace
 import qualified Data.Vector as V
 import League
 import Network.MessagePackRpc.Server
 import System.IO.Unsafe
-import System.Posix.Unistd
 import System.Posix.Files
 import System.Random
 
 
-{-
-add :: Int -> Int -> IO Int
-add x y = do
-  _ <- sleep 1
-  return $ x+y
- 
-echo :: String -> IO String
-echo s = do
-  _ <- sleep 1
-  return s
- 
-main :: IO ()
-main = do
-  serve port [ ("add", fun add), ("echo", fun echo) ]
--}
-
-
-
 selectMatch :: Double -> Vector (Vector Int) -> (Int, Int)
-selectMatch ratio matchCount = (ret0, ret1)
+selectMatch ratio matchCount' = (ret0, ret1)
     where
-      maxMC = V.maximum $ V.concat $ V.toList matchCount
-      weighted = V.toList $ V.concat $ V.toList $ imap2 mkWeight matchCount
+      maxMC = V.maximum $ V.concat $ V.toList matchCount'
+      weighted = V.toList $ V.concat $ V.toList $ imap2 mkWeight matchCount'
       (ret0, ret1) = ret
       weightSum = sum $ map fst weighted
       charge = ratio * weightSum
       ret = extract charge $ cycle weighted
+
       extract c ((w,x):rest)
               | c - w < 0 = x
               | True   = extract (c-w) rest
-               
+      extract _ _ = undefined
+
       mkWeight ix iy mc = let w = if ix==iy then 0
                                   else ((fromIntegral $ maxMC + 1 - mc)::Double)
                           in (w, (ix, iy))
@@ -54,7 +35,9 @@ suggestMatch = do
   rand <- randomRIO (0,1)
   (i0, i1) <- atomically $ do
                  mc <- readTVar matchCount
-                 return $selectMatch rand mc
+                 let match@(i0, i1) = selectMatch rand mc
+                 writeTVar matchCount $  modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
+                 return $ match
   return (command $ ais!i0, command $ ais!i1)
 
 
@@ -90,12 +73,8 @@ main = do
   let matches :: [Match]
       matches = replicate 100 Match{p0 = ais ! 0, p1 = ais!1, score0 = 6} ++ map read results
   mapM_ recordMatch matches
-  readTVarIO scoreBoard >>= print2
-  readTVarIO matchCount >>= print2
   putStrLn "ready."
-  replicateM_ 1000 $ suggestMatch >>= print
-
-
+  serve port [ ("suggestMatch", fun suggestMatch) ]
 
 
 ---- Vector Libraries ----

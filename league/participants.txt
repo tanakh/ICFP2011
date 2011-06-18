@@ -1,3 +1,8 @@
-./CompactSayaka
-./Random
-./Watcher
+# List AI's in this file.
+# One AI per line.
+  
+../ai/CompactSayaka
+../ai/Random
+../ai/Watcher
+
+
