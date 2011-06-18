@@ -15,6 +15,8 @@ module LTG.SoulGems (
   applyFA,
   attackFA,
   revive,
+  lazyApplyFA,
+  lazyApply2FA
 ) where
 
 import LTG.Base
@@ -170,6 +172,14 @@ composeNtimes0 f1 n = do
 -- S (compisition get succ ... succ) (compisition get succ ... succ) zero
 futureApply :: Int -> Int -> Int -> Int -> LTG ()
 futureApply i1 i2 ffa f2 = do
+
+  clear ffa
+  ffa $< Get
+  lazyAdd ffa i1
+
+  clear f2
+  f2 $< Get
+  lazyAdd f2 i2
 {-
   clear ffa
   ffa $< Get
@@ -179,21 +189,23 @@ futureApply i1 i2 ffa f2 = do
   f2 $< Get
   lazy_add f2 i2
 -}
-  if i2 > i1
+{-
+  if i2 `mod` i1 == 0
     then do
       clear ffa
       ffa $< Get
       lazyAdd ffa i1
       num f2 ffa
       Get $> f2
-      lazyAdd f2 (i2-i1)
+      lazyAdd f2 (i2 `div` i1)
     else do -- i2 <= i1
+      clear ffa
+      ffa $< Get
+      lazyAdd ffa i1
       clear f2
       f2 $< Get
       lazyAdd f2 i2
-      num ffa f2
-      Get $> ffa
-      lazyAdd f2 (i1-i2)
+-}
 
   S $> ffa
 
@@ -256,3 +268,28 @@ revive ix = do
     num jx ix
     Revive $> jx
     return False
+
+
+
+
+
+
+-- v[f1] <- (\x -> v[f1] v[f2])
+-- (S (K v[f1]) (K v[f2])) = (\x -> v[f1] v[f2])
+-- Construct cost: 3+2+4=9
+-- Execution cost: +3
+lazyApplyFA :: Int -> Int -> Int -> Int -> Int -> LTG ()
+lazyApplyFA i1 i2 ffa f1 f2 = do
+  K    $> f1
+  S    $> f1
+  K    $> f2
+  applyFA i1 i2 ffa f1 f1 f2
+
+-- v[f1] <- (\x -> v[f1] v[f2] v[f3])
+-- (S (S (K v[f1]) (K v[f2])) (K v[f3]))
+lazyApply2FA :: Int -> Int -> Int -> Int -> Int -> Int -> LTG()
+lazyApply2FA i1 i2 ffa f1 f2 f3 = do
+  lazyApplyFA i1 i2 ffa f1 f2
+  S    $> f1
+  K    $> f3
+  applyFA i1 i2 ffa f1 f1 f3

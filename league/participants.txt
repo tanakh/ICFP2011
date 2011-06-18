@@ -5,6 +5,7 @@
 ../ai/Random
 ../ai/SayakaRevive
 ../ai/Kyouko
+../ai/KyoukoFA
 
 
 
