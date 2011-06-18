@@ -5,6 +5,7 @@ import Control.Concurrent.STM
 import Control.Monad
 import Data.Char
 import Data.Maybe
+import Data.Time
 import Data.Vector (Vector, (!), (//))
 import qualified Data.Vector as V
 import League
@@ -12,6 +13,7 @@ import Network.MessagePackRpc.Server
 import System.IO
 import System.IO.Unsafe
 import System.Posix.Files
+import System.Process
 import System.Random
 
 resultFile :: String
@@ -105,7 +107,9 @@ recordMatch isNew match = when valid $ do
           hPutStrLn h $ show match
           hClose h
           atomically $ putTMVar recordMatchMutex (count+1)
-          when (mod count 10 == 0) $ printHoshitori
+          hPutStr stderr $ show count
+          hFlush stderr
+          when (mod count 100 == 0) $ printHoshitori
 
 printHoshitori :: IO ()
 printHoshitori = do
@@ -113,12 +117,38 @@ printHoshitori = do
                    bd <- readTVar scoreBoard
                    mc <- readTVar matchCount
                    return (bd,mc)
+  tz <- getCurrentTimeZone 
+  ut <- getCurrentTime
   let
-    printHoshitoriLine i = do
-      putStrLn $ command (ais!i) ++ "  " ++     
-               unwords [ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ]
-  forM_ [0..aiSize-1] printHoshitoriLine
-  putStrLn ""
+    tr i = command (ais!i) : show i :    
+                [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ]
+
+    headline :: [String]
+    headline = "" : "" : map show [0..aiSize-1]
+    tbl :: [[String]]
+    tbl = headline : map tr [0..aiSize-1]
+
+    htmlTag :: String -> String -> String
+    htmlTag tag str = "<" ++ tag ++ ">" ++ str ++ "</" ++ tag ++ ">" 
+
+    htmlTag' :: String -> String -> String -> String
+    htmlTag' tag flag str = "<" ++ tag ++ " " ++ flag ++  ">" ++ str ++ "</" ++ tag ++ ">" 
+                      
+    htmlTd :: String -> String
+    htmlTd str = htmlTag "td" str 
+
+    htmlTr :: [String] -> String
+    htmlTr strs =  htmlTag "tr" $ unwords $ map htmlTd strs
+
+    htmlTbl :: [[String]] -> String
+    htmlTbl tbl' = htmlTag' "table" "border=1 align=center" $ unlines $ map htmlTr tbl'
+
+    localTimeStr = show $ utcToLocalTime tz ut
+    banner = htmlTag "p" $ "Last Update : " ++ localTimeStr
+  writeFile "scoreboard.html" $ htmlTag "html" $  htmlTag "body" $ banner ++ htmlTbl tbl
+  _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht"
+  return ()
+
 
 main :: IO ()
 main = do
