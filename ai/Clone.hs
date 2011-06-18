@@ -75,7 +75,7 @@ injectOctavia workf idxopp idxprop = do
   0 $< I
   dloop (255 :: Int)
   where 
-    dloop 0 = return ()
+    dloop 0 = sittingDuck
     dloop x = do 
       Succ $> 4
       dloop (x-1)

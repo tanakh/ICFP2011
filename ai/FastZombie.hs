@@ -110,7 +110,7 @@ injectHelpfulSayaka = do
   clear 2
   loopHelp (256 :: Int)
   where
-    loopHelp 0 = return ()
+    loopHelp 0 = sittingDuck
     loopHelp x = do
       2 $< Zombie
       2 $< Zero
