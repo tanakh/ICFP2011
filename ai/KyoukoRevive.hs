@@ -113,7 +113,7 @@ getEasyInt x =
   max (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
   where
     twos = map (2^) [(0::Int)..]
-    threep = map (\n -> 3*(2^n)) [(0::Int)..]
+    threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
 
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
