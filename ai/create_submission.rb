@@ -1,11 +1,18 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
+require 'optparse'
 
 def sh(cmd)
   STDERR.puts cmd
   system(cmd)
 end
+
+$upload = false
+ARGV.options {|opt|
+  opt.on('-u'){$upload = true}
+  opt.parse!
+}
 
 unless ARGV[0]
   STDERR.puts <<USAGE
@@ -29,11 +36,27 @@ Machine = if EtcIssue.index('Arch')
             :compatible
           end
 
+
+
 sh "rm -fr #{WorkDir}"
 sh "git checkout-index -a -f --prefix=ai/#{WorkDir}"
 sh "mv #{WorkDir}/ai #{WorkDir}/src"
-sh "cp install #{WorkDir}"
+open("#{WorkDir}/install", 'w') {|fp|
+  fp.puts <<SCRIPT
+#!/bin/sh
+exit 0
+SCRIPT
+}
+open("#{WorkDir}/run", 'w') {|fp|
+  fp.puts <<SCRIPT
+#!/bin/sh
+LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./CompactSayaka $@ 
+SCRIPT
+}
+
 sh "cp #{BinFn} #{WorkDir}/husk"
+sh "chmod 755  #{WorkDir}/install #{WorkDir}/run #{WorkDir}/husk"
+
 sh "cp ../README #{WorkDir}"
 
 if Machine == :arch
@@ -47,5 +70,7 @@ FileUtils.cd(WorkDir) {
 sh "mv #{WorkDir}/#{ArchiveFn} ."
 sh "sha512sum #{ArchiveFn}"
 
-
+if $upload
+  sh "scp #{ArchiveFn} paraiso-lang.org:/var/www/html/Walpurgisnacht/#{ArchiveFn}"
+end
 
