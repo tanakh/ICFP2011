@@ -17,7 +17,7 @@ getFirstWorthEnemy dmg = do
             (\ix -> do
                 al <- isAlive False ix
                 vt <- getVital False ix
-                return (al && vt > dmg))
+                return (al && vt >= dmg))
             [0..255]
   if null alives then return Nothing
     else return $ Just $ head alives
