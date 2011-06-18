@@ -19,33 +19,39 @@ module LTG.SoulGems (
   lazyApply2FA
 ) where
 
+import Control.Monad
 import LTG.Base
 import LTG.Monad
+import LTG.Simulator
 
 -- ################################################################
 -- Functions that do NOT require v[0]
 -- v[field] <- n
 num :: Int -> Int -> LTG ()
-num field n = do
-  clear field
-  field $< Zero
+num ix n = do
+  f <- getField True ix
+  when (f /= VInt 0) $ do
+    clear ix
+    ix $< Zero
   num_iter n
   where
     num_iter 0 = do
       return ()
     num_iter 1 = do
-      Succ $> field
+      Succ $> ix
     num_iter q = do
       num_iter (q `div` 2)
-      Dbl $> field
-      if q `mod` 2 == 0 
+      Dbl $> ix
+      if q `mod` 2 == 0
         then return ()
-        else (Succ $> field) >> (return ())
+        else (Succ $> ix) >> (return ())
 
 -- v[field] <- I
 clear :: Int -> LTG()
-clear field = do
-  Zero $> field
+clear ix = do
+  f <- getField True ix
+  when (f /= VFun "I") $ do
+    Zero $> ix
 
 -- v[f1] <- v[f2]
 -- Construct cost: 2
@@ -278,18 +284,18 @@ revive ix = do
 -- (S (K v[f1]) (K v[f2])) = (\x -> v[f1] v[f2])
 -- Construct cost: 3+2+4=9
 -- Execution cost: +3
-lazyApplyFA :: Int -> Int -> Int -> Int -> Int -> LTG ()
-lazyApplyFA i1 i2 ffa f1 f2 = do
+lazyApplyFA :: Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
+lazyApplyFA i1 i2 ffa fout f1 f2 = do
   K    $> f1
   S    $> f1
   K    $> f2
-  applyFA i1 i2 ffa f1 f1 f2
+  applyFA i1 i2 ffa fout f1 f2
 
 -- v[f1] <- (\x -> v[f1] v[f2] v[f3])
 -- (S (S (K v[f1]) (K v[f2])) (K v[f3]))
-lazyApply2FA :: Int -> Int -> Int -> Int -> Int -> Int -> LTG()
-lazyApply2FA i1 i2 ffa f1 f2 f3 = do
-  lazyApplyFA i1 i2 ffa f1 f2
-  S    $> f1
+lazyApply2FA :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG()
+lazyApply2FA i1 i2 ffa fout f1 f2 f3 = do
+  lazyApplyFA i1 i2 ffa fout f1 f2
+  S    $> fout
   K    $> f3
-  applyFA i1 i2 ffa f1 f1 f3
+  applyFA i1 i2 ffa fout fout f3

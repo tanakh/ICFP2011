@@ -3,7 +3,9 @@ all: Test \
 	CompactSayaka NonZeroCompactSayaka \
 	Watcher \
 	SayakaRevive \
+	SayakaRD2 \
 	KuroMadoka Kyouko KyoukoRevive KyoukoFA \
+	KyoukoFADash \
 	Clone \
 	FastZombie
 
@@ -25,11 +27,19 @@ KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFA.hs
 
+KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoFADash.hs
+
+
+
 Random: Random.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Random.hs
 
 SayakaRevive: SayakaRevive.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 SayakaRevive.hs
+
+SayakaRD2: SayakaRD2.hs  LTG.hs LTG/*.hs
+	ghc --make -O3 SayakaRD2.hs
 
 
 SittingDuck: SittingDuck.hs  LTG.hs LTG/*.hs
