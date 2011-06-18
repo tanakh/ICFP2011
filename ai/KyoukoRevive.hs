@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# OPTIONS -Wall #-}
 import Control.Applicative
 import qualified Control.Exception.Control as E
@@ -115,11 +116,23 @@ getEasyInt x =
     twos = map (2^) [(0::Int)..]
     threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
 
+
+#ifdef KAMIJO
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
   oppAlives <- filterM (isAlive False) [0..255]
   vitals <- mapM (getVital False) oppAlives
   return $ maximum vitals
+#else
+getMaxEnemy :: LTG Int
+getMaxEnemy = do
+  oppAlives <- filterM (isAlive False) [0..255]
+  vitals <- mapM (getVital False) oppAlives
+  return $ maximum vitals
+#endif
+
+
+
 
 kyoukoMain :: LTG()
 kyoukoMain = do
@@ -164,8 +177,10 @@ kyoukoMain = do
 --  sittingDuck
   
 
+
 main :: IO ()
 main = runLTG $ do
+  lprint greeting
   forever $ do
     ds <- filterM (isDead True) [0..255]
     if null ds
