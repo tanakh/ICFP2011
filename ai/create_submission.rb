@@ -50,7 +50,7 @@ SCRIPT
 open("#{WorkDir}/run", 'w') {|fp|
   fp.puts <<SCRIPT
 #!/bin/sh
-LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./CompactSayaka $@ 
+LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./husk $@ 
 SCRIPT
 }
 
@@ -60,7 +60,7 @@ sh "chmod 755  #{WorkDir}/install #{WorkDir}/run #{WorkDir}/husk"
 sh "cp ../README #{WorkDir}"
 
 if Machine == :arch
-  "cp /usr/lib/libgmp.so.10 #{WorkDir}"
+  sh "cp /usr/lib/libgmp.so.10 #{WorkDir}"
 end
 
 FileUtils.cd(WorkDir) {
