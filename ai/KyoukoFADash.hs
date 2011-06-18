@@ -2,6 +2,13 @@
 import Control.Monad
 import LTG 
 
+lazyApplyFAold :: Int -> Int -> Int -> Int -> Int -> LTG ()
+lazyApplyFAold i1 i2 ffa f1 f2 = do
+  K $> f1
+  S $> f1
+  K $> f2
+  applyFA i1 i2 ffa f1 f1 f2
+
 findFirstAlive :: Int -> LTG Int
 findFirstAlive i = do
   if i >= 256
@@ -69,7 +76,7 @@ kyokoAnAnFA i1 i2 ffa f1 f2 f3 f4 f6 f7 target = do
   num f1 f4
   clear f2
   f2 $< Copy
-  lazyApplyFA i1 i2 ffa f2 f2 f1
+  lazyApplyFAold i1 i2 ffa f2 f1
   S $> f2
   f2 $< Succ
 
@@ -87,7 +94,7 @@ kyokoAnAnFA i1 i2 ffa f1 f2 f3 f4 f6 f7 target = do
   clear f3
   f3 $< Copy
   num f1 f6
-  lazyApplyFA i1 i2 ffa f3 f3 f1
+  lazyApplyFAold i1 i2 ffa f3 f1
   applyFA i1 i2 ffa f4 f4 f3
 
  -- v[f4] <- S f next
@@ -99,20 +106,20 @@ kyokoAnAnFA i1 i2 ffa f1 f2 f3 f4 f6 f7 target = do
   clear f1
   f1 $< Copy
   num f2 f4
-  lazyApplyFA i1 i2 ffa f1 f1 f2
+  lazyApplyFAold i1 i2 ffa f1 f2
   S $> f1
 
   clear f2
   f2 $< Copy
   num f3 f7
-  lazyApplyFA i1 i2 ffa f2 f2 f3
+  lazyApplyFAold i1 i2 ffa f2 f3
   applyFA i1 i2 ffa f1 f1 f2
 --  lazyApply2 f1 f2 f3
 
   num f2 (255-target)
   Zombie $> f2
 
-  lazyApplyFA i1 i2 ffa f2 f2 f1
+  lazyApplyFAold i1 i2 ffa f2 f1
   zombieLoopFA f2 f3 f6 f7
 
 
