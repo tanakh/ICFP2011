@@ -110,7 +110,7 @@ sittingDuck = do
 -- get 3 * 2^n or 2^n smaller than x
 getEasyInt :: Int -> Int
 getEasyInt x = 
-  min (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
+  max (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
   where
     twos = map (2^) [(0::Int)..]
     threep = map (\n -> 3*(2^n)) [(0::Int)..]
