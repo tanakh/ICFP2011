@@ -15,7 +15,7 @@ input :: Proc -> Proc -> IO Hand
 input (_, Just inp, _, _) (Just out, _, _, _) = do
   putStrLn "(1) apply card to slot, or (2) apply slot to card?"
   typ <- read <$> hGetLine inp
-  hPrint out $ show typ
+  hPrint out typ
   hFlush out
   case typ of
     1 -> do
@@ -25,13 +25,13 @@ input (_, Just inp, _, _) (Just out, _, _, _) = do
       hFlush out
       putStrLn "slot no?"
       pos <- read <$> hGetLine inp
-      hPutStrLn out $ show pos
+      hPrint out pos
       hFlush out
       return (typ, pos, cname)
     2 -> do
       putStrLn "slot no?"
       pos <- read <$> hGetLine inp
-      hPutStrLn out $ show pos
+      hPrint out pos
       hFlush out
       putStrLn "card name?"
       cname <- hGetLine inp

@@ -1,6 +1,6 @@
 {-# Language BangPatterns #-}
 
-module Simulator (
+module LTG.Simulator (
   Simulator(..),
   newSimulator,
   execStep,
@@ -308,4 +308,3 @@ eval !z !v my opp = do
       error "Native.Error"
     _ ->
       return v
-  
