@@ -12,10 +12,13 @@ module LTG.Monad (
   getField,
   getState,
   
+  nop, 
+  lerror,
   lprint,
   ) where
 
 import Control.Applicative
+import qualified Control.Exception.Control as E
 import Control.Monad
 import Control.Monad.State hiding (State)
 import qualified Data.Vector.Mutable as MV
@@ -24,16 +27,24 @@ import System.Exit
 import System.IO
 
 import LTG.Base
+import LTG.Exception
 import LTG.Simulator
 
-runLTG :: LTG a -> IO a
+runLTG :: LTG a -> IO ()
 runLTG ltg = do
   (teban:_) <- reverse <$> getArgs
   
   let ltg' = f teban
   
   siml <- newSimulator
-  evalStateT ltg' siml
+  flip evalStateT siml $ do
+    er <- E.try ltg'
+    case er of
+      Left (LTGError msg) -> do
+        lprint msg
+        forever nop
+      Right r -> do
+        return ()
   where
     f "0" = ltg
     f "1" = getHand >> ltg
@@ -88,6 +99,8 @@ getHand = do
 
 right, ($<) :: Int -> Card -> LTG ()
 right s c = do
+  v <- getVital True s
+  when (v <= 0) $ lerror "dead card apply"
   putHand (2, s, cardName c)
   getHand
 
@@ -95,6 +108,8 @@ right s c = do
 
 left, ($>) :: Card -> Int -> LTG ()
 left c s = do
+  v <- getVital True s
+  when (v <= 0) $ lerror "dead card apply"
   putHand (1, s, cardName c)
   getHand
 
@@ -130,6 +145,14 @@ getState :: Bool -> LTG State
 getState my = do
   s <- get
   return $ if my then myState s else oppState s
+
+nop :: LTG ()
+nop = do
+  ix <- findAlive True (const True)
+  I $> ix
+
+lerror :: String -> LTG ()
+lerror msg = E.throwIO $ LTGError msg
 
 lprint :: Show a => a -> LTG ()
 lprint v = liftIO $ hPrint stderr v
