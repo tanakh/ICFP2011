@@ -164,7 +164,13 @@ printHoshitori = do
     banner4 = "<br/>" ++ (htmlTag "center" $ htmlTag "h1" $ "league")
     banner = unlines [banner1, banner2, banner3, banner4]
 
-  writeFile "scoreboard.html" $ htmlTag "html" $  htmlTag "body" $ banner ++ htmlTbl tbl
+    htmlHead = unlines ["<head>",
+                        "<meta http-equiv='Refresh' content='60'>",
+                        "<title>Incubating...</title>",
+                        "</head>"]
+
+
+  writeFile "scoreboard.html" $ htmlTag "html" $ (htmlHead ++) $ htmlTag "body" $ banner ++ htmlTbl tbl
   _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht"
   return ()
 
