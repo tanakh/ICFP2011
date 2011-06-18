@@ -2,13 +2,21 @@ all: Test \
 	SittingDuck  Random \
 	CompactSayaka NonZeroCompactSayaka \
 	Watcher \
-	SayakaRevive
+	SayakaRevive \
+	KuroMadoka Kyouko \
+	Watcher
 
 CompactSayaka: CompactSayaka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 CompactSayaka.hs
 
 NonZeroCompactSayaka: NonZeroCompactSayaka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 NonZeroCompactSayaka.hs
+
+KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KuroMadoka.hs
+
+Kyouko: Kyouko.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Kyouko.hs
 
 Random: Random.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Random.hs

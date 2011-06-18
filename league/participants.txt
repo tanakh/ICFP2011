@@ -2,9 +2,9 @@
 # One AI per line.
   
 ../ai/CompactSayaka
-# ../ai/Random
-../ai/SittingDuck
+../ai/Random
 ../ai/SayakaRevive
+../ai/Kyouko
 
 
 
