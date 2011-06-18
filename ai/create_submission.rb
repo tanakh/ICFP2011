@@ -31,16 +31,20 @@ Machine = if EtcIssue.index('Arch')
 
 sh "rm -fr #{WorkDir}"
 sh "git checkout-index -a -f --prefix=ai/#{WorkDir}"
+sh "mv #{WorkDir}/ai #{WorkDir}/src"
 sh "cp install #{WorkDir}"
-sh "cp #{BinFn} #{WorkDir}"
+sh "cp #{BinFn} #{WorkDir}/husk"
 sh "cp ../README #{WorkDir}"
+
+if Machine == :arch
+  "cp /usr/lib/libgmp.so.10 #{WorkDir}"
+end
 
 FileUtils.cd(WorkDir) {
   sh "tar czhf #{ArchiveFn} *"
 }
 
 sh "mv #{WorkDir}/#{ArchiveFn} ."
-sh "rm -fr #{WorkDir}"
 sh "sha512sum #{ArchiveFn}"
 
 
