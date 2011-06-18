@@ -10,7 +10,7 @@ all: Test \
 	KyoukoSort \
 	KyoukoReviveFirstAttack \
 	Clone \
-	Mamisan \
+	Mami103 \
 	FastZombie
 
 Clone: Clone.hs LTG.hs LTG/*.hs
@@ -52,8 +52,8 @@ KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
 KyoukoReviveFirstAttack: KyoukoReviveFirstAttack.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoReviveFirstAttack.hs
 
-Mamisan: Mamisan.hs  LTG.hs LTG/*.hs
-	ghc --make -O3 Mamisan.hs
+Mami103: Mami103.hs  LTG.hs LTG/*.hs
+	ghc --make -O3 Mami103.hs
 
 
 NonZeroCompactSayaka: NonZeroCompactSayaka.hs LTG.hs LTG/*.hs

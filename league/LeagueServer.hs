@@ -20,6 +20,7 @@ import System.Random
 resultFile :: String
 resultFile = "result.txt"
 
+
 scoreBoard :: TVar (Vector (Vector Int))
 scoreBoard = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
 
@@ -31,11 +32,15 @@ suggestMatch :: IO (String, String)
 suggestMatch = do
   rand <- randomRIO (0,1)
   (i0, i1) <- atomically $ do
-                 mc <- readTVar matchCount
-                 let match@(i0, i1) = selectMatch rand mc
+          mc <- readTVar matchCount
+          case selectMatch rand mc of
+            Just (match@(i0, i1)) -> do
                  writeTVar matchCount $  modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
                  return $ match
-  return (command $ ais!i0, command $ ais!i1)
+            Nothing -> do
+              return (-1,-1)
+  if i0<0 then return ("","") 
+  else return (command $ ais!i0, command $ ais!i1)
 
 reportMatch :: (String, String) -> String -> IO ()
 reportMatch (cmd0, cmd1) result = do
@@ -63,10 +68,14 @@ reportMatch (cmd0, cmd1) result = do
 -- !! player 0 wins by 256:0 after turn 22218
 -- !! draw by 256:256 after turn 100000
 
-selectMatch :: Double -> Vector (Vector Int) -> (Int, Int)
-selectMatch ratio matchCount' = (ret0, ret1)
+matchLimit :: Int
+matchLimit = 1
+
+selectMatch :: Double -> Vector (Vector Int) -> Maybe (Int, Int)
+selectMatch ratio matchCount' = if weightSum <=0 then Nothing 
+                                else Just (ret0, ret1)
     where
-      maxMC = V.maximum $ V.concat $ V.toList matchCount'
+      maxMC = min matchLimit $ (+1) $ V.maximum $ V.concat $ V.toList matchCount'
       weighted = V.toList $ V.concat $ V.toList $ imap2 mkWeight matchCount'
       (ret0, ret1) = ret
       weightSum = sum $ map fst weighted
@@ -79,7 +88,7 @@ selectMatch ratio matchCount' = (ret0, ret1)
       extract _ _ = undefined
 
       mkWeight ix iy mc = let w = if ix==iy then 0
-                                  else ((fromIntegral $ maxMC + 1 - mc)::Double)
+                                  else ((fromIntegral $ maxMC  - mc)::Double)
                           in (w, (ix, iy))
 
 
@@ -92,8 +101,8 @@ recordMatch isNew match = when valid $ do
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
-    mc <- readTVar matchCount
-    writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
+    --mc <- readTVar matchCount
+    --writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
   when isNew rec
       where
         valid = isJust i0m && isJust i1m
@@ -108,9 +117,10 @@ recordMatch isNew match = when valid $ do
           hPutStrLn h $ show match
           hClose h
           atomically $ putTMVar recordMatchMutex (count+1)
-          hPutStr stderr $ show count
+          hPutStrLn stderr $ show count ++ " / " ++ show (matchLimit * aiSize * (aiSize-1))
           hFlush stderr
-          when (mod count 100 == 0) $ printHoshitori
+          let goal = matchLimit * aiSize * (aiSize-1)
+          when (count == goal || count == goal - 5) $ printHoshitori
 
 printHoshitori :: IO ()
 printHoshitori = do
@@ -126,8 +136,8 @@ printHoshitori = do
     nakami i = [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ] ++ [ketsu i]
     ketsu i = htmlTag "center" $ show(numerator i) ++ "/" ++ show(denominator i)
 
-    numerator   i =   sum [bd!j!i | j <- [0..aiSize-1] ]
-    denominator i = 1+sum [mc!j!i | j <- [0..aiSize-1] ]
+    numerator   i =   100*sum [bd!j!i | j <- [0..aiSize-1] ]
+    denominator i = 1+100*sum [mc!j!i | j <- [0..aiSize-1] ]
 
     strongness :: Int -> Double    
     strongness i = (fromIntegral $ numerator i) / (fromIntegral $denominator i)
@@ -179,7 +189,7 @@ main :: IO ()
 main = do
   results <- do
          exist <- fileExist resultFile
-         if exist then fmap lines $ readFile resultFile
+         if exist then return [] --fmap lines $ readFile resultFile
          else return []
   let matches :: [Match]
       matches = map read results

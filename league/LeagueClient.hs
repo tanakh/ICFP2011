@@ -4,6 +4,7 @@
 import Control.Monad
 import League 
 import Network.MessagePackRpc.Client
+import System.Exit
 import System.IO
 import System.Process
 
@@ -21,6 +22,7 @@ main = do
   conn <- connect "192.168.0.1" port
   forever $ do
     (cmd0, cmd1) <- suggestMatch conn 
+    when (length cmd0 <= 0) exitSuccess
     let vs :: String -> String -> IO ()
         vs cmd0' cmd1' = do
               let cmd = "../bin/ltg -silent true match " ++ seal cmd0' ++ " " ++ seal cmd1'
