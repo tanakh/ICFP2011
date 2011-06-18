@@ -19,7 +19,6 @@ import LTG.Monad
 
 -- ################################################################
 -- Functions that do NOT require v[0]
-
 -- v[field] <- n
 num :: Int -> Int -> LTG ()
 num field n = do
