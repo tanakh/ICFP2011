@@ -7,23 +7,19 @@ zombieLoop f2 = do
   copyTo f2 0
   f2 $< I
 
-  num 7 43
+  num 7 58
   copyTo f2 0
   f2 $< I
 
-  num 7 86
+  num 7 116
   copyTo f2 0
   f2 $< I
 
-  num 7 129
+  num 7 174
   copyTo f2 0
   f2 $< I
 
-  num 7 172
-  copyTo f2 0
-  f2 $< I
-
-  num 7 215
+  num 7 232
   copyTo f2 0
   f2 $< I
 
@@ -45,12 +41,31 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target = do
   f2 $< Succ
 
   -- f = v[f4] <- S (lazy_apply Copy f5) I
+  -- S (S help I) (S (K copy) (K 6))
+
+-- S (S(S help I)(S(K copy)(K 6))) (S (S(K copy)(K 4)) succ)
+-- \x -> help x x (\x -> (copy 6)) x; (copy 4) (succ x)
+
+  clear f4
+  f4 $< S
+  f4 $< Help
+  f4 $< I
+  S $> f4
+  clear f3
+  f3 $< Copy
+  num f1 6
+  lazyApply f3 f1
+  copyTo 0 f3
+  apply0 f4
+
+{-
   num f1 f5
   clear f4
   f4 $< Copy
   lazyApply f4 f1
   S  $> f4
   f4 $< I
+-}
 
  -- v[f4] <- S f next
   S  $> f4
@@ -94,6 +109,7 @@ main = runLTG $ do
 
 -- v[5] <- S (S help I) (lazyApply Copy 6)
 
+{-
   clear 5
   5 $< S
   5 $< Help
@@ -105,6 +121,7 @@ main = runLTG $ do
   lazyApply 6 7
   copyTo 0 6
   apply0 5
+-}
 
   num 6 8192
 
