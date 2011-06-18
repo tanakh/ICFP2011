@@ -2,11 +2,13 @@
 import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
+import Control.Monad.Trans
 import Data.List
 import Data.Maybe
 
 import LTG 
 import LTG.SoulGems
+import System.Environment
 
 isDead :: Bool -> Int -> LTG Bool
 isDead my ix = not <$> isAlive my ix
@@ -17,7 +19,7 @@ getFirstWorthEnemy dmg = do
             (\ix -> do
                 al <- isAlive False ix
                 vt <- getVital False ix
-                return (al && vt >= dmg))
+                return (al && vt > dmg))
             [0..255]
   if null alives then return Nothing
     else return $ Just $ head alives
@@ -113,7 +115,7 @@ getEasyInt x =
   max (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
   where
     twos = map (2^) [(0::Int)..]
-    threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
+    threep = map (\n -> 3*(2^n)) [(0::Int)..]
 
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
@@ -159,12 +161,21 @@ kyoukoMain = do
 --  attackFA    1 2 18 3 5 6 8192
 --  attackLoopFA 1 2 18 5 0 0
 --  sittingDuck
+
+
+speedo :: Int -> Int
+speedo x
+    | x == 0 = 0
+    | odd  x = 1 + speedo (x-1)
+    | even x = 1 + speedo (div x 2)
   
 
 main :: IO ()
 main = runLTG $ do
+  (range:_) <- lift $ getArgs
+  let binbin = take (read range) $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
   forever $ do
-    ds <- filterM (isDead True) [0..255]
+    ds <- filterM (isDead True) binbin
     if null ds
       then do
       mb <- E.try kyoukoMain
