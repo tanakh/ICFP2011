@@ -4,6 +4,7 @@
 import Control.Concurrent.STM
 import Control.Monad
 import Data.Char
+import Data.List
 import Data.Maybe
 import Data.Time
 import Data.Vector (Vector, (!), (//))
@@ -91,8 +92,8 @@ recordMatch isNew match = when valid $ do
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
-    bd <- readTVar matchCount
-    writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) bd
+    mc <- readTVar matchCount
+    writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
   when isNew rec
       where
         valid = isJust i0m && isJust i1m
@@ -120,8 +121,20 @@ printHoshitori = do
   tz <- getCurrentTimeZone 
   ut <- getCurrentTime
   let
-    tr i = command (ais!i) : show i :    
-                [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ]
+    tr i = command (ais!i) : show i : nakami i
+
+    nakami i = [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ] ++ [ketsu i]
+    ketsu i = htmlTag "center" $ show(numerator i) ++ "/" ++ show(denominator i)
+
+    numerator   i =   sum [bd!j!i | j <- [0..aiSize-1] ]
+    denominator i = 1+sum [mc!j!i | j <- [0..aiSize-1] ]
+
+    strongness :: Int -> Double    
+    strongness i = (fromIntegral $ numerator i) / (fromIntegral $denominator i)
+
+    ranking = map snd $ reverse $ sort $ [(strongness i, i)| i <- [0..aiSize-1]]
+
+    rankingTbl = htmlTbl $ [ [command $ ais ! ri, ketsu ri] | ri <- ranking]
 
     headline :: [String]
     headline = "" : "" : map show [0..aiSize-1]
@@ -144,7 +157,13 @@ printHoshitori = do
     htmlTbl tbl' = htmlTag' "table" "border=1 align=center" $ unlines $ map htmlTr tbl'
 
     localTimeStr = show $ utcToLocalTime tz ut
-    banner = htmlTag "p" $ "Last Update : " ++ localTimeStr
+
+    banner1 = htmlTag "p" $ "Last Update : " ++ localTimeStr
+    banner2 = htmlTag "center" $ htmlTag "h1" $ "ranking"
+    banner3 = htmlTag "center" $ rankingTbl
+    banner4 = "<br/>" ++ (htmlTag "center" $ htmlTag "h1" $ "league")
+    banner = unlines [banner1, banner2, banner3, banner4]
+
   writeFile "scoreboard.html" $ htmlTag "html" $  htmlTag "body" $ banner ++ htmlTbl tbl
   _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht"
   return ()
