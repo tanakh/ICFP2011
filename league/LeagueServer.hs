@@ -2,6 +2,7 @@
 {-# OPTIONS -Wall #-}
 
 import Control.Concurrent.STM
+import Data.Char
 import Data.Vector (Vector, (!), (//))
 import qualified Data.Vector as V
 import League
@@ -10,6 +11,41 @@ import System.IO.Unsafe
 import System.Posix.Files
 import System.Random
 
+
+suggestMatch :: IO (String, String)
+suggestMatch = do
+  rand <- randomRIO (0,1)
+  (i0, i1) <- atomically $ do
+                 mc <- readTVar matchCount
+                 let match@(i0, i1) = selectMatch rand mc
+                 writeTVar matchCount $  modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
+                 return $ match
+  return (command $ ais!i0, command $ ais!i1)
+
+reportMatch :: (String, String) -> String -> IO ()
+reportMatch (cmd0, cmd1) result = do
+  print match
+  where
+    wr = words result
+    turn' = read $ last wr
+    score0'
+          | wr !! 1 == "draw" = 1
+          | wr !! 2 == "0"    = if turn' < 100000 then 6 else 2
+          | otherwise         = 0
+    killRatioStr = $ head $ filter (elem ':') wr
+    [a0,a1] = words $ map (\c -> if isDigit c then c else ' ') killRatioStr
+    match = Match {
+              p0 = cmd0' ,
+              p1 = cmd1' ,
+              score0 = score0' ,
+              alive0 = a0,
+              alive1 = a1,
+              turn = turn'
+            }
+
+-- results are string like this
+-- !! player 0 wins by 256:0 after turn 22218
+-- !! draw by 256:256 after turn 100000
 
 selectMatch :: Double -> Vector (Vector Int) -> (Int, Int)
 selectMatch ratio matchCount' = (ret0, ret1)
@@ -30,15 +66,6 @@ selectMatch ratio matchCount' = (ret0, ret1)
                                   else ((fromIntegral $ maxMC + 1 - mc)::Double)
                           in (w, (ix, iy))
 
-suggestMatch :: IO (String, String)
-suggestMatch = do
-  rand <- randomRIO (0,1)
-  (i0, i1) <- atomically $ do
-                 mc <- readTVar matchCount
-                 let match@(i0, i1) = selectMatch rand mc
-                 writeTVar matchCount $  modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
-                 return $ match
-  return (command $ ais!i0, command $ ais!i1)
 
 
 resultFile :: String

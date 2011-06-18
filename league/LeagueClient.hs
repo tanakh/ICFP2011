@@ -4,14 +4,25 @@
 import Control.Monad
 import League 
 import Network.MessagePackRpc.Client
-
+import System.IO
+import System.Process
 
 suggestMatch :: RpcMethod (IO (String, String))
 suggestMatch = method "suggestMatch"
+
+reportMatch :: RpcMethod ((String, String) -> String -> IO ())
+reportMatch = method "reportMatch"
 
 main :: IO ()
 main = do
   conn <- connect "192.168.0.1" port
   replicateM_ 1 $ do
-    (cmd0, cmd1) <- suggestMatch conn 
-    print (cmd0, cmd1)
+    match@(cmd0, cmd1) <- suggestMatch conn 
+    let cmd = "../bin/ltg -silent true match " ++  cmd0 ++ " " ++ cmd1
+    putStrLn cmd
+    (_, _, Just herr,_) <- createProcess (shell cmd) {std_err = CreatePipe}
+    ret <- hGetContents herr
+    let result = last $ filter ((=="!!").(take 2)) $ lines ret
+    reportMatch match result
+
+

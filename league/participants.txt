@@ -3,6 +3,7 @@
   
 ../ai/CompactSayaka
 ../ai/Random
-../ai/Watcher
+../ai/SittingDuck
+
 
 

@@ -13,7 +13,9 @@ import System.IO.Unsafe
 
 data AI = AI {command :: String}
           deriving (Eq, Ord, Show, Read)
-data Match = Match {p0::AI, p1::AI, score0::Int}
+data Match = Match {p0::AI, p1::AI, score0::Int, 
+                    alive0 :: Int, alive1 :: Int,
+                    turn :: Int}
              deriving (Eq, Ord, Show, Read)
 
 makeAI :: String -> AI
