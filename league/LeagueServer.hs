@@ -4,6 +4,7 @@
 import Control.Concurrent.STM
 import Control.Monad
 import Data.Char
+import Data.Maybe
 import Data.Vector (Vector, (!), (//))
 import qualified Data.Vector as V
 import League
@@ -84,7 +85,7 @@ recordMatchMutex :: TMVar Int
 recordMatchMutex = unsafePerformIO $ newTMVarIO 1
 
 recordMatch :: Bool -> Match -> IO ()
-recordMatch isNew match = do
+recordMatch isNew match = when valid $ do  
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
@@ -92,8 +93,11 @@ recordMatch isNew match = do
     writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) bd
   when isNew rec
       where
-        i0 = aiIndex $ p0 match
-        i1 = aiIndex $ p1 match
+        valid = isJust i0m && isJust i1m
+        i0 = fromJust i0m
+        i1 = fromJust i1m
+        i0m = aiIndex $ p0 match
+        i1m = aiIndex $ p1 match
         s0 = score0 match
         rec = do
           count <- atomically $ takeTMVar recordMatchMutex

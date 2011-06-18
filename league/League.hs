@@ -22,10 +22,8 @@ data Match = Match {p0::AI, p1::AI, score0::Int,
 port :: Int
 port = 0x9b9b
 
-aiIndex :: AI -> Int
-aiIndex ai = case V.findIndex (==ai) ais of
-               Just n -> n
-               Nothing -> error $ "AI not found: " ++ show ai
+aiIndex :: AI -> Maybe Int
+aiIndex ai = V.findIndex (==ai) ais 
 
 aiSize :: Int
 aiSize = V.length ais
