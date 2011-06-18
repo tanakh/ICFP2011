@@ -1,21 +1,29 @@
 module LTG.SoulGems (
-                apply0,
-                clear,
-                num,
-                attack,
-                copyTo0,
-                lazyApply,
-                compose,
-                lazyAdd,
-                composeNtimes0,
-                futureApply,
-                lazyGet,
-                applyFA,
-                attackFA
+  nop,
+  
+  apply0,
+  clear,
+  num,
+  attack,
+  copyTo0,
+  lazyApply,
+  compose,
+  lazyAdd,
+  composeNtimes0,
+  futureApply,
+  lazyGet,
+  applyFA,
+  attackFA,
+  revive,
 ) where
 
 import LTG.Base
 import LTG.Monad
+
+nop :: LTG ()
+nop = do
+  ix <- findAlive True (const True)
+  I $> ix
 
 -- ################################################################
 -- Functions that do NOT require v[0]
@@ -230,3 +238,14 @@ attackFA i1 i2 ffa f1 from to value = do
   num i2 value
   -- v[i1] <- apply v[f1] v[i2]
   applyFA i1 i2 ffa f1 f1 i2
+
+-- revive specified field
+revive :: Int -> LTG Bool
+revive ix = do
+  a <- isAlive True ix
+  if a then return True
+    else do
+    jx <- findAlive True (const True)
+    num jx ix
+    Revive $> jx
+    return False
