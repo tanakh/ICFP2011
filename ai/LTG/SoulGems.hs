@@ -5,8 +5,10 @@ module LTG.SoulGems (
   clear,
   num,
   attack,
+  copyTo,
   copyTo0,
   lazyApply,
+  lazyApply2,
   compose,
   lazyAdd,
   composeNtimes0,
@@ -111,6 +113,18 @@ lazyApply f1 f2 = do
   copyTo 0 f2
   K    $> 0
   apply0 f1
+  
+-- v[f1] <- (\x -> v[f1] v[f2] v[f3])
+-- (S (S (K v[f1]) (K v[f2])) (K v[f3]))
+lazyApply2 :: Int -> Int -> Int -> LTG()
+lazyApply2 f1 f2 f3 = do
+  lazyApply f1 f2
+  S    $> f1
+  copyTo 0 f3
+  K    $> 0
+  apply0 f1
+  
+-- TODO: make lazyApplyList
 
 -- v[f1] <- \x -> (v[f1] (v[f2] x))
 -- S (K v[f1]) v[f2]
