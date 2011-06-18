@@ -7,7 +7,7 @@
 ../ai/KyoukoRevive
 ../ai/KyoukoFA
 ../ai/SayakaRevive
-../ai/SayakaReviveDakyou
+../ai/SayakaRD2
 ../ai/Random
 
 
