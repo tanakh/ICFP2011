@@ -4,7 +4,8 @@ all: Test \
 	Watcher \
 	SayakaRevive \
 	SayakaRD2 \
-	KuroMadoka Kyouko KyoukoRevive KyoukoFA \
+	KuroMadoka Kyouko KyoukoFA \
+	KyoukoRevive \
 	KamijoRevive \
 	KyoukoFADash \
 	KyoukoFARocket \

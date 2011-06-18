@@ -180,7 +180,6 @@ kyoukoMain = do
 
 main :: IO ()
 main = runLTG $ do
-  lprint greeting
   forever $ do
     ds <- filterM (isDead True) [0..255]
     if null ds
