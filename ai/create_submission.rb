@@ -21,6 +21,14 @@ WorkDir   = '.work/'
 BinFn     = ARGV[0]
 ArchiveFn = ARGV[1] || 'submit.tar.gz'
 
+EtcIssue = open('/etc/issue', 'r').read
+
+Machine = if EtcIssue.index('Arch')
+            :arch
+          else
+            :compatible
+          end
+
 sh "rm -fr #{WorkDir}"
 sh "git checkout-index -a -f --prefix=ai/#{WorkDir}"
 sh "cp install #{WorkDir}"
