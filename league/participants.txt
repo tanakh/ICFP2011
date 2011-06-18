@@ -4,6 +4,7 @@
 ../ai/CompactSayaka
 ../ai/SayakaRevive
 ../ai/Kyouko
+../ai/KyoukoFA
 ../ai/Clone
 ../ai/FastZombie
 
