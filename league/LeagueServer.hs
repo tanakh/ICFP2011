@@ -11,6 +11,19 @@ import System.IO.Unsafe
 import System.Posix.Files
 import System.Random
 
+resultFile :: String
+resultFile = "result.txt"
+
+scoreBoard :: TVar (Vector (Vector Int))
+scoreBoard = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
+
+matchCount :: TVar (Vector (Vector Int))
+matchCount = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
+
+matchLogs :: TVar [Match]
+matchLogs = unsafePerformIO $ newTVarIO $ []
+
+
 
 suggestMatch :: IO (String, String)
 suggestMatch = do
@@ -24,7 +37,7 @@ suggestMatch = do
 
 reportMatch :: (String, String) -> String -> IO ()
 reportMatch (cmd0, cmd1) result = do
-  print match
+  recordMatch match
   where
     wr = words result
     turn' = read $ last wr
@@ -32,11 +45,12 @@ reportMatch (cmd0, cmd1) result = do
           | wr !! 1 == "draw" = 1
           | wr !! 2 == "0"    = if turn' < 100000 then 6 else 2
           | otherwise         = 0
-    killRatioStr = $ head $ filter (elem ':') wr
-    [a0,a1] = words $ map (\c -> if isDigit c then c else ' ') killRatioStr
+    killRatioStr = head $ filter (elem ':') wr
+    [a0,a1] = map read $ words $
+              map (\c -> if isDigit c then c else ' ') killRatioStr
     match = Match {
-              p0 = cmd0' ,
-              p1 = cmd1' ,
+              p0 = AI cmd0 ,
+              p1 = AI cmd1 ,
               score0 = score0' ,
               alive0 = a0,
               alive1 = a1,
@@ -68,28 +82,22 @@ selectMatch ratio matchCount' = (ret0, ret1)
 
 
 
-resultFile :: String
-resultFile = "result.txt"
-
-
-scoreBoard :: TVar (Vector (Vector Int))
-scoreBoard = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
-
-matchCount :: TVar (Vector (Vector Int))
-matchCount = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
-
 
 recordMatch :: Match -> IO ()
-recordMatch m = do
-  let i0 = aiIndex $ p0 m
-      i1 = aiIndex $ p1 m
-      s0 = score0 m
+recordMatch match = do
+  let i0 = aiIndex $ p0 match
+      i1 = aiIndex $ p1 match
+      s0 = score0 match
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
   atomically $ do
     bd <- readTVar matchCount
     writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) bd
+  atomically $ do
+    ms <- readTVar matchLogs 
+    writeTVar matchLogs (match:ms)
+
 
 main :: IO ()
 main = do
@@ -98,10 +106,11 @@ main = do
          if exist then fmap lines $ readFile resultFile
          else return []
   let matches :: [Match]
-      matches = replicate 100 Match{p0 = ais ! 0, p1 = ais!1, score0 = 6} ++ map read results
+      matches = map read results
   mapM_ recordMatch matches
   putStrLn "ready."
-  serve port [ ("suggestMatch", fun suggestMatch) ]
+  serve port [ ("suggestMatch", fun suggestMatch),
+               ("reportMatch" , fun reportMatch )]
 
 
 ---- Vector Libraries ----

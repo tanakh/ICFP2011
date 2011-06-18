@@ -16,13 +16,13 @@ reportMatch = method "reportMatch"
 main :: IO ()
 main = do
   conn <- connect "192.168.0.1" port
-  replicateM_ 1 $ do
+  forever $ do
     match@(cmd0, cmd1) <- suggestMatch conn 
     let cmd = "../bin/ltg -silent true match " ++  cmd0 ++ " " ++ cmd1
-    putStrLn cmd
+    hPutStrLn stderr cmd
     (_, _, Just herr,_) <- createProcess (shell cmd) {std_err = CreatePipe}
     ret <- hGetContents herr
     let result = last $ filter ((=="!!").(take 2)) $ lines ret
-    reportMatch match result
+    reportMatch conn match result
 
 
