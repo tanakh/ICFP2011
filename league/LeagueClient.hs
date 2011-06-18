@@ -24,7 +24,7 @@ main = do
               hPutStrLn stderr cmd
               (_, _, Just herr,hdl) <- createProcess (shell cmd) {std_err = CreatePipe}
               ret <- hGetContents herr
-              _ <- waitForProcess hdl
+              _ <- length ret `seq` waitForProcess hdl
               let result = last $ filter ((=="!!").(take 2)) $ lines ret
               reportMatch conn (cmd0', cmd1') result
     cmd0 `vs` cmd1

@@ -115,7 +115,7 @@ printHoshitori = do
                    return (bd,mc)
   let
     printHoshitoriLine i = do
-      putStrLn $ command (ais!i) ++ "\t" ++     
+      putStrLn $ command (ais!i) ++ "  " ++     
                unwords [ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ]
   forM_ [0..aiSize-1] printHoshitoriLine
   putStrLn ""
