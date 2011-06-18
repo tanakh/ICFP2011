@@ -5,6 +5,7 @@ import Control.Concurrent.STM
 import Control.Monad
 import Data.Char
 import Data.Maybe
+import Data.Time
 import Data.Vector (Vector, (!), (//))
 import qualified Data.Vector as V
 import League
@@ -106,7 +107,9 @@ recordMatch isNew match = when valid $ do
           hPutStrLn h $ show match
           hClose h
           atomically $ putTMVar recordMatchMutex (count+1)
-          when (mod count 1000 == 0) $ printHoshitori
+          hPutStr stderr $ show count
+          hFlush stderr
+          when (mod count 100 == 0) $ printHoshitori
 
 printHoshitori :: IO ()
 printHoshitori = do
@@ -114,6 +117,8 @@ printHoshitori = do
                    bd <- readTVar scoreBoard
                    mc <- readTVar matchCount
                    return (bd,mc)
+  tz <- getCurrentTimeZone 
+  ut <- getCurrentTime
   let
     tr i = command (ais!i) : show i :    
                 [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ]
@@ -137,7 +142,10 @@ printHoshitori = do
 
     htmlTbl :: [[String]] -> String
     htmlTbl tbl' = htmlTag' "table" "border=1 align=center" $ unlines $ map htmlTr tbl'
-  writeFile "scoreboard.html" $ htmlTag "html" $  htmlTag "body" $ htmlTbl tbl
+
+    localTimeStr = show $ utcToLocalTime tz ut
+    banner = htmlTag "p" $ "Last Update : " ++ localTimeStr
+  writeFile "scoreboard.html" $ htmlTag "html" $  htmlTag "body" $ banner ++ htmlTbl tbl
   _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht"
   return ()
 
