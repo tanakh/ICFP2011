@@ -4,6 +4,7 @@
 ../ai/CompactSayaka
 ../ai/Random
 ../ai/SittingDuck
+../ai/Kyouko
 
 
 
