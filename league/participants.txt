@@ -1,6 +1,7 @@
 # List AI's in this file.
 # One AI per line.
   
+../ai/Random
 ../ai/CompactSayaka
 ../ai/SayakaRevive
 ../ai/Kyouko
