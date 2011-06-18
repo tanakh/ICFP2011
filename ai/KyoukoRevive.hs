@@ -3,6 +3,7 @@ import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
 import Data.List
+import Data.Maybe
 
 import LTG 
 import LTG.SoulGems
@@ -10,32 +11,30 @@ import LTG.SoulGems
 isDead :: Bool -> Int -> LTG Bool
 isDead my ix = not <$> isAlive my ix
 
-zombieLoop f2 = do
-  num 7 0
-  copyTo f2 0
-  f2 $< I
+getFirstWorthEnemy :: Int -> LTG (Maybe Int)
+getFirstWorthEnemy dmg = do
+  alives <- filterM 
+            (\ix -> do
+                al <- isAlive False ix
+                vt <- getVital False ix
+                return (al && vt > dmg))
+            [0..255]
+  if null alives then return Nothing
+    else return $ Just $ head alives
 
-  num 7 58
-  copyTo f2 0
-  f2 $< I
+zombieLoop :: Int -> Int -> LTG ()
+zombieLoop f2 dmg = do
+  elms <- getFirstWorthEnemy dmg
+  case elms of
+    Nothing -> return ()
+    Just n -> do
+      num 7 n
+      copyTo f2 0
+      f2 $< I
+      zombieLoop f2 dmg
 
-  num 7 116
-  copyTo f2 0
-  f2 $< I
-
-  num 7 174
-  copyTo f2 0
-  f2 $< I
-
-  num 7 232
-  copyTo f2 0
-  f2 $< I
-
-  zombieLoop f2
-
-
-kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
-kyokoAnAn f1 f2 f3 f4 f5 f7 target = do
+kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
+kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
 -- f1, f2, f3: temp
 -- f4, f5
 -- target: zombie target
@@ -101,24 +100,40 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target = do
 
   lazyApply f2 f1
   copyTo 0 f2
-  zombieLoop f2
+  zombieLoop f2 dmg
 
 sittingDuck :: LTG()
 sittingDuck = do
   I $> 0
   sittingDuck
 
+-- get 3 * 2^n or 2^n smaller than x
+getEasyInt :: Int -> Int
+getEasyInt x = 
+  min (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
+  where
+    twos = map (2^) [(0::Int)..]
+    threep = map (\n -> 3*(2^n)) [(0::Int)..]
+
+getMaxEnemy :: LTG Int
+getMaxEnemy = do
+  oppAlives <- filterM (isAlive False) [0..255]
+  vitals <- mapM (getVital False) oppAlives
+  return $ maximum vitals
+
 kyoukoMain :: LTG()
 kyoukoMain = do
-  alives <- filterM (\x -> do v <- getVital True x; return $ v > 8192) [1..255]
+  dmg <- getEasyInt <$> getMaxEnemy
+  alives <- filterM (\x -> do v <- getVital True x; return $ v > dmg) [1..255]
   -- TODO: raise error to increase vitality
-  if length alives <= 2 
+  if length alives < 2 
     then return ()
     else do
-    attack      (alives !! 0) 0 8192
-    attack      (alives !! 1) 0 8192
+    attack      (alives !! 0) 0 dmg
+    attack      (alives !! 1) 0 dmg
 
--- v[5] <- S (S help I) (lazyApply Copy 6)
+
+    -- v[5] <- S (S help I) (lazyApply Copy 6)
 
 {-
   clear 5
@@ -134,8 +149,8 @@ kyoukoMain = do
   apply0 5
 -}
 
-    num 6 8192
-    kyokoAnAn 1 2 3 4 5 7 255
+    num 6 dmg
+    kyokoAnAn 1 2 3 4 5 7 255 dmg
 
 --  attackFA    1 2 18 3 5 6 8192
 --  attackLoopFA 1 2 18 5 0 0
