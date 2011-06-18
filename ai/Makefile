@@ -5,6 +5,7 @@ all: Test \
 	SayakaRevive \
 	SayakaRD2 \
 	KuroMadoka Kyouko KyoukoRevive KyoukoFA \
+	KyoukoFADash \
 	KyoukoFARocket \
 	Clone \
 	FastZombie
@@ -29,6 +30,9 @@ KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs
 
 KyoukoFARocket: KyoukoFARocket.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFARocket.hs
+
+KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoFADash.hs
 
 
 
