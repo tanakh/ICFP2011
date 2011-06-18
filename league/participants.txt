@@ -6,7 +6,7 @@
 ../ai/Kyouko
 ../ai/KyoukoRevive
 ../ai/KyoukoFA
-../ai/KyoukoFADash
+../ai/KyoukoFARocket
 ../ai/SayakaRevive
 ../ai/SayakaRD2
 ../ai/Random
