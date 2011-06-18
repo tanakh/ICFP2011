@@ -9,13 +9,21 @@ all: Test \
 	KyoukoFARocket \
 	KyoukoSort \
 	Clone \
+	Mamisan \
 	FastZombie
+
+Clone: Clone.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Clone.hs
+
 
 CompactSayaka: CompactSayaka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 CompactSayaka.hs
 
-NonZeroCompactSayaka: NonZeroCompactSayaka.hs LTG.hs LTG/*.hs
-	ghc --make -O3 NonZeroCompactSayaka.hs
+
+FastZombie: FastZombie.hs LTG.hs LTG/*.hs
+	ghc --make -O3 FastZombie.hs
+
+
 
 KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KuroMadoka.hs
@@ -41,6 +49,12 @@ KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFADash.hs
 
 
+Mamisan: Mamisan.hs  LTG.hs LTG/*.hs
+	ghc --make -O3 Mamisan.hs
+
+
+NonZeroCompactSayaka: NonZeroCompactSayaka.hs LTG.hs LTG/*.hs
+	ghc --make -O3 NonZeroCompactSayaka.hs
 
 Random: Random.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Random.hs
@@ -55,14 +69,13 @@ SayakaRD2: SayakaRD2.hs  LTG.hs LTG/*.hs
 SittingDuck: SittingDuck.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 SittingDuck.hs
 
+
+
+
 Test: Test.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Test.hs
 
 Watcher: Watcher.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Watcher.hs
 
-Clone: Clone.hs LTG.hs LTG/*.hs
-	ghc --make -O3 Clone.hs
 
-FastZombie: FastZombie.hs LTG.hs LTG/*.hs
-	ghc --make -O3 FastZombie.hs
