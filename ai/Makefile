@@ -43,7 +43,7 @@ KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoRevive.hs
 
 KamijoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
-	ghc --make -O3 KyoukoRevive.hs -DKAMIJO
+	ghc --make -O3 KyoukoRevive.hs -DKAMIJO -o KamijoRevive
 
 KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFA.hs
