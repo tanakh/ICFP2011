@@ -1,6 +1,4 @@
 module LTG.SoulGems (
-  nop,
-  
   apply0,
   clear,
   num,
@@ -21,11 +19,6 @@ module LTG.SoulGems (
 
 import LTG.Base
 import LTG.Monad
-
-nop :: LTG ()
-nop = do
-  ix <- findAlive True (const True)
-  I $> ix
 
 -- ################################################################
 -- Functions that do NOT require v[0]
