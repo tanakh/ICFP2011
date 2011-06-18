@@ -176,8 +176,6 @@ kyoukoMain = do
 --  attackLoopFA 1 2 18 5 0 0
 --  sittingDuck
   
-
-
 main :: IO ()
 main = runLTG $ do
   forever $ do
