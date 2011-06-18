@@ -19,33 +19,39 @@ module LTG.SoulGems (
   lazyApply2FA
 ) where
 
+import Control.Monad
 import LTG.Base
 import LTG.Monad
+import LTG.Simulator
 
 -- ################################################################
 -- Functions that do NOT require v[0]
 -- v[field] <- n
 num :: Int -> Int -> LTG ()
-num field n = do
-  clear field
-  field $< Zero
+num ix n = do
+  f <- getField True ix
+  when (f /= VInt 0) $ do
+    clear ix
+    ix $< Zero
   num_iter n
   where
     num_iter 0 = do
       return ()
     num_iter 1 = do
-      Succ $> field
+      Succ $> ix
     num_iter q = do
       num_iter (q `div` 2)
-      Dbl $> field
-      if q `mod` 2 == 0 
+      Dbl $> ix
+      if q `mod` 2 == 0
         then return ()
-        else (Succ $> field) >> (return ())
+        else (Succ $> ix) >> (return ())
 
 -- v[field] <- I
 clear :: Int -> LTG()
-clear field = do
-  Zero $> field
+clear ix = do
+  f <- getField True ix
+  when (f /= VFun "I") $ do
+    Zero $> ix
 
 -- v[f1] <- v[f2]
 -- Construct cost: 2
