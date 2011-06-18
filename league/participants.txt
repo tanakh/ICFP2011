@@ -3,7 +3,8 @@
   
 ../ai/CompactSayaka
 ../ai/Random
-../ai/SittingDuck
+../ai/SayakaRevive
+../ai/Kyouko
 
 
 
