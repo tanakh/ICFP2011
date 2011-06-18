@@ -118,12 +118,18 @@ getEasyInt x =
 
 
 #ifdef KAMIJO
+debugTag::String
+debugTag = "kamijo"
+
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
   oppAlives <- filterM (isAlive False) [0..255]
   vitals <- mapM (getVital False) oppAlives
   return $ maximum vitals
 #else
+debugTag::String
+debugTag = "kyoko"
+
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
   oppAlives <- filterM (isAlive False) [0..255]
@@ -178,6 +184,8 @@ kyoukoMain = do
   
 main :: IO ()
 main = runLTG $ do
+  lprint debugTag
+
   forever $ do
     ds <- filterM (isDead True) [0..255]
     if null ds
