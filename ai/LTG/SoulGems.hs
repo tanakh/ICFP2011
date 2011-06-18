@@ -1,4 +1,6 @@
 module LTG.SoulGems (
+  nop,
+  
   apply0,
   clear,
   num,
@@ -17,6 +19,11 @@ module LTG.SoulGems (
 
 import LTG.Base
 import LTG.Monad
+
+nop :: LTG ()
+nop = do
+  ix <- findAlive True (const True)
+  I $> ix
 
 -- ################################################################
 -- Functions that do NOT require v[0]
@@ -239,6 +246,6 @@ revive ix = do
   if a then return True
     else do
     jx <- findAlive True (const True)
-    num jx 0
+    num jx ix
     Revive $> jx
     return False

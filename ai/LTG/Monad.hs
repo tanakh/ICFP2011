@@ -11,6 +11,8 @@ module LTG.Monad (
   getVital,
   getField,
   getState,
+  
+  lprint,
   ) where
 
 import Control.Applicative
@@ -128,3 +130,6 @@ getState :: Bool -> LTG State
 getState my = do
   s <- get
   return $ if my then myState s else oppState s
+
+lprint :: Show a => a -> LTG ()
+lprint v = liftIO $ hPrint stderr v
