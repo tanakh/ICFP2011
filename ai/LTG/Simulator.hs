@@ -1,6 +1,6 @@
 {-# Language BangPatterns #-}
 
-module Simulator (
+module LTG.Simulator (
   Simulator(..),
   newSimulator,
   execStep,
@@ -16,6 +16,7 @@ import qualified Control.Exception as E
 import Control.Monad
 import Data.IORef
 import qualified Data.Vector.Mutable as MV
+import System.IO
 import System.IO.Unsafe
 
 data Simulator
@@ -66,7 +67,7 @@ execStep (typ, pos, name) s = do
           es <- E.try $ eval True (VApp fi (VFun "I")) my opp
           case es of
             Left (E.SomeException e) -> do
-              print e
+              hPrint stderr e
             _ ->
               return ()
           MV.write (field my) i (VFun "I")
@@ -84,7 +85,7 @@ execStep (typ, pos, name) s = do
         eres <- E.try $ eval False val my opp
         case eres of
           Left (E.SomeException e) -> do
-            print e
+            hPrint stderr e
             MV.write (field my) pos (VFun "I")
           Right res ->
             MV.write (field my) pos res
@@ -149,7 +150,7 @@ allDead stat = go 0 where
 printState :: State -> IO ()
 printState stat = do
   go 0
-  putStrLn "(slots {10000,I} are omitted)"
+  hPutStrLn stderr "(slots {10000,I} are omitted)"
   where
   go !ix
     | ix >= 256 =
@@ -161,7 +162,7 @@ printState stat = do
           (VFun "I", 10000) -> do
             return ()
           _ -> do
-            putStrLn $ show ix ++ "={" ++ show vi ++ "," ++ showValue fl ++ "}"
+            hPutStrLn stderr $ show ix ++ "={" ++ show vi ++ "," ++ showValue fl ++ "}"
         go (ix+1)
 
 gcnt :: IORef Int
@@ -308,4 +309,3 @@ eval !z !v my opp = do
       error "Native.Error"
     _ ->
       return v
-  

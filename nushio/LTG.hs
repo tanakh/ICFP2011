@@ -37,6 +37,7 @@ cardName Zombie  = pack "zombie"
 infix 1 $<
 infix 1 $>
 
+
 right, ($<) :: Int -> Card -> IO ()
 right s c = do
   T.putStr $ T.unlines [pack "2", pack (show s), cardName c]

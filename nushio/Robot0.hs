@@ -28,8 +28,15 @@ main :: IO ()
 main = do
   side <- fmap (read . head) getArgs 
   when (side == (1::Int)) skip
-  Revive $> 0
-  Revive $> 0
-  I $> 0
+  S $> 255
+  S $> 255
+  S $> 255
+  play
 
+
+play :: IO ()  
+play = do
+  1 $< Zero 
+  Dec $> 1
+  play
 

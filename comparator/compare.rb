@@ -73,19 +73,18 @@ USAGE
 exit
 end
 
-system("ln -s ../nushio/Random Random")
-system("ln -s ../nushio/UnstableSayaka UnstableSayaka")
 `mkdir -p #{LogDir}`
 `mkdir -p #{SampleDir}`
 
 sims = ARGV[0..1]
 
 def randomAI()
-  if rand() < 0.5
-    return "./Random #{randSlot} #{randSeed()}" 
+  if rand() < 0.3
+    return "../nushio/Random" 
+  elsif rand() < 0.5
+    return "../nushio/SayakaTestWithRandom"
   else
-    rr = 10.0 ** (-5.0*rand())
-    return "./UnstableSayaka #{rr} #{randSlot} #{randSeed()}" 
+    return "../nushio/UnstableSayaka" 
   end
 end
 
@@ -103,9 +102,22 @@ loop {
   uniquetag = "#{rand(2**30)}"
   cmds = []
   fns = []
+  fnRec = []
+  fnRec[0] = "#{LogDir}#{uniquetag}-p0.rec"
+  fnRec[1] = "#{LogDir}#{uniquetag}-p1.rec"
+
   (0..1).each{|simid|
-    fn = "#{LogDir}#{uniquetag}-#{simid}"
-    cmd = "#{sims[simid]} match '#{ais[0]}' '#{ais[1]}' &> #{fn}"
+    fn = "#{LogDir}#{uniquetag}-m#{simid}.match"
+    
+    wrappedAis = (0..1).map{|i|
+      if simid == 0 
+        "./record.rb #{fnRec[i]} #{ais[i]}"
+      else
+        "./play.rb #{fnRec[i]}"
+      end
+    }
+
+    cmd = "#{sims[simid]} match '#{wrappedAis[0]}'  '#{wrappedAis[1]}' &> #{fn}"
     sh cmd
     cmds << cmd
     fns << fn
@@ -118,7 +130,7 @@ loop {
       fp.puts Time::now
       fp.puts msg
     }
-    sh "cp #{fns[0]} #{fns[1]} #{SampleDir}"
+    sh "cp #{fns[0]} #{fns[1]}  #{fnRec[0]} #{fnRec[1]} #{SampleDir}"
   else
     msg = "good. #{cmds[0]} == #{cmds[1]}"
     STDERR.puts msg
