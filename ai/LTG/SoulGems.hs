@@ -278,18 +278,18 @@ revive ix = do
 -- (S (K v[f1]) (K v[f2])) = (\x -> v[f1] v[f2])
 -- Construct cost: 3+2+4=9
 -- Execution cost: +3
-lazyApplyFA :: Int -> Int -> Int -> Int -> Int -> LTG ()
-lazyApplyFA i1 i2 ffa f1 f2 = do
+lazyApplyFA :: Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
+lazyApplyFA i1 i2 ffa fout f1 f2 = do
   K    $> f1
   S    $> f1
   K    $> f2
-  applyFA i1 i2 ffa f1 f1 f2
+  applyFA i1 i2 ffa fout f1 f2
 
 -- v[f1] <- (\x -> v[f1] v[f2] v[f3])
 -- (S (S (K v[f1]) (K v[f2])) (K v[f3]))
-lazyApply2FA :: Int -> Int -> Int -> Int -> Int -> Int -> LTG()
-lazyApply2FA i1 i2 ffa f1 f2 f3 = do
-  lazyApplyFA i1 i2 ffa f1 f2
-  S    $> f1
+lazyApply2FA :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG()
+lazyApply2FA i1 i2 ffa fout f1 f2 f3 = do
+  lazyApplyFA i1 i2 ffa fout f1 f2
+  S    $> fout
   K    $> f3
-  applyFA i1 i2 ffa f1 f1 f3
+  applyFA i1 i2 ffa fout fout f3
