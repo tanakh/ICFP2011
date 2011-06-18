@@ -1,21 +1,31 @@
 module LTG.SoulGems (
-                apply0,
-                clear,
-                num,
-                attack,
-                copyTo0,
-                lazyApply,
-                compose,
-                lazyAdd,
-                composeNtimes0,
-                futureApply,
-                lazyGet,
-                applyFA,
-                attackFA
+  nop,
+  
+  apply0,
+  clear,
+  num,
+  attack,
+  copyTo,
+  copyTo0,
+  lazyApply,
+  lazyApply2,
+  compose,
+  lazyAdd,
+  composeNtimes0,
+  futureApply,
+  lazyGet,
+  applyFA,
+  attackFA,
+  revive,
 ) where
 
 import LTG.Base
 import LTG.Monad
+
+nop :: LTG ()
+nop = do
+  ix <- findAlive True (const True)
+  I $> ix
 
 -- ################################################################
 -- Functions that do NOT require v[0]
@@ -103,6 +113,18 @@ lazyApply f1 f2 = do
   copyTo 0 f2
   K    $> 0
   apply0 f1
+  
+-- v[f1] <- (\x -> v[f1] v[f2] v[f3])
+-- (S (S (K v[f1]) (K v[f2])) (K v[f3]))
+lazyApply2 :: Int -> Int -> Int -> LTG()
+lazyApply2 f1 f2 f3 = do
+  lazyApply f1 f2
+  S    $> f1
+  copyTo 0 f3
+  K    $> 0
+  apply0 f1
+  
+-- TODO: make lazyApplyList
 
 -- v[f1] <- \x -> (v[f1] (v[f2] x))
 -- S (K v[f1]) v[f2]
@@ -230,3 +252,14 @@ attackFA i1 i2 ffa f1 from to value = do
   num i2 value
   -- v[i1] <- apply v[f1] v[i2]
   applyFA i1 i2 ffa f1 f1 i2
+
+-- revive specified field
+revive :: Int -> LTG Bool
+revive ix = do
+  a <- isAlive True ix
+  if a then return True
+    else do
+    jx <- findAlive True (const True)
+    num jx ix
+    Revive $> jx
+    return False
