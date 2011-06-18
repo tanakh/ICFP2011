@@ -5,6 +5,7 @@ all: Test \
 	SayakaRevive \
 	SayakaRD2 \
 	KuroMadoka Kyouko KyoukoRevive KyoukoFA \
+	KyoukoFADash \
 	Clone \
 	FastZombie
 
@@ -25,6 +26,11 @@ KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 
 KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFA.hs
+
+KyoukoFADash: KyoukoFADash.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoFADash.hs
+
+
 
 Random: Random.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Random.hs
