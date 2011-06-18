@@ -8,6 +8,7 @@ import System.Random
 
 main :: IO ()
 main = do 
+  setStdGen $ mkStdGen 0x9b
   sr <- randomRIO (0,8::Int)
   runLTG $ ltgMain (2^sr)
 

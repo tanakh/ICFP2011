@@ -1,5 +1,9 @@
 all: Test \
-	 SittingDuck  Random
+	SittingDuck  Random \
+	CompactSayaka
+
+CompactSayaka: CompactSayaka.hs  LTG.hs LTG/*.hs
+	ghc --make -O3 CompactSayaka.hs
 
 Random: Random.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Random.hs
