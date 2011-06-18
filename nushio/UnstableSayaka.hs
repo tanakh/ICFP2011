@@ -203,11 +203,12 @@ attackloop v k s = do
 
 main :: IO()
 main = do
-  (rr: sr: seed: arg: _) <- getArgs
-  writeIORef randRatio (read rr)
-  writeIORef slotRange (read sr)
-  setStdGen $ mkStdGen (read seed)
-  let b = (read arg :: Int) -- 0: Sente, 1: Gote
+  (side: _) <- getArgs
+  rr <- fmap (10**) $ randomRIO (-4,0::Double)
+  sr <- fmap (2^) $ randomRIO (0,8::Int)
+  writeIORef randRatio rr
+  writeIORef slotRange sr
+  let b = (read side :: Int) -- 0: Sente, 1: Gote
   if b == 1 then skip else return ()
   attackloop 5 0 0
   sittingDuck
