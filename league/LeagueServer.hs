@@ -2,11 +2,13 @@
 {-# OPTIONS -Wall #-}
 
 import Control.Concurrent.STM
+import Control.Monad
 import Data.Char
 import Data.Vector (Vector, (!), (//))
 import qualified Data.Vector as V
 import League
 import Network.MessagePackRpc.Server
+import System.IO
 import System.IO.Unsafe
 import System.Posix.Files
 import System.Random
@@ -19,10 +21,6 @@ scoreBoard = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSi
 
 matchCount :: TVar (Vector (Vector Int))
 matchCount = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
-
-matchLogs :: TVar [Match]
-matchLogs = unsafePerformIO $ newTVarIO $ []
-
 
 
 suggestMatch :: IO (String, String)
@@ -37,7 +35,7 @@ suggestMatch = do
 
 reportMatch :: (String, String) -> String -> IO ()
 reportMatch (cmd0, cmd1) result = do
-  recordMatch match
+  recordMatch True match
   where
     wr = words result
     turn' = read $ last wr
@@ -82,22 +80,28 @@ selectMatch ratio matchCount' = (ret0, ret1)
 
 
 
+recordMatchMutex :: TMVar ()
+recordMatchMutex = unsafePerformIO $ newTMVarIO ()
 
-recordMatch :: Match -> IO ()
-recordMatch match = do
-  let i0 = aiIndex $ p0 match
-      i1 = aiIndex $ p1 match
-      s0 = score0 match
+recordMatch :: Bool -> Match -> IO ()
+recordMatch isNew match = do
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+s0) bd
   atomically $ do
     bd <- readTVar matchCount
     writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) bd
-  atomically $ do
-    ms <- readTVar matchLogs 
-    writeTVar matchLogs (match:ms)
-
+  when isNew rec
+      where
+        i0 = aiIndex $ p0 match
+        i1 = aiIndex $ p1 match
+        s0 = score0 match
+        rec = do
+          _ <- atomically $ takeTMVar recordMatchMutex
+          h <- openFile resultFile AppendMode
+          hPutStrLn h $ show match
+          hClose h
+          atomically $ putTMVar recordMatchMutex ()
 
 main :: IO ()
 main = do
@@ -107,7 +111,7 @@ main = do
          else return []
   let matches :: [Match]
       matches = map read results
-  mapM_ recordMatch matches
+  mapM_ (recordMatch False) matches
   putStrLn "ready."
   serve port [ ("suggestMatch", fun suggestMatch),
                ("reportMatch" , fun reportMatch )]
