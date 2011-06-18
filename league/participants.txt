@@ -3,10 +3,7 @@
 
 ../ai/KyoukoRevive
 ../ai/SayakaRevive
-../ai/KyoukoReviveFirstAttack
-../ai/Mami103 8
 ../ai/Mami103 16
-../ai/Mami103 32
 
 #../ai/KyoukoRevive
 #../ai/SayakaRevive

@@ -118,7 +118,7 @@ recordMatch isNew match = when valid $ do
           hPutStrLn h $ show match
           hClose h
           let goal = matchLimit * aiSize * (aiSize-1)
-          when (count >= goal - 5) $ printHoshitori
+          printHoshitori
           atomically $ putTMVar recordMatchMutex (count+1)
           hPutStrLn stderr $ show count ++ " / " ++ show (matchLimit * aiSize * (aiSize-1))
           hFlush stderr
