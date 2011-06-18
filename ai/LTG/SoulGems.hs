@@ -3,6 +3,7 @@ module LTG.SoulGems (
   clear,
   num,
   attack,
+  attack2,
   copyTo,
   copyTo0,
   lazyApply,
@@ -102,6 +103,25 @@ attack from to value = do
   num 0 value
   -- v[1] <- apply v[1] v[0]
   apply0 1
+
+-- execute "attack2 from1/from2 to value" using v[0] and v[1] and f[2]
+attack2 :: Int -> Int -> Int -> Int -> LTG ()
+attack2 from1 from2 to value = do
+  -- v[1] <- (Attack from)
+  num 1 from1
+  Attack $> 1
+  num 2 from2
+  Attack $> 2
+  -- v[0] <- to
+  num 0 to
+  -- v[1] <- apply v[1] v[0]
+  apply0 1
+  apply0 2
+  -- v[0] <- value
+  num 0 value
+  -- v[1] <- apply v[1] v[0]
+  apply0 1
+  apply0 2
 
 -- v[f1] <- (\x -> v[f1] v[f2])
 -- (S (K v[f1]) (K v[f2])) = (\x -> v[f1] v[f2])

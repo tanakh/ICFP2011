@@ -134,8 +134,11 @@ kyoukoMain = do
   if length alives < 2 
     then return ()
     else do
+    attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
+{-
     attack      (alives !! 0) 0 zombifySlotV
     attack      (alives !! 1) 0 zombifySlotV
+-}
 
     -- v[5] <- S (S help I) (lazyApply Copy 6)
 
