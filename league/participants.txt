@@ -9,5 +9,5 @@
 ../ai/KyoukoFA
 ../ai/SayakaRevive
 ../ai/Random
-
+../ai/KyoukoReviveFirstAttack
 
