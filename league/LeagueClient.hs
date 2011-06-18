@@ -1,20 +1,28 @@
 #!/usr/bin/env runhaskell
 {-# OPTIONS -Wall #-}
 
-import Network.MessagePackRpc.Client
- 
-import Control.Concurrent
 import Control.Monad
 import League 
+import Network.MessagePackRpc.Client
+import System.IO
+import System.Process
 
-add :: RpcMethod (Int -> Int -> IO Int)
-add  = method "add"
- 
-echo :: RpcMethod (String -> IO String)
-echo = method "echo"
- 
+suggestMatch :: RpcMethod (IO (String, String))
+suggestMatch = method "suggestMatch"
+
+reportMatch :: RpcMethod ((String, String) -> String -> IO ())
+reportMatch = method "reportMatch"
+
 main :: IO ()
 main = do
-  conn <- connect "p01" port
-  forM_ [0..100] $ \i -> do
-    print =<< add conn i (i*2)
+  conn <- connect "192.168.0.1" port
+  forever $ do
+    match@(cmd0, cmd1) <- suggestMatch conn 
+    let cmd = "../bin/ltg -silent true match " ++  cmd0 ++ " " ++ cmd1
+    hPutStrLn stderr cmd
+    (_, _, Just herr,_) <- createProcess (shell cmd) {std_err = CreatePipe}
+    ret <- hGetContents herr
+    let result = last $ filter ((=="!!").(take 2)) $ lines ret
+    reportMatch conn match result
+
+
