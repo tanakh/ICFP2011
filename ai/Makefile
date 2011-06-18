@@ -3,7 +3,7 @@ all: Test \
 	CompactSayaka NonZeroCompactSayaka \
 	Watcher \
 	SayakaRevive \
-	KuroMadoka Kyouko KyoukoFA \
+	KuroMadoka Kyouko KyoukoRevive KyoukoFA \
 	Clone \
 	FastZombie
 
@@ -18,6 +18,9 @@ KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
 
 Kyouko: Kyouko.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Kyouko.hs
+
+KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KyoukoRevive.hs
 
 KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFA.hs

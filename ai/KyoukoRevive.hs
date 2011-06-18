@@ -1,0 +1,164 @@
+{-# OPTIONS -Wall #-}
+import Control.Applicative
+import qualified Control.Exception.Control as E
+import Control.Monad
+import Data.List
+
+import LTG 
+import LTG.SoulGems
+
+isDead :: Bool -> Int -> LTG Bool
+isDead my ix = not <$> isAlive my ix
+
+zombieLoop f2 = do
+  num 7 0
+  copyTo f2 0
+  f2 $< I
+
+  num 7 58
+  copyTo f2 0
+  f2 $< I
+
+  num 7 116
+  copyTo f2 0
+  f2 $< I
+
+  num 7 174
+  copyTo f2 0
+  f2 $< I
+
+  num 7 232
+  copyTo f2 0
+  f2 $< I
+
+  zombieLoop f2
+
+
+kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
+kyokoAnAn f1 f2 f3 f4 f5 f7 target = do
+-- f1, f2, f3: temp
+-- f4, f5
+-- target: zombie target
+  -- \x -> (copy f4) (succ x)
+  -- next = v[f2] <- S (lazy_apply Copy f4) succ
+  num f1 f4
+  clear f2
+  f2 $< Copy
+  lazyApply f2 f1
+  S $> f2
+  f2 $< Succ
+
+  -- f = v[f4] <- S (lazy_apply Copy f5) I
+  -- S (S help I) (S (K copy) (K 6))
+
+-- S (S(S help I)(S(K copy)(K 6))) (S (S(K copy)(K 4)) succ)
+-- \x -> help x x (\x -> (copy 6)) x; (copy 4) (succ x)
+
+  clear f4
+  f4 $< S
+  f4 $< Help
+  f4 $< I
+  S $> f4
+  clear f3
+  f3 $< Copy
+  num f1 6
+  lazyApply f3 f1
+  copyTo 0 f3
+  apply0 f4
+
+{-
+  num f1 f5
+  clear f4
+  f4 $< Copy
+  lazyApply f4 f1
+  S  $> f4
+  f4 $< I
+-}
+
+ -- v[f4] <- S f next
+  S  $> f4
+  copyTo 0 f2
+  apply0 f4
+
+  -- v[f1] <- S (lazyApply Copy f4) (lazyApply Copy f7)
+  -- this is zombie!
+  clear f1
+  f1 $< Copy
+  num f2 f4
+  lazyApply f1 f2
+  S $> f1
+
+  clear f2
+  f2 $< Copy
+  num f3 f7
+  lazyApply f2 f3
+  copyTo 0 f2
+  apply0 f1
+--  lazyApply2 f1 f2 f3
+
+  num f2 (255-target)
+  Zombie $> f2
+
+  lazyApply f2 f1
+  copyTo 0 f2
+  zombieLoop f2
+
+sittingDuck :: LTG()
+sittingDuck = do
+  I $> 0
+  sittingDuck
+
+kyoukoMain :: LTG()
+kyoukoMain = do
+  alives <- filterM (\x -> do v <- getVital True x; return $ v > 8192) [1..255]
+  -- TODO: raise error to increase vitality
+  if length alives <= 2 
+    then return ()
+    else do
+    attack      (alives !! 0) 0 8192
+    attack      (alives !! 1) 0 8192
+
+-- v[5] <- S (S help I) (lazyApply Copy 6)
+
+{-
+  clear 5
+  5 $< S
+  5 $< Help
+  5 $< I
+  S $> 5
+  clear 6
+  6 $< Copy
+  num 7 6
+  lazyApply 6 7
+  copyTo 0 6
+  apply0 5
+-}
+
+    num 6 8192
+    kyokoAnAn 1 2 3 4 5 7 255
+
+--  attackFA    1 2 18 3 5 6 8192
+--  attackLoopFA 1 2 18 5 0 0
+--  sittingDuck
+  
+
+main :: IO ()
+main = runLTG $ do
+  forever $ do
+    ds <- filterM (isDead True) [0..255]
+    if null ds
+      then do
+      mb <- E.try kyoukoMain
+      case mb of
+        Left (LTGError e) -> do
+          lprint e
+          return ()
+        Right _ -> do
+          return ()
+      return ()
+      else do
+      revive (head ds)
+      return ()
+
+--  futureApply 1 2 18 3
+

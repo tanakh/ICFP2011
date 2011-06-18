@@ -2,10 +2,11 @@
 # One AI per line.
   
 ../ai/CompactSayaka
-../ai/SayakaRevive
-../ai/Kyouko
-../ai/KyoukoFA
-../ai/Clone
 ../ai/FastZombie
+../ai/Kyouko
+../ai/KyoukoRevive
+../ai/KyoukoFA
+../ai/SayakaRevive
+../ai/Random
 
 

@@ -13,6 +13,9 @@ suggestMatch = method "suggestMatch"
 reportMatch :: RpcMethod ((String, String) -> String -> IO ())
 reportMatch = method "reportMatch"
 
+seal :: String -> String
+seal cmd = "'./nostderr.rb " ++  cmd ++ "'"
+
 main :: IO ()
 main = do
   conn <- connect "192.168.0.1" port
@@ -20,7 +23,7 @@ main = do
     (cmd0, cmd1) <- suggestMatch conn 
     let vs :: String -> String -> IO ()
         vs cmd0' cmd1' = do
-              let cmd = "../bin/ltg -silent true match " ++ cmd0' ++ " " ++ cmd1'
+              let cmd = "../bin/ltg -silent true match " ++ seal cmd0' ++ " " ++ seal cmd1'
               hPutStrLn stderr cmd
               (_, _, Just herr,_) <- createProcess (shell cmd) {std_err = CreatePipe}
               ret <- hGetContents herr
