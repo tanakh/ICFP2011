@@ -118,13 +118,15 @@ showValue v = case v of
   VFun s -> s
   VApp x y -> showValue x ++ "(" ++ showValue y ++ ")"
 
-data Monitor = Monitor {
-      propHandCount :: Int 
+data Monitor
+  = Monitor 
+    { propHandCount :: Int 
+    , zombieSeedCount :: Int 
     }
   deriving (Eq, Show)
 
 initialMonitor :: Monitor
-initialMonitor = Monitor { propHandCount = 0 }
+initialMonitor = Monitor { propHandCount = 0, zombieSeedCount = 0}
 
 
 data State
@@ -322,6 +324,9 @@ eval !z !v my opp = do
             serror "zombie: slot is not dead"
           MV.write (field opp) (255-ii) x
           MV.write (vital opp) (255-ii) (-1)
+          monAtPos <- MV.read (monitor opp) (255-ii)
+          MV.write (monitor opp) (255-ii) $ monAtPos { zombieSeedCount = 1 + zombieSeedCount monAtPos }
+
           return $ VFun "I"
         _ -> do
           serror "zombie: argument is not valid slot number"

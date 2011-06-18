@@ -11,10 +11,16 @@ main = runLTG ltgMain
 ltgMain :: LTG ()
 ltgMain = do
   forever $ do
-    I $> 0
-    mons <- forM [0..255] $ getMonitor False 
-    let addrMons = zip [0..255] mons
-        info = filter ( (>0) . propHandCount . snd ) addrMons
-        prettyInfo = map (\(i,m) -> (i, propHandCount m)) info
-    t <- turnCnt <$> get
-    lprint $ "turn" ++ show t ++ " : (addr, access freq.) = " ++ show prettyInfo
+    nop
+    spy "enemy slot use"      False propHandCount   (>0)
+    spy "my zombie weakpoint" True  zombieSeedCount (>0)
+
+spy :: (Show a) => String -> Bool -> (Monitor -> a) -> (a -> Bool) ->LTG ()
+spy label my dataRecord isImportant = do
+  mons <- forM [0..255] $ getMonitor my
+  let addrMons = zip [0..255] mons
+      info = filter ( isImportant . dataRecord . snd ) addrMons
+      prettyInfo = map (\(i,m) -> (i, dataRecord m)) info
+  t <- turnCnt <$> get
+  lprint $ "turn" ++ show t ++ " : (addr, " ++ label ++ ") = " ++ show prettyInfo
+
