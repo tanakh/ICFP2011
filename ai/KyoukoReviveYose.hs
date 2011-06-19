@@ -98,10 +98,10 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
   let lazyCopy4 = lazyApplyIntermediate (ofC Copy) (ofN 4)
   makeFieldUnlessConstructed f2
     (ofC S $| lazyCopy4 $| ofC Succ) $ do
-      num f1 f4
       clear f2
       f2 $< Copy
-      lazyApply f2 f1
+      num 0 f4
+      lazyApply f2 0
       S $> f2
       f2 $< Succ
   --x0 <- getField True f2; lprint x0
@@ -128,8 +128,8 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       clear f3
       -- lazy (Copy 6)
       f3 $< Copy
-      num f1 6
-      lazyApply f3 f1
+      num 0 6
+      lazyApply f3 0
       copyTo 0 f3
       apply0 f4 -- S (S Help I) (S (K copy) (K 6))
 
@@ -146,14 +146,14 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
     (ofC S $| lazyCopy4 $| lazyCopy7) $ do
       clear f1
       f1 $< Copy
-      num f2 f4
-      lazyApply f1 f2
+      num 0 f4
+      lazyApply f1 0
       S $> f1
 
       clear f2
       f2 $< Copy
-      num f3 f7
-      lazyApply f2 f3
+      num 0 f7
+      lazyApply f2 0
       copyTo 0 f2
       apply0 f1
   --x2 <- getField True f1; lprint x2
