@@ -1,4 +1,4 @@
-Team: hogehoge
+Team: atomically $ save Madoka
 
 ## Team Member and their major role:
 
@@ -100,9 +100,9 @@ Team: hogehoge
   could easily write the contest system that can hold hundreds of LTG
   match in parallel on a 64-core distributed computer system.
   
-  The contest system used remote procedure call (RPC) library and
-  msgpack-rpc and software transactional memory (STM) library from
-  the Hackage.
+  The contest system used remote procedure call (RPC) library
+  msgpack-rpc and software transactional memory (STM) library from the
+  Hackage.
 
   
 P.S.
