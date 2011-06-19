@@ -44,7 +44,11 @@ ensureZombieDead target = do
         num slot (255 - target)
         Dec $> slot
         ensureZombieDead target
-      _ -> return ()
+      (1, Nothing) -> do
+        return ()
+      (x, _) -> do
+        killTarget target
+        checkTarget target
 
 zombieLoop :: Int -> Int -> Int -> Int -> LTG ()
 zombieLoop f4 f1 dmg target = do
@@ -57,7 +61,6 @@ zombieLoop f4 f1 dmg target = do
       ensureZombieDead target
       f1 $< I
       zombieLoop f4 f1 dmg target
-
 
 ofN :: Int -> Value
 ofN x  = VInt x
@@ -216,11 +219,14 @@ getMaxEnemy = do
   return $ maximum vitals
 #endif
 
+checkTarget :: Int -> LTG ()
+checkTarget target = do
+  isTargetAlive <- isAlive False target
+  when isTargetAlive $ lerror "Not dead"
 
-kyoukoMain :: LTG()
-kyoukoMain = do
-  dmg <- getEasyInt <$> getMaxEnemy
-  zombifySlotVital <- getVital False 255
+killTarget :: Int -> LTG()
+killTarget target = do
+  zombifySlotVital <- getVital False target
   let zombifySlotV = getEasyInt zombifySlotVital
   alives <- filterM (\x -> do 
                         v <- getVital True x
@@ -228,17 +234,29 @@ kyoukoMain = do
             [1..255]
 
     -- dmg > 2 -> attack is issued
-    -- "dec" is issued if dmg == 1 
     -- Create wall between the cut, to control damage, if possible
   case length alives of
     n | n < 2 -> lerror "there are no vital"
-    n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) 0 zombifySlotV
-    _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
+    n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) (255 - target) zombifySlotV
+    _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) (255 - target) zombifySlotV
     _ -> return ()
-  kyokoAnAn 1 3 4 2 255 dmg
+  checkTarget target
 
+chooseTarget :: LTG Int
+chooseTarget = do
+  vs <- forM [255,254..240] $ \i -> do
+    vit <- getVital False i
+    return (vit, -i)
+  return $ negate $ snd $ minimum vs
 
+kyoukoMain :: LTG()
+kyoukoMain = do
+  target <- chooseTarget
+  dmg <- getEasyInt <$> getMaxEnemy
 
+  isTargetAlive <- isAlive False target
+  when isTargetAlive $ killTarget target
+  kyokoAnAn 1 3 4 2 target dmg
 
 keepAlive :: Int -> LTG ()
 keepAlive ix = do
