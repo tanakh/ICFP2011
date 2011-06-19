@@ -6,6 +6,7 @@ all:\
 	MamiY2C \
 	Y2CQB \
 	Kyubey \
+	Y2CAtkQb \
 	SpyDuck SittingDuck  Random 
 
 everything: Test \
@@ -32,10 +33,16 @@ everything: Test \
 	KRYMadanNoButou \
 	Mami103 \
 	FastZombie\
-	Y2CShuffle
+	Y2CShuffle \
+	Y2CAtkQb 
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+Y2CAtkQb: Y2CAtkQb.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Y2CAtkQb.hs
+
+
 
 Y2CQB: Y2CQB.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Y2CQB.hs

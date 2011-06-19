@@ -4,8 +4,9 @@ import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
 import Control.Monad.State
-
+import Data.List
 import Data.Maybe
+import System.Environment
 
 import LTG 
 
@@ -29,37 +30,36 @@ getAnySlot = do
             [0..255]
   return $ listToMaybe aliveidents
 
-ensureZombieDead :: Int -> LTG ()
-ensureZombieDead target = do
-  zombieReady <- isDead False target
+ensureZombieDead :: LTG ()
+ensureZombieDead = do
+  zombieReady <- isDead False 255
   if zombieReady 
     then do
     return ()
     else do -- oops! They revived 255!
-    vit <- getVital False target
+    vit <- getVital False 255
     aliveslot <- getAnySlot
     case (vit, aliveslot) of
       (1, Just slot) -> do
         -- dec 
-        num slot (255 - target)
+        slot $< Zero
         Dec $> slot
-        ensureZombieDead target
-      (1, Nothing) -> do
-        return ()
-      (x, _) -> do
-        killTarget target
+        ensureZombieDead
+      _ -> return ()
 
-zombieLoop :: Int -> Int -> Int -> Int -> LTG ()
-zombieLoop f4 f1 dmg target = do
+zombieLoop :: Int -> Int -> Int -> LTG ()
+zombieLoop f4 f1 dmg = do
+  --x0 <- getField True 0; lprint x0
   elms <- getFirstWorthEnemy dmg
   case elms of
     Nothing -> return ()
     Just n -> do
       num f4 n
       copyTo f1 0
-      ensureZombieDead target
+      ensureZombieDead
       f1 $< I
-      zombieLoop f4 f1 dmg target
+      zombieLoop f4 f1 dmg
+
 
 ofN :: Int -> Value
 ofN x  = VInt x
@@ -76,23 +76,18 @@ lazyApplyIntermediate f g =
   -- S (K f) (K g)
   (ofC S) $| (ofC K $| f) $| (ofC K $| g)
 
-makeFieldsUnlessConstructed :: [(Int, Value)] -> LTG() -> LTG()
-makeFieldsUnlessConstructed pairs procedure = do
-  ffs <- mapM
-         (\(f, v) -> do
-             k <- getField True f
-             return (k == v))
-         pairs
-  if and ffs 
-    then do 
-    lprint $ "Reusing " ++ show (map fst pairs)
-    return ()
-    else do
-    procedure
-
 makeFieldUnlessConstructed :: Int -> Value -> LTG() -> LTG()
 makeFieldUnlessConstructed f lval procedure = do
-  makeFieldsUnlessConstructed [(f, lval)] procedure
+  ff <- getField True f
+  if ff == lval 
+    then do 
+    -- lprint $ "Reusing " ++ show f
+    return ()
+    else do
+    {-
+    lprint $ "Failed reusing " ++
+      show f ++ " [expected " ++ show lval ++ " but was " ++ show ff ++ "]"-}
+    procedure
 
 kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
 kyokoAnAn f1 f2 f4 f8 target dmg = do
@@ -107,50 +102,47 @@ kyokoAnAn f1 f2 f4 f8 target dmg = do
     else do
     num f8 dmg
 
-  makeFieldsUnlessConstructed
+  makeFieldUnlessConstructed 0
     -- I know it's ugly
-    [(0, (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VFun "zombie") (VInt (255 - target))))) (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ"))))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 4))))))),
-     (f2, VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ")))] $ do
+    (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VFun "zombie") (VInt (255 - target))))) (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ"))))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 4)))))) $ do
       -- v[f4] <- S (S Help I) (lazyApply Copy f8)
       -- S (S Help I)
 
-      makeFieldUnlessConstructed f2
-        (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ"))) $ do
-          -- v[f2] <- (lazyApply Copy f8)
-          -- num: gen f8
-          clear f2
-          f2 $< Copy
-          num 0 f8
-          lazyApply f2 0
-          0 $< Put
+      -- v[f2] <- (lazyApply Copy f8)
+      -- num: gen f8
+      clear f2
+      f2 $< Copy
+      num 0 f8
+      lazyApply f2 0
+      0 $< Put
 
-          -- v[f2] <- S (S Help I) v[f8]; loop body
-          --        = S (\x -> Help x x) (lazyApply Copy f8)
-          -- num: kill f4
-          copyTo 0 f2
+      -- v[f2] <- S (S Help I) v[f8]; loop body
+      --        = S (\x -> Help x x) (lazyApply Copy f8)
+      -- num: kill f4
+      copyTo 0 f2
 
-          clear f2
-          f2 $< S
-          f2 $< Help
-          f2 $< I
-          S $> f2
-          apply0 f2 -- S (S Help I) (S (K copy) (K 8))
+      clear f2
+      f2 $< S
+      f2 $< Help
+      f2 $< I
+      S $> f2
+      apply0 f2 -- S (S Help I) (S (K copy) (K 8))
 
-          -- v[f4] <- S (lazyApply Copy f2) Succ; loop next
-          -- num: gen f2
-          clear f4
-          f4 $< Copy
-          num 0 f2
-          lazyApply f4 0
-          0 $< Put
-          S $> f4
-          f4 $< Succ
+      -- v[f4] <- S (lazyApply Copy f2) Succ; loop next
+      -- num: gen f2
+      clear f4
+      f4 $< Copy
+      num 0 f2
+      lazyApply f4 0
+      0 $< Put
+      S $> f4
+      f4 $< Succ
 
-          -- v[f2] <- S f2 f4
-          -- num: kill f4
-          S  $> f2
-          copyTo 0 f4
-          apply0 f2
+      -- v[f2] <- S f2 f4
+      -- num: kill f4
+      S  $> f2
+      copyTo 0 f4
+      apply0 f2
 
   -- v[f1] <- S (K v[f2]) (lazyApply Copy f4); zombie
       -- v[0] = v[f4] = (lazyApply Copy f4)
@@ -173,7 +165,7 @@ kyokoAnAn f1 f2 f4 f8 target dmg = do
       lazyApply f4 f1
       copyTo 0 f4
 
-  zombieLoop f4 f1 dmg target
+  zombieLoop f4 f1 dmg
 
 sittingDuck :: LTG()
 sittingDuck = do
@@ -218,14 +210,11 @@ getMaxEnemy = do
   return $ maximum vitals
 #endif
 
-checkTarget :: Int -> LTG ()
-checkTarget target = do
-  isTargetAlive <- isAlive False target
-  when isTargetAlive $ lerror "Not dead"
 
-killTarget :: Int -> LTG()
-killTarget target = do
-  zombifySlotVital <- getVital False target
+kyoukoMain :: LTG()
+kyoukoMain = do
+  dmg <- getEasyInt <$> getMaxEnemy
+  zombifySlotVital <- getVital False 255
   let zombifySlotV = getEasyInt zombifySlotVital
   alives <- filterM (\x -> do 
                         v <- getVital True x
@@ -233,29 +222,17 @@ killTarget target = do
             [1..255]
 
     -- dmg > 2 -> attack is issued
+    -- "dec" is issued if dmg == 1 
     -- Create wall between the cut, to control damage, if possible
   case length alives of
     n | n < 2 -> lerror "there are no vital"
-    n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) (255 - target) zombifySlotV
-    _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) (255 - target) zombifySlotV
+    n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) 0 zombifySlotV
+    _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
     _ -> return ()
-  when (zombifySlotV > 1) $ checkTarget target 
+  kyokoAnAn 1 3 4 2 255 dmg
 
-chooseTarget :: LTG Int
-chooseTarget = do
-  vs <- forM [255,254..240] $ \i -> do
-    vit <- getVital False i
-    return (vit, -i)
-  return $ negate $ snd $ minimum vs
 
-kyoukoMain :: LTG()
-kyoukoMain = do
-  target <- chooseTarget
-  dmg <- getEasyInt <$> getMaxEnemy
 
-  isTargetAlive <- isAlive False target
-  when isTargetAlive $ killTarget target
-  kyokoAnAn 1 3 4 2 target dmg
 
 keepAlive :: Int -> LTG ()
 keepAlive ix = do
@@ -293,12 +270,23 @@ waruagaki = do
   num 0 2
   Inc $> 0
 
+
+speedo :: Int -> Int
+speedo x
+    | x == 0 = 0
+    | odd  x = 1 + speedo (x-1)
+    | even x = 1 + speedo (div x 2)
+
+
 main :: IO ()
 main = runLTG $ do
   lprint debugTag
 
+  --(range:_) <- lift $ getArgs
+  let range = 8
+  let necks = take (range) $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
   forever $ do
-    ds <- filterM (isDead True) [0..255]
+    ds <- filterM (isDead True) necks
     if null ds
       then do
       turn <- turnCnt <$> get
@@ -322,10 +310,20 @@ main = runLTG $ do
             return ()
         return ()
       else do
-      lprint $ "Revive mode: " ++ show (head ds)
-      ignExc $ revive (head ds)
+      rankedTgt <- mapM rankDeads ds
+      let reviveTgt = snd $ head $ sort rankedTgt          
+      lprint $ "Revive mode: " ++ show (sort rankedTgt)
+      ignExc $ revive reviveTgt
       lprint "Revive done"
       return ()
+
+rankDeads :: Int -> LTG (Int, Int)
+rankDeads i 
+    | i == 0 = return (0, i)
+    | True   = do
+          fa <- isAlive True (i-1)
+          return (if fa then 1 else 0, i)
+
 
 --  futureApply 1 2 18 3
 
