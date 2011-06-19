@@ -15,6 +15,8 @@
 ../ai/KyoukoReviveYose
 ../ai/KyoukoReviveYose2
 ../ai/KyoukoReviveYose2C
+../ai/Yuma2a
+../ai/Y2CAtkQb
 #../ai/KRY2Madan
 #../ai/MamiY2C 16
 #../ai/MamiY2C 8
