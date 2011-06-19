@@ -59,7 +59,7 @@ clear :: Int -> LTG()
 clear ix = do
   f <- getField True ix
   when (f /= VFun "I") $ do
-    Zero $> ix
+    Put $> ix
 
 -- v[f1] <- v[f2]
 -- Construct cost: 2
