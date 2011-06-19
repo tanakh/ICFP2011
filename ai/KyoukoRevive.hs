@@ -113,7 +113,7 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
   -- S (S help I) (S (K copy) (K 6))
 
   -- S (S(S help I)(S(K copy)(K 6))) (S (S(K copy)(K 4)) succ)
-  -- \x -> help x x (\x -> (copy 6)) x; (copy 4) (succ x)
+  -- \x -> help x x (\_ -> (copy 6)) x; (copy 4) (succ x)
 
   let lazyCopy6 = lazyApplyIntermediate (ofC Copy) (ofN 6)
   let loopCode = ofC S $| lazyCopy4 $| ofC Succ
