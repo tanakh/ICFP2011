@@ -21,17 +21,19 @@ ltgMain = do
     ignExc qbMain
     _ <- revive 0
     return ()
-{-
-scan :: Int -> LTG (Int, Bool, Value)
-scan i = do
-  a    <- isAlive  True i
-  val  <- getValue True i
-  vit  <- getVital True i
--}
+
+
 
 qbMain :: LTG ()
 qbMain = do
   deadEvens  <- filterM (isDead  True) [0,2..128]
   aliveEvens <- filterM (isAlive True) [0,2..128]
-  if nul 
-  return ()
+  if null deadEvens
+  then do
+    num 0 2
+    Inc $> 0
+    num 0 4
+    Inc $> 0
+  else do
+    _ <- revive (head deadEvens)
+    return ()
