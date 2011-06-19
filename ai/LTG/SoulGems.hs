@@ -136,11 +136,16 @@ attack2 from1 from2 to value = do
   Attack $> 1
   num 2 from2
   Attack $> 2
-  -- v[0] <- to
-  num 0 to
-  -- v[1] <- apply v[1] v[0]
-  apply0 1
-  apply0 2
+  if to == 0
+    then do
+      1 $< Zero
+      2 $< Zero
+    else do
+      -- v[0] <- to
+      num 0 to
+      -- v[1] <- apply v[1] v[0]
+      apply0 1
+      apply0 2
   -- v[0] <- value
   num 0 value
   -- v[1] <- apply v[1] v[0]
