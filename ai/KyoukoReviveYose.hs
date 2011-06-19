@@ -172,6 +172,7 @@ sittingDuck = do
 
 -- get 3 * 2^n or 2^n smaller than x
 getEasyInt :: Int -> Int
+getEasyInt x | (x <= 3) = x
 getEasyInt x = 
   max (head $ filter (\y -> y * 2 > x) twos) (head $ filter (\y -> y * 2 > x) threep)
   where
@@ -223,6 +224,7 @@ kyoukoMain = do
   if length alives < 2 
     then lerror "there are no vital"
     else do
+    -- dmg > 2 -> attack is issued
     -- "dec" is issued if dmg == 1 
     when (zombifySlotV > 1) $ do attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
 {-
@@ -273,12 +275,12 @@ yose = do
   forever $ ignExc $ do
     keepAlive 0
     num 0 0
-    forever $ do
+    forM_ [(0::Int)..255] $ \_ -> do
       keepAlive 0
       keepAlive 1
-      num 1 0
-      Get $> 1
+      copyTo 1 0
       Dec $> 1
+      Succ $> 0
 
 waruagaki :: LTG ()
 waruagaki = do
