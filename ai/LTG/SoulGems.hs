@@ -18,7 +18,8 @@ module LTG.SoulGems (
   revive,
   lazyApplyFA,
   lazyApply2FA,
-  ensureAlive
+  ensureAlive,
+  summonMami 
 ) where
 
 import Control.Monad
@@ -366,3 +367,37 @@ ensureAlive f = do
   when zeroDead (revive f >> return ())
   zeroDead' <- isDead True f
   when zeroDead' $ lerror "ZeroDead"
+
+
+
+-- bombard area [n..(n + 124)] 
+-- bombarding starts from (255 - (n + 124)) and goes backwords
+summonMami :: Int -> Int -> Int -> LTG()
+summonMami slot work n = do
+  copyTo work slot
+  num 0 (max 0 (255 - (n + 124)))
+  apply0 work
+
+prepareMagicalBullet :: Int -> Int -> LTG ()
+prepareMagicalBullet slot work = do
+  -- 
+  -- S (\X -> dec X) (\X -> (lazy (get slot)) (succ X)) X
+  -- compiles to
+  -- S dec (S (S (K get) (K slot)) succ))
+  clear work
+  clear slot
+  
+  work $< Get
+  
+  num slot slot
+
+  lazyApply work slot -- (S (K get) (K slot))
+
+  S $> work
+  work $< Succ -- S (S (K get) (K slot)) succ
+
+  clear slot
+  slot $< S
+  slot $< Dec
+  copyTo0 work
+  apply0 slot -- S Dec (S (S ...))

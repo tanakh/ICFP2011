@@ -3,6 +3,9 @@ import LTG
 
 import Control.Monad
 
+
+-- bombard area [n..(255 - (n + 124))] 
+-- bombarding starts from (255 - (n + 124)) and goes backwords
 summonMami :: Int -> Int -> Int -> LTG()
 summonMami slot work n = do
   copyTo work slot
