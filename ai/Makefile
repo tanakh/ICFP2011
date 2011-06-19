@@ -14,6 +14,10 @@ all:\
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
 
+YumaAn: YumaAn.hs LTG.hs LTG/*.hs
+	ghc --make -O3 YumaAn.hs
+
+
 Y2CAtkQb: Y2CAtkQb.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Y2CAtkQb.hs
 
