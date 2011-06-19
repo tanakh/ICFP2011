@@ -48,7 +48,6 @@ ensureZombieDead target = do
         return ()
       (x, _) -> do
         killTarget target
-        checkTarget target
 
 zombieLoop :: Int -> Int -> Int -> Int -> LTG ()
 zombieLoop f4 f1 dmg target = do
@@ -240,7 +239,7 @@ killTarget target = do
     n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) (255 - target) zombifySlotV
     _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) (255 - target) zombifySlotV
     _ -> return ()
-  checkTarget target
+  when (zombifySlotV > 1) $ checkTarget target 
 
 chooseTarget :: LTG Int
 chooseTarget = do
