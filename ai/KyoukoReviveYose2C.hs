@@ -29,35 +29,34 @@ getAnySlot = do
             [0..255]
   return $ listToMaybe aliveidents
 
-ensureZombieDead :: LTG ()
-ensureZombieDead = do
-  zombieReady <- isDead False 255
+ensureZombieDead :: Int -> LTG ()
+ensureZombieDead target = do
+  zombieReady <- isDead False target
   if zombieReady 
     then do
     return ()
     else do -- oops! They revived 255!
-    vit <- getVital False 255
+    vit <- getVital False target
     aliveslot <- getAnySlot
     case (vit, aliveslot) of
       (1, Just slot) -> do
         -- dec 
-        slot $< Zero
+        num slot (255 - target)
         Dec $> slot
-        ensureZombieDead
+        ensureZombieDead target
       _ -> return ()
 
-zombieLoop :: Int -> Int -> Int -> LTG ()
-zombieLoop f4 f1 dmg = do
-  --x0 <- getField True 0; lprint x0
+zombieLoop :: Int -> Int -> Int -> Int -> LTG ()
+zombieLoop f4 f1 dmg target = do
   elms <- getFirstWorthEnemy dmg
   case elms of
     Nothing -> return ()
     Just n -> do
       num f4 n
       copyTo f1 0
-      ensureZombieDead
+      ensureZombieDead target
       f1 $< I
-      zombieLoop f4 f1 dmg
+      zombieLoop f4 f1 dmg target
 
 
 ofN :: Int -> Value
@@ -75,18 +74,23 @@ lazyApplyIntermediate f g =
   -- S (K f) (K g)
   (ofC S) $| (ofC K $| f) $| (ofC K $| g)
 
-makeFieldUnlessConstructed :: Int -> Value -> LTG() -> LTG()
-makeFieldUnlessConstructed f lval procedure = do
-  ff <- getField True f
-  if ff == lval 
+makeFieldsUnlessConstructed :: [(Int, Value)] -> LTG() -> LTG()
+makeFieldsUnlessConstructed pairs procedure = do
+  ffs <- mapM
+         (\(f, v) -> do
+             k <- getField True f
+             return (k == v))
+         pairs
+  if and ffs 
     then do 
-    -- lprint $ "Reusing " ++ show f
+    lprint $ "Reusing " ++ show (map fst pairs)
     return ()
     else do
-    {-
-    lprint $ "Failed reusing " ++
-      show f ++ " [expected " ++ show lval ++ " but was " ++ show ff ++ "]"-}
     procedure
+
+makeFieldUnlessConstructed :: Int -> Value -> LTG() -> LTG()
+makeFieldUnlessConstructed f lval procedure = do
+  makeFieldsUnlessConstructed [(f, lval)] procedure
 
 kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
 kyokoAnAn f1 f2 f4 f8 target dmg = do
@@ -101,47 +105,50 @@ kyokoAnAn f1 f2 f4 f8 target dmg = do
     else do
     num f8 dmg
 
-  makeFieldUnlessConstructed 0
+  makeFieldsUnlessConstructed
     -- I know it's ugly
-    (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VFun "zombie") (VInt (255 - target))))) (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ"))))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 4)))))) $ do
+    [(0, (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VFun "zombie") (VInt (255 - target))))) (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VFun "K") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ"))))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 4))))))),
+     (f2, VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ")))] $ do
       -- v[f4] <- S (S Help I) (lazyApply Copy f8)
       -- S (S Help I)
 
-      -- v[f2] <- (lazyApply Copy f8)
-      -- num: gen f8
-      clear f2
-      f2 $< Copy
-      num 0 f8
-      lazyApply f2 0
-      0 $< Put
+      makeFieldUnlessConstructed f2
+        (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VFun "help")) (VFun "I"))) (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 2))))) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "copy"))) (VApp (VFun "K") (VInt 3)))) (VFun "succ"))) $ do
+          -- v[f2] <- (lazyApply Copy f8)
+          -- num: gen f8
+          clear f2
+          f2 $< Copy
+          num 0 f8
+          lazyApply f2 0
+          0 $< Put
 
-      -- v[f2] <- S (S Help I) v[f8]; loop body
-      --        = S (\x -> Help x x) (lazyApply Copy f8)
-      -- num: kill f4
-      copyTo 0 f2
+          -- v[f2] <- S (S Help I) v[f8]; loop body
+          --        = S (\x -> Help x x) (lazyApply Copy f8)
+          -- num: kill f4
+          copyTo 0 f2
 
-      clear f2
-      f2 $< S
-      f2 $< Help
-      f2 $< I
-      S $> f2
-      apply0 f2 -- S (S Help I) (S (K copy) (K 8))
+          clear f2
+          f2 $< S
+          f2 $< Help
+          f2 $< I
+          S $> f2
+          apply0 f2 -- S (S Help I) (S (K copy) (K 8))
 
-      -- v[f4] <- S (lazyApply Copy f2) Succ; loop next
-      -- num: gen f2
-      clear f4
-      f4 $< Copy
-      num 0 f2
-      lazyApply f4 0
-      0 $< Put
-      S $> f4
-      f4 $< Succ
+          -- v[f4] <- S (lazyApply Copy f2) Succ; loop next
+          -- num: gen f2
+          clear f4
+          f4 $< Copy
+          num 0 f2
+          lazyApply f4 0
+          0 $< Put
+          S $> f4
+          f4 $< Succ
 
-      -- v[f2] <- S f2 f4
-      -- num: kill f4
-      S  $> f2
-      copyTo 0 f4
-      apply0 f2
+          -- v[f2] <- S f2 f4
+          -- num: kill f4
+          S  $> f2
+          copyTo 0 f4
+          apply0 f2
 
   -- v[f1] <- S (K v[f2]) (lazyApply Copy f4); zombie
       -- v[0] = v[f4] = (lazyApply Copy f4)
@@ -164,7 +171,7 @@ kyokoAnAn f1 f2 f4 f8 target dmg = do
       lazyApply f4 f1
       copyTo 0 f4
 
-  zombieLoop f4 f1 dmg
+  zombieLoop f4 f1 dmg target
 
 sittingDuck :: LTG()
 sittingDuck = do
