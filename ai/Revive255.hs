@@ -11,6 +11,8 @@ ltgMain = do
   num 1 255
   Get $> 0
   forever $ do
-    b <- isDead True 255
-    if b then Revive $> 0
-    else nop
+    b <- isAlive True 255
+    if b then nop
+    else do
+      Revive $> 0
+      Get $> 0
