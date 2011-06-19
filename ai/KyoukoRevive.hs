@@ -3,11 +3,11 @@
 import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
-import Data.List
+
 import Data.Maybe
 
 import LTG 
-import LTG.SoulGems
+
 
 isDead :: Bool -> Int -> LTG Bool
 isDead my ix = not <$> isAlive my ix
@@ -20,19 +20,67 @@ getFirstWorthEnemy dmg = do
                 vt <- getVital False ix
                 return (al && vt >= dmg))
             [0..255]
-  if null alives then return Nothing
-    else return $ Just $ head alives
+  return $ listToMaybe alives
+
+getAnySlot :: LTG (Maybe Int)
+getAnySlot = do
+  aliveidents <- filterM 
+            (\ix -> do
+                al <- isAlive True ix
+                fn <- getField True ix
+                return (al && fn == VFun "i"))
+            [0..255]
+  return $ listToMaybe aliveidents
 
 zombieLoop :: Int -> Int -> LTG ()
 zombieLoop f2 dmg = do
-  elms <- getFirstWorthEnemy dmg
-  case elms of
-    Nothing -> return ()
-    Just n -> do
-      num 7 n
-      copyTo f2 0
-      f2 $< I
-      zombieLoop f2 dmg
+  zombieReady <- isDead False 255
+  if zombieReady 
+    then do
+    elms <- getFirstWorthEnemy dmg
+    case elms of
+      Nothing -> return ()
+      Just n -> do
+        num 7 n
+        copyTo f2 0
+        f2 $< I
+        zombieLoop f2 dmg
+    else do -- oops! They revived 255!
+    vit <- getVital False 255
+    aliveslot <- getAnySlot
+    case (vit, aliveslot) of
+      (1, Just slot) -> do
+        -- dec 
+        slot $< Zero
+        Dec $> slot
+        zombieLoop f2 dmg
+      _ -> return ()
+
+
+ofN :: Int -> Value
+ofN x  = VInt x
+
+ofC :: Card -> Value
+ofC x = VFun (cardName x)
+
+infixl 1 $|
+($|) :: Value -> Value -> Value
+x $| y  = VApp x y
+
+lazyApplyIntermediate :: Value -> Value -> Value
+lazyApplyIntermediate f g =
+  -- S (K f) (K g)
+  (ofC S) $| (ofC K $| f) $| (ofC K $| g)
+
+makeFieldUnlessConstructed :: Int -> Value -> LTG() -> LTG()
+makeFieldUnlessConstructed f lval procedure = do
+  ff <- getField True f
+  if ff == lval 
+    then do lprint $ "Reusing " ++ show f
+    else do
+    lprint $ "Failed reusing " ++
+      show f ++ " [expected " ++ show lval ++ " but was " ++ show ff ++ "]"
+    procedure
 
 kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
 kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
@@ -41,60 +89,63 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
 -- target: zombie target
   -- \x -> (copy f4) (succ x)
   -- next = v[f2] <- S (lazy_apply Copy f4) succ
-  num f1 f4
-  clear f2
-  f2 $< Copy
-  lazyApply f2 f1
-  S $> f2
-  f2 $< Succ
+  let lazyCopy4 = lazyApplyIntermediate (ofC Copy) (ofN 4)
+  makeFieldUnlessConstructed f2
+    (ofC S $| lazyCopy4 $| ofC Succ) $ do
+      num f1 f4
+      clear f2
+      f2 $< Copy
+      lazyApply f2 f1
+      S $> f2
+      f2 $< Succ
 
   -- f = v[f4] <- S (lazy_apply Copy f5) I
   -- S (S help I) (S (K copy) (K 6))
 
--- S (S(S help I)(S(K copy)(K 6))) (S (S(K copy)(K 4)) succ)
--- \x -> help x x (\x -> (copy 6)) x; (copy 4) (succ x)
+  -- S (S(S help I)(S(K copy)(K 6))) (S (S(K copy)(K 4)) succ)
+  -- \x -> help x x (\x -> (copy 6)) x; (copy 4) (succ x)
 
-  clear f4
-  f4 $< S
-  f4 $< Help
-  f4 $< I
-  S $> f4
-  clear f3
-  f3 $< Copy
-  num f1 6
-  lazyApply f3 f1
-  copyTo 0 f3
-  apply0 f4
+  let lazyCopy6 = lazyApplyIntermediate (ofC Copy) (ofN 6)
+  let loopCode = ofC S $| lazyCopy4 $| ofC Succ
+  let helpBody = ofC S $| (ofC S $| ofC Help $| ofC I) $| lazyCopy6
+  makeFieldUnlessConstructed f4
+    (ofC S $| helpBody $| loopCode) $ do
+      -- S (S Help I)
+      clear f4
+      f4 $< S
+      f4 $< Help
+      f4 $< I
+      S $> f4
+      clear f3
+      -- lazy (Copy 6)
+      f3 $< Copy
+      num f1 6
+      lazyApply f3 f1
+      copyTo 0 f3
+      apply0 f4 -- S (S Help I) (S (K copy) (K 6))
 
-{-
-  num f1 f5
-  clear f4
-  f4 $< Copy
-  lazyApply f4 f1
-  S  $> f4
-  f4 $< I
--}
-
- -- v[f4] <- S f next
-  S  $> f4
-  copyTo 0 f2
-  apply0 f4
+      -- v[f4] <- S f4 f2 
+      S  $> f4
+      copyTo 0 f2
+      apply0 f4
 
   -- v[f1] <- S (lazyApply Copy f4) (lazyApply Copy f7)
   -- this is zombie!
-  clear f1
-  f1 $< Copy
-  num f2 f4
-  lazyApply f1 f2
-  S $> f1
+  let lazyCopy7 = lazyApplyIntermediate (ofC Copy) (ofN 7)
+  makeFieldUnlessConstructed f1
+    (ofC S $| lazyCopy4 $| lazyCopy7) $ do
+      clear f1
+      f1 $< Copy
+      num f2 f4
+      lazyApply f1 f2
+      S $> f1
 
-  clear f2
-  f2 $< Copy
-  num f3 f7
-  lazyApply f2 f3
-  copyTo 0 f2
-  apply0 f1
---  lazyApply2 f1 f2 f3
+      clear f2
+      f2 $< Copy
+      num f3 f7
+      lazyApply f2 f3
+      copyTo 0 f2
+      apply0 f1
 
   num f2 (255-target)
   Zombie $> f2
@@ -207,7 +258,7 @@ main = runLTG $ do
           return ()
       return ()
       else do
-      revive (head ds)
+      _ <- revive (head ds)
       return ()
 
 --  futureApply 1 2 18 3
