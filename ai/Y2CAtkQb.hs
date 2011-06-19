@@ -49,7 +49,6 @@ ensureZombieDead target = do
         return ()
       (x, _) -> do
         killTarget target
-        checkTarget target
 
 zombieLoop :: Int -> Int -> Int -> Int -> LTG ()
 zombieLoop f4 f1 dmg target = do
@@ -241,7 +240,7 @@ killTarget target = do
     n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) (255 - target) zombifySlotV
     _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) (255 - target) zombifySlotV
     _ -> return ()
-  checkTarget target
+  when (zombifySlotV > 1) $ checkTarget target 
 
 chooseTarget :: LTG Int
 chooseTarget = do
@@ -301,14 +300,13 @@ speedo x
     | odd  x = 1 + speedo (x-1)
     | even x = 1 + speedo (div x 2)
 
-
 main :: IO ()
 main = runLTG $ do
-  lprint $ sort $[(speedo i, i) | i<-[0..255]]
 
-  let necks = take 16 $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
+  let range = 10
+  let necks = take (range) $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
   forever $ do
-    ds <- filterM (isDead True) [0..255]
+    ds <- filterM (isDead True) necks
     if null ds
       then do
       turn <- turnCnt <$> get

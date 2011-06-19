@@ -10,33 +10,6 @@ all:\
 	Yuma2a \
 	SpyDuck SittingDuck  Random 
 
-everything: Test \
-	SpyDuck SittingDuck  Random \
-	Revive255 \
-	CompactSayaka NonZeroCompactSayaka \
-	Watcher \
-	SayakaRevive \
-	SayakaRD2 \
-	KuroMadoka Kyouko KyoukoFA \
-	KyoukoRevive \
-	KyoukoFirewall \
-	KyoukoShuffle \
-	KyoukoImouto \
-	KamijoRevive \
-	KamijoShuffle \
-	KyoukoFADash \
-	KyoukoFARocket \
-	KyoukoSort \
-	KyoukoReviveFirstAttack \
-	Clone \
-	KRYHomu \
-	KRY2Madan \
-	KRYMadanNoButou \
-	Mami103 \
-	FastZombie\
-	Y2CShuffle \
-	Y2CAtkQb 
-
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
 
@@ -189,3 +162,32 @@ Watcher: Watcher.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Watcher.hs
 
 
+
+
+
+everything: Test \
+	SpyDuck SittingDuck  Random \
+	Revive255 \
+	CompactSayaka NonZeroCompactSayaka \
+	Watcher \
+	SayakaRevive \
+	SayakaRD2 \
+	KuroMadoka Kyouko KyoukoFA \
+	KyoukoRevive \
+	KyoukoFirewall \
+	KyoukoShuffle \
+	KyoukoImouto \
+	KamijoRevive \
+	KamijoShuffle \
+	KyoukoFADash \
+	KyoukoFARocket \
+	KyoukoSort \
+	KyoukoReviveFirstAttack \
+	Clone \
+	KRYHomu \
+	KRY2Madan \
+	KRYMadanNoButou \
+	Mami103 \
+	FastZombie\
+	Y2CShuffle \
+	Y2CAtkQb 
