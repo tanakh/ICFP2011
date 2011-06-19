@@ -19,16 +19,21 @@ Team: hogehoge
 
 
 
-- We implemented a DSL for programming LTG AI (artificial intelligents) in Haskell.
-- The core of the language is the LTG Monad, with which we can describe wide hierarchy
-  of abstractness: from the raw list of highly-tuned raw-level instructions, to
-  human-readable strategic instructions (such as 'attack these range' or 'summon zombie').
+- We implemented a DSL for programming LTG AI (artificial
+  intelligents) in Haskell.
+
+- The core of the language is the LTG Monad, with which we can
+  describe wide hierarchy of abstractness: from the raw list of
+  highly-tuned raw-level instructions, to human-readable strategic
+  instructions (such as 'attack these range' or 'summon zombie').
 
   Such high-level library functions provides safeness, robustness and
   speed. For example, user can build complex strategies and when it
-  fails at any point (e.g. the slot it uses is accidentally dead) it can safely
-  fall back to recovery. Other functions, such as 'set a numeric value to the slot'
-  will automatically try to
+  fails at any point (e.g. the slot it uses is accidentally dead) it
+  can safely fall back to recovery. Other functions, such as 'set a
+  numeric value to the slot' will performed number construction, so
+  that it re-uses partially build numbers from the slot and other
+  slotsm, and it automatically revives the target slot if it's dead.
 
   All these are seamlessly composable.
  simulatlor and integrated it with the DSL seemlessly, 
