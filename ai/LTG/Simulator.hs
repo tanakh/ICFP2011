@@ -10,6 +10,8 @@ module LTG.Simulator (
   printState,
   
   Hand,
+  HandC,
+  get13, get23, get33,
   State(..),
   Value(..),
   Monitor(..)
@@ -22,7 +24,16 @@ import qualified Data.Vector.Mutable as MV
 import System.IO
 import System.IO.Unsafe
 
+import LTG.Base (Card, nameToCard)
 import LTG.Exception
+
+get13 :: (a1,a2,a3)->a1
+get13 (a1,a2,a3) = a1
+get23 :: (a1,a2,a3)->a2
+get23 (a1,a2,a3) = a2
+get33 :: (a1,a2,a3)->a3
+get33 (a1,a2,a3) = a3
+
 
 data Simulator
   = Simulator
@@ -38,7 +49,8 @@ newSimulator = do
   s2 <- newState
   return $ Simulator 0 True s1 s2
 
-type Hand = (Int, Int, String)
+type Hand  = (Int, Int, String)
+type HandC = (Int, Int, Card)
 
 myState :: Simulator -> State
 myState Simulator { phase = True, p1State = stat } = stat
@@ -49,11 +61,14 @@ oppState Simulator { phase = True, p2State = stat } = stat
 oppState Simulator { p1State = stat } = stat
 
 execStep :: Hand -> Simulator -> IO (Simulator, String)
-execStep (typ, pos, name) s = do
+execStep myHand@(typ, pos, name) s = do
   em <- allDead my   -- proponent in phase s
   eo <- allDead opp
   monAtPos <- MV.read (monitor my) pos
   MV.write (monitor my) pos $ monAtPos { propHandCount = 1 + propHandCount monAtPos }
+  let myHandC = (typ, pos, nameToCard name)
+  modifyIORef (backlog my) (myHandC :) 
+  
 
   case (em, eo) of
     (True, True) -> do
@@ -128,21 +143,21 @@ data Monitor
 initialMonitor :: Monitor
 initialMonitor = Monitor { propHandCount = 0, zombieSeedCount = 0}
 
-
 data State
   = State
     { field :: MV.IOVector Value
     , vital :: MV.IOVector Int
     , monitor :: MV.IOVector Monitor
+    , backlog :: IORef [HandC]
     }
 
-cards :: [String]
-cards = words "I zero succ dbl get put S K inc dec attack help copy revive zombie"
+cardNames :: [String]
+cardNames = words "I zero succ dbl get put S K inc dec attack help copy revive zombie"
 
 getCard :: String -> Value
 getCard name
   | name == "zero" = VInt 0
-  | name `elem` cards = VFun name
+  | name `elem` cardNames = VFun name
   | otherwise =
     error $ "card " ++ show name ++ " is invalud"
 
@@ -152,11 +167,12 @@ newState = do
   f <- MV.new 256
   v <- MV.new 256
   mon <- MV.new 256
+  back <- newIORef []
   forM_ [0..255] $ \i -> do
     MV.write f i (VFun "I")
     MV.write v i 10000
     MV.write mon i initialMonitor
-  return $ State f v mon
+  return $ State f v mon back
 
 allDead :: State -> IO Bool
 allDead stat = go 0 where

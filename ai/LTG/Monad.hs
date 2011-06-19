@@ -11,6 +11,7 @@ module LTG.Monad (
   getVital,
   getField,
   getMonitor,
+  getBacklog,
   getState,
   
   nop, 
@@ -22,6 +23,7 @@ import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
 import Control.Monad.State hiding (State)
+import Data.IORef (readIORef)
 import qualified Data.Vector.Mutable as MV
 import System.Environment
 import System.Exit
@@ -146,6 +148,11 @@ getMonitor :: Bool -> Int -> LTG Monitor
 getMonitor my ix = do
   st <- getState my
   liftIO $ MV.read (monitor st) ix
+
+getBacklog :: Bool ->  LTG [HandC]
+getBacklog my = do
+  st <- getState my
+  liftIO $ readIORef $ backlog st
 
 
 getState :: Bool -> LTG State

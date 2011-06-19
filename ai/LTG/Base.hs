@@ -2,12 +2,13 @@ module LTG.Base (
   Card(..),
   cards,
   cardName,
+  nameToCard,
   ) where
 
 import Data.Vector (Vector, fromList)
 
 data Card = I | Zero | Succ | Dbl | Get | Put | S | K | Inc | Dec | Attack | Help | Copy | Revive | Zombie
-
+          deriving (Eq, Show)
 cards :: Vector Card
 cards = fromList [I , Zero , Succ , Dbl , Get , Put , S , K , Inc , Dec , Attack , Help , Copy , Revive , Zombie]
 
@@ -27,3 +28,20 @@ cardName Help    = "help"
 cardName Copy    = "copy"    
 cardName Revive  = "revive"    
 cardName Zombie  = "zombie"  
+nameToCard :: String -> Card 
+nameToCard "I"        =  I       
+nameToCard "zero"     =  Zero    
+nameToCard "succ"     =  Succ    
+nameToCard "dbl"      =  Dbl     
+nameToCard "get"      =  Get     
+nameToCard "put"      =  Put     
+nameToCard "S"        =  S       
+nameToCard "K"        =  K       
+nameToCard "inc"      =  Inc     
+nameToCard "dec"      =  Dec     
+nameToCard "attack"   =  Attack  
+nameToCard "help"     =  Help    
+nameToCard "copy"     =  Copy    
+nameToCard "revive"   =  Revive  
+nameToCard "zombie"   =  Zombie  
+nameToCard x          =  error $ "unknown card name : " ++ x
