@@ -224,8 +224,6 @@ getMaxEnemy = do
 #endif
 
 
-
-
 kyoukoMain :: LTG()
 kyoukoMain = do
   dmg <- getEasyInt <$> getMaxEnemy
@@ -235,40 +233,20 @@ kyoukoMain = do
                         v <- getVital True x
                         return $ v > zombifySlotV)
             [1..255]
-  -- TODO: raise error to increase vitality
-  if length alives < 2 
-    then lerror "there are no vital"
-    else do
+
     -- dmg > 2 -> attack is issued
     -- "dec" is issued if dmg == 1 
-    when (zombifySlotV > 1) $ do attack2 (alives !! 1) (alives !! 4) 0 zombifySlotV
-{-
-    attack      (alives !! 0) 0 zombifySlotV
-    attack      (alives !! 1) 0 zombifySlotV
--}
+    -- Create wall between the cut, to control damage, if possible
+  case length alives of
+    n | n < 2 -> lerror "there are no vital"
+    n | zombifySlotV > 1 && n >= 5 ->  attack2 (alives !! 1) (alives !! 4) 0 zombifySlotV
+    _ | zombifySlotV > 1  ->  attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
+    _ -> return ()
 
-    -- v[5] <- S (S help I) (lazyApply Copy 6)
+  num 8 dmg
+  kyokoAnAn 1 2 3 4 5 7 255 dmg
 
-{-
-  clear 5
-  5 $< S
-  5 $< Help
-  5 $< I
-  S $> 5
-  clear 6
-  6 $< Copy
-  num 7 6
-  lazyApply 6 7
-  copyTo 0 6
-  apply0 5
--}
 
-    num 8 dmg
-    kyokoAnAn 1 2 3 4 5 7 255 dmg
-
---  attackFA    1 2 18 3 5 6 8192
---  attackLoopFA 1 2 18 5 0 0
---  sittingDuck
 
 
 keepAlive :: Int -> LTG ()
