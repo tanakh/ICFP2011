@@ -1,4 +1,13 @@
-all: Test \
+all:\
+	KyoukoReviveYose \
+	KyoukoReviveYose2 \
+	KyoukoReviveYose2C \
+	KRY2Madan \
+	CompactSayaka \
+	Kyubey \
+	SpyDuck SittingDuck  Random 
+
+everything: Test \
 	SpyDuck SittingDuck  Random \
 	Revive255 \
 	CompactSayaka NonZeroCompactSayaka \
@@ -7,7 +16,6 @@ all: Test \
 	SayakaRD2 \
 	KuroMadoka Kyouko KyoukoFA \
 	KyoukoRevive \
-	KyoukoReviveYose \
 	KyoukoFirewall \
 	KyoukoShuffle \
 	KyoukoImouto \
@@ -22,13 +30,16 @@ all: Test \
 	KRY2Madan \
 	KRYMadanNoButou \
 	Mami103 \
-	KyoukoReviveYose2 \
-	KyoukoReviveYose2C \
 	FastZombie\
-	Kyubey
+	Y2CShuffle
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+
+Y2CShuffle: Y2CShuffle.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Y2CShuffle.hs
+
 
 Kyubey: Kyubey.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Kyubey.hs

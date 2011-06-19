@@ -18,8 +18,7 @@ module LTG.Monad (
   getState,
   
   nop, 
-  lerror,
-  lprint,
+  lerror, lprint,
   ) where
 
 import Control.Applicative
