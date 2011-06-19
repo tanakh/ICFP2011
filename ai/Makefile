@@ -23,6 +23,7 @@ all: Test \
 	KRYMadanNoButou \
 	Mami103 \
 	KyoukoReviveYose2 \
+	KyoukoReviveYose2C \
 	FastZombie\
 	Kyubey
 
@@ -78,6 +79,10 @@ KyoukoReviveYose: KyoukoReviveYose.hs LTG.hs LTG/*.hs
 KyoukoReviveYose2: KyoukoReviveYose2.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoReviveYose2.o
 	ghc --make -O3 KyoukoReviveYose2.hs
+
+KyoukoReviveYose2C: KyoukoReviveYose2C.hs LTG.hs LTG/*.hs
+	rm -fr KyoukoReviveYose2C.o
+	ghc --make -O3 KyoukoReviveYose2C.hs
 
 
 KRY2Madan: KRY2Madan.hs LTG.hs LTG/*.hs
