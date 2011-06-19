@@ -226,7 +226,7 @@ kyoukoMain = do
           n1' = div n 3
           n2' = 2 * div n 3
           (n1,n2) = if n1'==n2' then (0,1) else (n1', n2')
-      attack2 (alives !! n1) (alives !! n2) 0 zombifySlotV
+      attack2 8 16 0 zombifySlotV
       num 6 dmg
       kyokoAnAn 1 2 3 4 5 7 255 dmg
 
