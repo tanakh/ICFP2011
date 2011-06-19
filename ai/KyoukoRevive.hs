@@ -28,33 +28,39 @@ getAnySlot = do
             (\ix -> do
                 al <- isAlive True ix
                 fn <- getField True ix
-                return (al && fn == VFun "i"))
+                return (al && fn == VFun "I"))
             [0..255]
   return $ listToMaybe aliveidents
 
-zombieLoop :: Int -> Int -> LTG ()
-zombieLoop f2 dmg = do
+ensureZombieDead :: LTG ()
+ensureZombieDead = do
   zombieReady <- isDead False 255
   if zombieReady 
     then do
-    elms <- getFirstWorthEnemy dmg
-    case elms of
-      Nothing -> return ()
-      Just n -> do
-        num 7 n
-        copyTo f2 0
-        f2 $< I
-        zombieLoop f2 dmg
+    return ()
     else do -- oops! They revived 255!
     vit <- getVital False 255
     aliveslot <- getAnySlot
+    lprint $ "GG2 " ++ show vit ++ " " ++ show aliveslot
     case (vit, aliveslot) of
       (1, Just slot) -> do
         -- dec 
         slot $< Zero
         Dec $> slot
-        zombieLoop f2 dmg
+        ensureZombieDead
       _ -> return ()
+
+zombieLoop :: Int -> Int -> LTG ()
+zombieLoop f2 dmg = do
+  elms <- getFirstWorthEnemy dmg
+  case elms of
+    Nothing -> return ()
+    Just n -> do
+      num 7 n
+      copyTo f2 0
+      ensureZombieDead
+      f2 $< I
+      zombieLoop f2 dmg
 
 
 ofN :: Int -> Value
