@@ -20,6 +20,7 @@ all: Test \
 	Clone \
 	KRYHomu \
 	Mami103 \
+	KyoukoReviveYose2 \
 	FastZombie
 
 Clone: Clone.hs LTG.hs LTG/*.hs
@@ -59,10 +60,13 @@ KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoRevive.o
 	ghc --make -O3 KyoukoRevive.hs
 
-
 KyoukoReviveYose: KyoukoReviveYose.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoReviveYose.o
 	ghc --make -O3 KyoukoReviveYose.hs
+
+KyoukoReviveYose2: KyoukoReviveYose2.hs LTG.hs LTG/*.hs
+	rm -fr KyoukoReviveYose2.o
+	ghc --make -O3 KyoukoReviveYose2.hs
 
 
 KyoukoFirewall: KyoukoFirewall.hs LTG.hs LTG/*.hs
