@@ -4,8 +4,9 @@ import Control.Applicative
 import qualified Control.Exception.Control as E
 import Control.Monad
 import Control.Monad.State
-
+import Control.Monad.Trans
 import Data.Maybe
+import System.IO
 
 import LTG 
 
@@ -286,10 +287,12 @@ waruagaki = do
   num 0 2
   Inc $> 0
 
-main :: IO ()
-main = runLTG $ do
-  lprint debugTag
-
+madanNoButou :: LTG ()
+madanNoButou = do
+  lift $ do
+      h <- openFile "mami.trace" AppendMode
+      hPutStrLn h "MB mode"
+      hClose h
   forever $ do
     ds <- filterM (isDead True) [0..255]
     if null ds
@@ -320,5 +323,44 @@ main = runLTG $ do
       lprint "Revive done"
       return ()
 
+
+
+main :: IO ()
+main = runLTG $ do
+  lprint debugTag
+
+  forever $ do
+    enemyVs <- mapM (getVital False) [0..255]
+    if (maximum enemyVs <= 2) then madanNoButou
+    else do 
+      ds <- filterM (isDead True) [0..255]
+      if null ds
+        then do
+        turn <- turnCnt <$> get
+        if turn >= 100000 - 1536
+          then do
+          lprint "yose mode"
+          yose
+          else do
+          lprint "normal mode"
+          mb <- E.try kyoukoMain
+          case mb of
+            Left (LTGError e) -> do
+              case e of
+                "there are no vital" -> do
+                  lprint "waruagaki mode"
+                  waruagaki
+                _ -> do
+                  lprint e
+              return ()
+            Right _ -> do
+              return ()
+          return ()
+        else do
+        lprint $ "Revive mode: " ++ show (head ds)
+        ignExc $ revive (head ds)
+        lprint "Revive done"
+        return ()
+  
 --  futureApply 1 2 18 3
 
