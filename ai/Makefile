@@ -23,10 +23,14 @@ all: Test \
 	KRYMadanNoButou \
 	Mami103 \
 	KyoukoReviveYose2 \
-	FastZombie
+	FastZombie\
+	Kyubey
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+Kyubey: Kyubey.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Kyubey.hs
 
 
 

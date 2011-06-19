@@ -9,4 +9,7 @@ main = runLTG ltgMain
 ltgMain :: LTG ()
 ltgMain = do
   forever $ do
-    forM [0..255]
+    _ <- filterM (isAlive True) [0..255]
+    as <- filterM (isAlive True) [0..255]
+    let evens = map (2*)[0..]
+    nop
