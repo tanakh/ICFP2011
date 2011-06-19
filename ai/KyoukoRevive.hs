@@ -118,15 +118,22 @@ getEasyInt x =
 
 
 #ifdef KAMIJO
-debugTag::String
-debugTag = "kamijo"
+debugTag::String    -- Iize, omae ga mahou wo Junbi Shiteruttenarayo,
+debugTag = "kamijo" -- Mazuhasonofuzaketagensouwobuchikowass!!
 
+speedo :: Int -> Double
+speedo x
+    | x == 0 = 0
+    | odd  x = 1 + speedo (x-1)
+    | even x = 1 + speedo (div x 2)
 
 getMaxEnemy :: LTG Int
 getMaxEnemy = do
   oppAlives <- filterM (isAlive False) [0..255]
   vitals <- mapM (getVital False) oppAlives
-  return $ maximum vitals
+  let targets = zip oppAlives vitals
+      umami (i, v) = (fromIntegral v * 2 ** (0-speedo i) , v)
+  return $ snd $ maximum $ map umami targets 
 #else
 debugTag::String
 debugTag = "kyoko"

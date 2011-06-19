@@ -12,35 +12,71 @@ import LTG.SoulGems
 isDead :: Bool -> Int -> LTG Bool
 isDead my ix = not <$> isAlive my ix
 
-getFirstWorthEnemy :: Int -> LTG (Maybe Int)
-getFirstWorthEnemy dmg = do
+#ifdef KAMIJO
+debugTag::String
+debugTag = "KAMIJO"
+
+
+getMaxEnemy :: LTG Int
+getMaxEnemy = do
+getFirstWorthEnemy ::  LTG (Maybe Int, Int)
+getFirstWorthEnemy = do  
+  oppAlives <- filterM (isAlive False) [0..255]
+  vitals <- mapM (getVital False) oppAlives
+  let iVitals = zip oppAlives vitals
+      withUmami (i,v) = ((v,-i),(i,v))
+  return $ \(i,v)->(Just i,v)  $ snd $ maximum $ map withUmami iVitals
+
+
+
+
+#else
+debugTag::String
+debugTag = "kyoko"
+
+getMaxEnemy :: LTG Int
+getMaxEnemy = do
+  oppAlives <- filterM (isAlive False) [0..255]
+  vitals <- mapM (getVital False) oppAlives
+  return $ maximum vitals
+
+
+getFirstWorthEnemy ::  LTG (Maybe Int, Int)
+getFirstWorthEnemy = do
+  dmg <- getEasyInt <$> getMaxEnemy
   alives <- filterM 
             (\ix -> do
                 al <- isAlive False ix
                 vt <- getVital False ix
                 return (al && vt >= dmg))
             [0..255]
-  if null alives then return Nothing
-    else return $ Just $ head alives
+  if null alives then return (Nothing, dmg)
+    else return $ (Just $ head alives, dmg)
 
-zombieLoop :: Int -> Int -> LTG ()
-zombieLoop f2 dmg = do
-  elms <- getFirstWorthEnemy dmg
+#endif
+
+zombieLoop ::  Int -> LTG ()
+zombieLoop f2 = do
+  (elms, dmg) <- getFirstWorthEnemy 
   case elms of
     Nothing -> return ()
     Just n -> do
+      num 6 dmg
       num 7 n
       copyTo f2 0
       f2 $< I
-      zombieLoop f2 dmg
+      zombieLoop f2 
 
-kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
-kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
+kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
+kyokoAnAn f1 f2 f3 f4 f5 f7 target  = do
 -- f1, f2, f3: temp
 -- f4, f5
 -- target: zombie target
+
+ 
   -- \x -> (copy f4) (succ x)
   -- next = v[f2] <- S (lazy_apply Copy f4) succ
+
   num f1 f4
   clear f2
   f2 $< Copy
@@ -101,7 +137,8 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
 
   lazyApply f2 f1
   copyTo 0 f2
-  zombieLoop f2 dmg
+
+  zombieLoop f2 
 
 sittingDuck :: LTG()
 sittingDuck = do
@@ -117,33 +154,12 @@ getEasyInt x =
     threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
 
 
-#ifdef KAMIJO
-debugTag::String
-debugTag = "kamijo"
-
-
-getMaxEnemy :: LTG Int
-getMaxEnemy = do
-  oppAlives <- filterM (isAlive False) [0..255]
-  vitals <- mapM (getVital False) oppAlives
-  return $ maximum vitals
-#else
-debugTag::String
-debugTag = "kyoko"
-
-getMaxEnemy :: LTG Int
-getMaxEnemy = do
-  oppAlives <- filterM (isAlive False) [0..255]
-  vitals <- mapM (getVital False) oppAlives
-  return $ maximum vitals
-#endif
 
 
 
 
 kyoukoMain :: LTG()
 kyoukoMain = do
-  dmg <- getEasyInt <$> getMaxEnemy
   zombifySlotVital <- getVital False 255
   let zombifySlotV = getEasyInt zombifySlotVital
   alives <- filterM (\x -> do 
@@ -176,8 +192,7 @@ kyoukoMain = do
   apply0 5
 -}
 
-    num 6 dmg
-    kyokoAnAn 1 2 3 4 5 7 255 dmg
+    kyokoAnAn 1 2 3 4 5 7 255 
 
 --  attackFA    1 2 18 3 5 6 8192
 --  attackLoopFA 1 2 18 5 0 0

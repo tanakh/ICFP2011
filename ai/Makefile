@@ -6,7 +6,9 @@ all: Test \
 	SayakaRD2 \
 	KuroMadoka Kyouko KyoukoFA \
 	KyoukoRevive \
+	KyoukoShuffle \
 	KamijoRevive \
+	KamijoShuffle \
 	KyoukoFADash \
 	KyoukoFARocket \
 	KyoukoSort \
@@ -43,9 +45,18 @@ KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoRevive.o
 	ghc --make -O3 KyoukoRevive.hs
 
+KyoukoShuffle: KyoukoShuffle.hs LTG.hs LTG/*.hs
+	rm -fr KyoukoShuffle.o
+	ghc --make -O3 KyoukoShuffle.hs
+
+
 KamijoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoRevive.o
 	ghc --make -O3 KyoukoRevive.hs -DKAMIJO -o KamijoRevive
+
+KamijoShuffle: KyoukoShuffle.hs LTG.hs LTG/*.hs
+	rm -fr KyoukoShuffle.o
+	ghc --make -O3 KyoukoShuffle.hs -DKAMIJO -o KamijoShuffle
 
 KyoukoFA: KyoukoFA.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KyoukoFA.hs
