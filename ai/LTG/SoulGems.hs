@@ -35,7 +35,21 @@ num :: Int -> Int -> LTG ()
 num ix n = do
   f <- getField True ix
   case f of
-    VInt cur | cur == n -> return () -- do Nothing
+    VInt cur | cur     == n -> return () -- do Nothing
+    VInt cur | cur + 1 == n -> do
+      Succ $> ix
+    VInt cur | cur * 2 == n -> do
+      Dbl $> ix
+    VInt cur | (cur + 1) * 2 == n -> do
+      Succ $> ix
+      Dbl $> ix
+    VInt cur | cur * 4 == n -> do
+      Dbl $> ix
+      Dbl $> ix
+    VInt cur | cur * 8 == n -> do
+      Dbl $> ix
+      Dbl $> ix
+      Dbl $> ix
     VInt 0 -> 
       num_iter n
     _ -> do
