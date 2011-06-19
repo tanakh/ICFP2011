@@ -1,8 +1,15 @@
 # List AI's in this file.
 # One AI per line.
 
-../ai/KyoukoRevive
-../ai/SayakaRevive
+
+../ai/oldbin/KR.1044.579b4ca54972edf8307e4a0b34b377735c200b89
+../ai/oldbin/KR.1426.0791de20acbfbcdf77ff7ac420263fcce9a5e16f
+../ai/oldbin/KR.1471.208ad3ca3498cd59578788eba77d0a2c6ef5f3e9
+../ai/oldbin/KRY.1534.a4b9031d9fd7ef4503802e94a101b4940e86027b
+../ai/oldbin/KRY.1569.64c01f00d26dfddb0bbf1ee830188fd4c5565ee7
+../ai/KyoukoReviveYose
+../ai/KRYHomu
+
 
 #../ai/KyoukoRevive
 #../ai/SayakaRevive
@@ -20,5 +27,6 @@
 #../ai/Mamisan 64
 #../ai/Mamisan 128
 #../ai/Mamisan 192
+
 
 
