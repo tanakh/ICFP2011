@@ -12,6 +12,7 @@
 ../oldbin/Y2C.1698.e8c3d38d877cbac5bdf8b2d73948372df0c228b5 
 ../oldbin/Y2CAtkQb.1965.0f91f30e1cb720768e18b1fd7d0b404f931a99a6 
 
+../qb_final
 ../ai/KyoukoReviveYose
 ../ai/KyoukoReviveYose2
 ../ai/KyoukoReviveYose2C
