@@ -318,7 +318,7 @@ main = runLTG $ do
 
 rankDeads :: Int -> LTG (Int, Int)
 rankDeads i 
-    | i == 0 = return (1, i)
+    | i == 0 = return (0, i)
     | True   = do
           fa <- isAlive True (i-1)
           return (if fa then 1 else 0, i)
