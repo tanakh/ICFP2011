@@ -120,9 +120,13 @@ attack from to value = do
   num 1 from
   Attack $> 1
   -- v[0] <- to
-  num 0 to
-  -- v[1] <- apply v[1] v[0]
-  apply0 1
+  if to == 0
+    then do
+      1 $< Zero
+    else do
+      num 0 to
+      -- v[1] <- apply v[1] v[0]
+      apply0 1
   -- v[0] <- value
   num 0 value
   -- v[1] <- apply v[1] v[0]
