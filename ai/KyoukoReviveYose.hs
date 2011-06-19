@@ -128,10 +128,10 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       clear f3
       -- lazy (Copy 6)
       f3 $< Copy
-      num 0 6
+      num 0 8
       lazyApply f3 0
       copyTo 0 f3
-      apply0 f4 -- S (S Help I) (S (K copy) (K 6))
+      apply0 f4 -- S (S Help I) (S (K copy) (K 8))
 
       -- v[f4] <- S f4 f2 
       S  $> f4
@@ -141,6 +141,20 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
 
   -- v[f1] <- S (lazyApply Copy f4) (lazyApply Copy f7)
   -- this is zombie!
+
+  -- S (K v[f4]) (lazyApply Copy f7)
+      copyTo f1 f4
+      K $> f1
+      S $> f1
+
+      clear f2
+      f2 $< Copy
+      num 0 f7
+      lazyApply f2 0
+      copyTo 0 f2
+      apply0 f1
+
+{-
   let lazyCopy7 = lazyApplyIntermediate (ofC Copy) (ofN 7)
   makeFieldUnlessConstructed f1
     (ofC S $| lazyCopy4 $| lazyCopy7) $ do
@@ -157,6 +171,7 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       copyTo 0 f2
       apply0 f1
   --x2 <- getField True f1; lprint x2
+-}
 
   num f2 (255-target)
   Zombie $> f2
@@ -246,7 +261,7 @@ kyoukoMain = do
   apply0 5
 -}
 
-    num 6 dmg
+    num 8 dmg
     kyokoAnAn 1 2 3 4 5 7 255 dmg
 
 --  attackFA    1 2 18 3 5 6 8192
