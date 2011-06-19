@@ -39,7 +39,7 @@ recover = do
     if a255 then do
               lift $ modifyIORef hima (+1)
               nop
-    else Revive $> 0
+    else Revive $> 1
   else do 
     when (not a0) $ revive 0 >> return ()
     when (not a1) $ revive 1 >> return ()
