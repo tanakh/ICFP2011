@@ -67,7 +67,8 @@ FileUtils.cd(WorkDir) {
   sh "tar czhf #{ArchiveFn} *"
 }
 
-sh "mv #{WorkDir}/#{ArchiveFn} ."
+sh "cp #{WorkDir}/#{ArchiveFn} ."
+sh "cp #{WorkDir}/#{ArchiveFn} ../"
 sh "sha512sum #{ArchiveFn}"
 
 if $upload
