@@ -223,7 +223,8 @@ kyoukoMain = do
   if length alives < 2 
     then lerror "there are no vital"
     else do
-    attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
+    -- "dec" is issued if dmg == 1 
+    when (zombifySlotV > 1) $ do attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
 {-
     attack      (alives !! 0) 0 zombifySlotV
     attack      (alives !! 1) 0 zombifySlotV
