@@ -53,15 +53,22 @@ toVitalCurve vec = do
   return $ iVitals3
 
 traceVitalFlag :: Bool
-traceVitalFlag = unsafePerformIO $ do
-                   args <- getArgs
-                   return $ "trace" `elem` args
+traceVitalFilename :: String
+(traceVitalFlag, traceVitalFilename)=
+    unsafePerformIO $ do
+      args <- getArgs
+      let fnCands = filter (isInfixOf ".trace") args
+      case fnCands of
+        []    -> return (False, "")
+        (x:_) -> return (True , x)
 
 traceVital :: Simulator -> IO ()
 traceVital s = when traceVitalFlag $ do 
   vc1 <- toVitalCurve $ vital $ p1State s
-  vc2 <- toVitalCurve $ vital $ p1State s
-  hPutStrLn stderr $ show (vc1, vc2)
+  vc2 <- toVitalCurve $ vital $ p2State s
+  let vc = (vc1, vc2)
+  lastVC <- readIORef lastVitalCurve
+  hPutStrLn stderr $ show vc
 --------------------------------------------- traceVital
 
 
