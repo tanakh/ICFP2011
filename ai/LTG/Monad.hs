@@ -8,6 +8,7 @@ module LTG.Monad (
   
   findAlive,
   isAlive,
+  isDead,
   getVital,
   getVitalCurve,
   getField,
@@ -138,6 +139,9 @@ isAlive :: Bool -> Int -> LTG Bool
 isAlive my ix = do
   v <- getVital my ix
   return $ v > 0
+
+isDead :: Bool -> Int -> LTG Bool
+isDead my ix = not <$> isAlive my ix
 
 getVital :: Bool -> Int -> LTG Int
 getVital my ix = do

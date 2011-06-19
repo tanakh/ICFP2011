@@ -25,16 +25,22 @@ import LTG.Base
 import LTG.Monad
 import LTG.Simulator
 
+import Data.Maybe
+
 -- ################################################################
 -- Functions that do NOT require v[0]
 -- v[field] <- n
 num :: Int -> Int -> LTG ()
 num ix n = do
   f <- getField True ix
-  when (f /= VInt 0) $ do
-    clear ix
-    ix $< Zero
-  num_iter n
+  case f of
+    VInt cur | cur == n -> return () -- do Nothing
+    VInt 0 -> 
+      num_iter n
+    _ -> do
+      clear ix
+      ix $< Zero
+      num_iter n
   where
     num_iter 0 = do
       return ()
@@ -59,6 +65,8 @@ clear ix = do
 -- Execution cost: -
 copyTo :: Int -> Int -> LTG ()
 copyTo f1 f2 = do
+  ensureAlive f1
+  ensureAlive f2
   if f1 /= f2
     then do
       num f1 f2
@@ -83,6 +91,7 @@ apply0 field = do
   K $> field
   S $> field
   field $< Get
+  ensureAlive 0
   field $< Zero
 
 -- ################################################################
@@ -290,15 +299,26 @@ revive ix = do
   a <- isAlive True ix
   if a then return True
     else do
-    jx <- findAlive True (const True)
-    num jx ix
-    Revive $> jx
-    return False
-
-
-
-
-
+    jx <- findIdentAlive
+    case jx of
+      Just jx' -> reviveImpl jx'
+      Nothing -> do 
+        -- This means almost all fields are filled with non-ident
+        jx' <- findAlive True (const True)
+        reviveImpl jx'
+  where
+    reviveImpl jx = do
+      num jx ix
+      Revive $> jx
+      return False
+    findIdentAlive = do
+      aliveidents <- filterM 
+                     (\ix -> do
+                         al <- isAlive True ix
+                         fn <- getField True ix
+                         return (al && fn == VFun "I"))
+                     [0..255]
+      return $ listToMaybe aliveidents
 
 -- v[f1] <- (\x -> v[f1] v[f2])
 -- (S (K v[f1]) (K v[f2])) = (\x -> v[f1] v[f2])
@@ -319,3 +339,10 @@ lazyApply2FA i1 i2 ffa fout f1 f2 f3 = do
   S    $> fout
   K    $> f3
   applyFA i1 i2 ffa fout fout f3
+
+ensureAlive :: Int -> LTG()
+ensureAlive f = do
+  zeroDead <- isDead True f
+  when zeroDead (revive f >> return ())
+  zeroDead' <- isDead True f
+  when zeroDead' $ lerror "ZeroDead"
