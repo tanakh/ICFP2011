@@ -1,23 +1,32 @@
 #!/usr/bin/env runhaskell
 
 import Control.Monad
+import Control.Monad.State(get)
+import Control.Monad.Trans
 import LTG
 import Data.IORef
+import System.IO
 import System.IO.Unsafe
 
 
-hima, busy :: IORef Int
+hima :: IORef Int
 hima = unsafePerformIO $ newIORef 0
-busy = unsafePerformIO $ newIORef 0
 {-# NOINLINE hima #-}
-{-# NOINLINE busy #-}
 
 main :: IO ()
 main = runLTG $ do
          num 1 255
          num 0 1
          Get $> 0
-         forever recover
+         forever $ do
+                  s <- get
+                  lift $ record (turnCnt s)
+                  recover
+                  
+record :: Int -> IO ()
+record t = do
+  h <- readIORef hima
+  when (t==99999)$  writeFile "Revive255.txt" $ show h ++ "/" ++ show t 
 
 recover :: LTG ()
 recover = do
@@ -27,7 +36,9 @@ recover = do
   [f0, f1] <- mapM (getField True) [0,1]
   if (a0 && a1 && f0 == VInt 255 && f1 == VInt 255) 
   then do 
-    if a255 then nop
+    if a255 then do
+              lift $ modifyIORef hima (+1)
+              nop
     else Revive $> 0
   else do 
     when (not a0) $ revive 0 >> return ()

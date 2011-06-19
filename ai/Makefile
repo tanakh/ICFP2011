@@ -1,5 +1,6 @@
 all: Test \
 	SpyDuck SittingDuck  Random \
+	Revive255 \
 	CompactSayaka NonZeroCompactSayaka \
 	Watcher \
 	SayakaRevive \
@@ -20,6 +21,11 @@ all: Test \
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+
+
+Revive255: Revive255.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Revive255.hs
 
 
 CompactSayaka: CompactSayaka.hs LTG.hs LTG/*.hs
