@@ -68,7 +68,6 @@ FileUtils.cd(WorkDir) {
 }
 
 sh "cp #{WorkDir}/#{ArchiveFn} ."
-sh "cp #{WorkDir}/#{ArchiveFn} ../"
 sh "sha512sum #{ArchiveFn}"
 
 if $upload
