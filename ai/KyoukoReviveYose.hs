@@ -275,12 +275,12 @@ yose = do
   forever $ ignExc $ do
     keepAlive 0
     num 0 0
-    forever $ do
+    forM_ [(0::Int)..255] $ \_ -> do
       keepAlive 0
       keepAlive 1
-      num 1 0
-      Get $> 1
+      copyTo 1 0
       Dec $> 1
+      Succ $> 0
 
 waruagaki :: LTG ()
 waruagaki = do
