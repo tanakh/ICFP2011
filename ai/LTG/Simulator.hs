@@ -58,7 +58,7 @@ traceVitalFlag = unsafePerformIO $ do
                    return $ "trace" `elem` args
 
 traceVital :: Simulator -> IO ()
-traceVital s = do 
+traceVital s = when traceVitalFlag $ do 
   vc1 <- toVitalCurve $ vital $ p1State s
   vc2 <- toVitalCurve $ vital $ p1State s
   hPutStrLn stderr $ show (vc1, vc2)
