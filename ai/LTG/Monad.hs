@@ -9,6 +9,7 @@ module LTG.Monad (
   findAlive,
   isAlive,
   getVital,
+  getVitalCurve,
   getField,
   getMonitor,
   getHistory,
@@ -26,6 +27,8 @@ import qualified Control.Exception.Control as E
 import Control.Monad
 import Control.Monad.State hiding (State)
 import Data.IORef (readIORef)
+import Data.Vector (Vector, (!))
+import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import System.Environment
 import System.Exit
@@ -140,6 +143,11 @@ getVital :: Bool -> Int -> LTG Int
 getVital my ix = do
   st <- getState my
   liftIO $ MV.read (vital st) ix
+
+getVitalCurve :: Bool -> LTG (Vector Int)
+getVitalCurve my = do
+  vitals <- mapM (getVital my) [0..255]
+  return $ V.fromList vitals 
 
 getField :: Bool -> Int -> LTG Value
 getField my ix = do

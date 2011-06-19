@@ -35,6 +35,8 @@ get33 :: (a1,a2,a3)->a3
 get33 (a1,a2,a3) = a3
 
 
+
+
 data Simulator
   = Simulator
     { turnCnt :: !Int
