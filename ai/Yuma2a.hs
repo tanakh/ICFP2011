@@ -19,19 +19,22 @@ kyoukoMain = do
   clear 1
   1 $< S
   1 $< Attack
-  1 $< I
-  S $> 1
-  num 0 512
+  num 0 255
+  copyTo 2 0
   K $> 0
   apply0 1
+  S $> 1
   0 $< Put
+  Dbl $> 0
+  K $> 0
+  apply0 1
 
+  0 $< Put
   Dbl $> 0
   Dbl $> 0
   Dbl $> 0
   Dbl $> 0
   K $> 0  
-
   clear 3
   3 $< S
   3 $< Help
@@ -39,32 +42,34 @@ kyoukoMain = do
   S $> 3
   apply0 3
 
-  clear 2
-  2 $< Get
   clear 0
-  0 $< Zero
-  lazyApply 2 0
-  S $> 2
-  2 $< Succ
-  copyTo 0 2
-
+  0 $< S
+  0 $< Get
+  0 $< I
   S $> 3
   apply0 3
 
-  copyTo 0 3
   S $> 1
+  copyTo 0 3
   apply0 1
 
   copyTo 0 1
 
-  1 $< Zero
+  num 2 1
+  Get $> 2
+  2 $< Zero
 
-  copyTo 1 0
-  1 $< Zero
+  num 2 1
+  Get $> 2
+  2 $< Zero
 
-  copyTo 1 0
-  1 $< Zero
+  num 2 1
+  Get $> 2
+  2 $< Zero
 
+  num 2 1
+  Get $> 2
+  2 $< Zero
 
 --  num 0 2
 --  1 $< Zero
