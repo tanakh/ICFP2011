@@ -17,7 +17,8 @@ module LTG.SoulGems (
   attackFA,
   revive,
   lazyApplyFA,
-  lazyApply2FA
+  lazyApply2FA,
+  ensureAlive
 ) where
 
 import Control.Monad
