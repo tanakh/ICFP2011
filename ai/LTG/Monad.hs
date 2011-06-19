@@ -11,7 +11,9 @@ module LTG.Monad (
   getVital,
   getField,
   getMonitor,
-  getBacklog,
+  getHistory,
+  getHistoryLength,
+  getHistoryReverse,
   getState,
   
   nop, 
@@ -149,11 +151,25 @@ getMonitor my ix = do
   st <- getState my
   liftIO $ MV.read (monitor st) ix
 
-getBacklog :: Bool ->  LTG [HandC]
-getBacklog my = do
+getHistory :: Bool -> Int -> LTG HandC
+getHistory my t = do
   st <- getState my
-  liftIO $ readIORef $ backlog st
+  liftIO $ MV.read (history st) t
 
+getHistoryReverse :: Bool -> Int -> LTG HandC
+getHistoryReverse my t = do
+  len <- getHistoryLength my
+  st <- getState my
+  liftIO $ MV.read (history st) (len-t-1)
+
+
+getHistoryLength :: Bool -> LTG Int
+getHistoryLength my = do
+  st <- getState my
+  liftIO $ readIORef (historyLength st) 
+
+
+  
 
 getState :: Bool -> LTG State
 getState my = do

@@ -3,7 +3,6 @@
 
 ../ai/KyoukoRevive
 ../ai/SayakaRevive
-../ai/Mami103 16
 
 #../ai/KyoukoRevive
 #../ai/SayakaRevive

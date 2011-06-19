@@ -67,8 +67,9 @@ execStep myHand@(typ, pos, name) s = do
   monAtPos <- MV.read (monitor my) pos
   MV.write (monitor my) pos $ monAtPos { propHandCount = 1 + propHandCount monAtPos }
   let myHandC = (typ, pos, nameToCard name)
-  modifyIORef (backlog my) (myHandC :) 
-  
+      t = turnCnt s
+  MV.write (history my) t myHandC 
+  writeIORef (historyLength my) (t+1)
 
   case (em, eo) of
     (True, True) -> do
@@ -148,7 +149,8 @@ data State
     { field :: MV.IOVector Value
     , vital :: MV.IOVector Int
     , monitor :: MV.IOVector Monitor
-    , backlog :: IORef [HandC]
+    , history :: MV.IOVector HandC
+    , historyLength :: IORef Int
     }
 
 cardNames :: [String]
@@ -167,12 +169,13 @@ newState = do
   f <- MV.new 256
   v <- MV.new 256
   mon <- MV.new 256
-  back <- newIORef []
+  hist <- MV.new 100000
+  histLen <- newIORef 0
   forM_ [0..255] $ \i -> do
     MV.write f i (VFun "I")
     MV.write v i 10000
     MV.write mon i initialMonitor
-  return $ State f v mon back
+  return $ State f v mon hist histLen
 
 allDead :: State -> IO Bool
 allDead stat = go 0 where

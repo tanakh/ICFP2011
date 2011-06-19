@@ -11,10 +11,10 @@ main = runLTG ltgMain
 ltgMain :: LTG ()
 ltgMain = do
   forever $ do
-    nop
     spy "enemy slot use"      False propHandCount   (>0)
     spy "my zombie weakpoint" True  zombieSeedCount (>0)
     howEnemyMakeZombie
+    nop
 
 spy :: (Show a) => String -> Bool -> (Monitor -> a) -> (a -> Bool) ->LTG ()
 spy label my dataRecord isImportant = do
@@ -28,6 +28,24 @@ spy label my dataRecord isImportant = do
 
 howEnemyMakeZombie :: LTG ()
 howEnemyMakeZombie = do
+  grepHistory False Zombie
+  len <- getHistoryLength False 
+  lprint $ "enemy's history len : " ++ show len
+  h <- getHistoryReverse False 0 
+  lprint $ "enemy's last hand :" ++ show h
+  h <- getHistory False 0 
+  lprint $ "enemy's first hand :" ++ show h
+  
+
+grepHistory :: Bool -> Card -> LTG ()
+grepHistory my card = do
+  n <- getHistoryLength my
+  hist <- mapM (getHistory my) [0..n-1] 
+  let tHist = zip [0..n-1] hist
+      ftHist = filter ((==card) . get33 . snd) tHist
+  lprint $ "enemy 's use of " ++ show card ++ " " ++ show ftHist
+
+{-
   bl <- getBacklog False
   let t = length bl
       timelog = zip [t-1, t-2 ..] bl
@@ -37,4 +55,4 @@ howEnemyMakeZombie = do
   lprint $ "enemy's use of Help cards (turn, hand): " ++ show tlHelp
   lprint $ "enemy's recent moves: " ++ show (take 5 timelog)
           
-      
+      -}
