@@ -82,10 +82,13 @@ makeFieldUnlessConstructed :: Int -> Value -> LTG() -> LTG()
 makeFieldUnlessConstructed f lval procedure = do
   ff <- getField True f
   if ff == lval 
-    then do lprint $ "Reusing " ++ show f
+    then do 
+    {-lprint $ "Reusing " ++ show f-}
+    return ()
     else do
+    {-
     lprint $ "Failed reusing " ++
-      show f ++ " [expected " ++ show lval ++ " but was " ++ show ff ++ "]"
+      show f ++ " [expected " ++ show lval ++ " but was " ++ show ff ++ "]"-}
     procedure
 
 kyokoAnAn :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Int -> LTG ()
@@ -104,6 +107,7 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       lazyApply f2 f1
       S $> f2
       f2 $< Succ
+  --x0 <- getField True f2; lprint x0
 
   -- f = v[f4] <- S (lazy_apply Copy f5) I
   -- S (S help I) (S (K copy) (K 6))
@@ -134,6 +138,7 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       S  $> f4
       copyTo 0 f2
       apply0 f4
+  --x1 <- getField True f4; lprint x1
 
   -- v[f1] <- S (lazyApply Copy f4) (lazyApply Copy f7)
   -- this is zombie!
@@ -152,6 +157,7 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       lazyApply f2 f3
       copyTo 0 f2
       apply0 f1
+  --x2 <- getField True f1; lprint x2
 
   num f2 (255-target)
   Zombie $> f2
