@@ -9,6 +9,7 @@ all:\
 	Y2CAtkQb \
 	Yuma2a \
 	Yuma2b \
+        YumaAn \
 	SpyDuck SittingDuck  Random 
 
 Clone: Clone.hs LTG.hs LTG/*.hs
