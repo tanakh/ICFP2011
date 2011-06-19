@@ -19,8 +19,10 @@ module LTG.Simulator (
 
 import qualified Control.Exception as E
 import Control.Monad
+import Data.List
 import Data.IORef
 import qualified Data.Vector.Mutable as MV
+import System.Environment
 import System.IO
 import System.IO.Unsafe
 
@@ -34,15 +36,41 @@ get23 (a1,a2,a3) = a2
 get33 :: (a1,a2,a3)->a3
 get33 (a1,a2,a3) = a3
 
+--------------------------------------------- traceVital
+type VitalCurve =  [((Int, Int),Int)]
+lastVitalCurve :: IORef (VitalCurve, VitalCurve)
+lastVitalCurve = unsafePerformIO $ newIORef ([],[])
+{-# NOINLINE lastVitalCurve #-}
 
+toVitalCurve ::  MV.IOVector Int -> IO VitalCurve
+toVitalCurve vec = do
+  vitals <- mapM (MV.read vec) [0..255]
+  let iVitals = zip [0..255] vitals
+      iVitals2 = groupBy (\(i0,v0) (i1,v1) -> v0==v1) iVitals
+      summary :: [(Int, Int)]->((Int, Int),Int)
+      summary xs = ((fst $ head xs, fst $ last xs), snd $ head xs)
+      iVitals3 = map summary iVitals2
+  return $ iVitals3
+
+traceVitalFlag :: Bool
+traceVitalFlag = unsafePerformIO $ do
+                   args <- getArgs
+                   return $ "trace" `elem` args
+
+traceVital :: Simulator -> IO ()
+traceVital s = do 
+  vc1 <- toVitalCurve $ vital $ p1State s
+  vc2 <- toVitalCurve $ vital $ p1State s
+  hPutStrLn stderr $ show (vc1, vc2)
+--------------------------------------------- traceVital
 
 
 data Simulator
   = Simulator
     { turnCnt :: !Int
     , phase   :: !Bool -- sente turn : True, gote turn : False
-    , p1State :: State
-    , p2State :: State
+    , p1State :: State -- sente state
+    , p2State :: State -- gote  state
     }
 
 newSimulator :: IO Simulator
@@ -64,6 +92,7 @@ oppState Simulator { p1State = stat } = stat
 
 execStep :: Hand -> Simulator -> IO (Simulator, String)
 execStep myHand@(typ, pos, name) s = do
+  traceVital s
   em <- allDead my   -- proponent in phase s
   eo <- allDead opp
   monAtPos <- MV.read (monitor my) pos
