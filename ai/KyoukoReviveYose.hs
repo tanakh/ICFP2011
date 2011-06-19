@@ -226,7 +226,7 @@ kyoukoMain = do
     else do
     -- dmg > 2 -> attack is issued
     -- "dec" is issued if dmg == 1 
-    when (zombifySlotV > 1) $ do attack2 (alives !! 0) (alives !! 1) 0 zombifySlotV
+    when (zombifySlotV > 1) $ do attack2 (alives !! 1) (alives !! 4) 0 zombifySlotV
 {-
     attack      (alives !! 0) 0 zombifySlotV
     attack      (alives !! 1) 0 zombifySlotV
