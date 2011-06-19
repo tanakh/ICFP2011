@@ -6,6 +6,7 @@ import Control.Monad
 import Control.Monad.State
 
 import Data.Maybe
+import Data.List
 
 import LTG 
 
@@ -293,12 +294,19 @@ waruagaki = do
   num 0 2
   Inc $> 0
 
+speedo :: Int -> Int
+speedo x
+    | x == 0 = 0
+    | odd  x = 1 + speedo (x-1)
+    | even x = 1 + speedo (div x 2)
+
 main :: IO ()
 main = runLTG $ do
-  lprint debugTag
 
+  let range = 10
+  let necks = take (range) $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
   forever $ do
-    ds <- filterM (isDead True) [0..255]
+    ds <- filterM (isDead True) necks
     if null ds
       then do
       turn <- turnCnt <$> get
@@ -322,10 +330,19 @@ main = runLTG $ do
             return ()
         return ()
       else do
-      lprint $ "Revive mode: " ++ show (head ds)
-      ignExc $ revive (head ds)
+      rankedTgt <- mapM rankDeads ds
+      let reviveTgt = snd $ head $ sort rankedTgt          
+      lprint $ "Revive mode: " ++ show (sort rankedTgt)
+      ignExc $ revive reviveTgt
       lprint "Revive done"
       return ()
+
+rankDeads :: Int -> LTG (Int, Int)
+rankDeads i 
+    | i == 0 = return (0, i)
+    | True   = do
+          fa <- isAlive True (i-1)
+          return (if fa then 1 else 0, i)
 
 --  futureApply 1 2 18 3
 

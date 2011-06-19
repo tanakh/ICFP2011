@@ -6,36 +6,17 @@ all:\
 	MamiY2C \
 	Y2CQB \
 	Kyubey \
+	Y2CAtkQb \
+	Yuma2a \
 	SpyDuck SittingDuck  Random 
-
-everything: Test \
-	SpyDuck SittingDuck  Random \
-	Revive255 \
-	CompactSayaka NonZeroCompactSayaka \
-	Watcher \
-	SayakaRevive \
-	SayakaRD2 \
-	KuroMadoka Kyouko KyoukoFA \
-	KyoukoRevive \
-	KyoukoFirewall \
-	KyoukoShuffle \
-	KyoukoImouto \
-	KamijoRevive \
-	KamijoShuffle \
-	KyoukoFADash \
-	KyoukoFARocket \
-	KyoukoSort \
-	KyoukoReviveFirstAttack \
-	Clone \
-	KRYHomu \
-	KRY2Madan \
-	KRYMadanNoButou \
-	Mami103 \
-	FastZombie\
-	Y2CShuffle
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+Y2CAtkQb: Y2CAtkQb.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Y2CAtkQb.hs
+
+
 
 Y2CQB: Y2CQB.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Y2CQB.hs
@@ -78,6 +59,9 @@ FastZombie: FastZombie.hs LTG.hs LTG/*.hs
 
 KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KuroMadoka.hs
+
+Yuma2a: Yuma2a.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Yuma2a.hs
 
 Kyouko: Kyouko.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Kyouko.hs
@@ -178,3 +162,32 @@ Watcher: Watcher.hs  LTG.hs LTG/*.hs
 	ghc --make -O3 Watcher.hs
 
 
+
+
+
+everything: Test \
+	SpyDuck SittingDuck  Random \
+	Revive255 \
+	CompactSayaka NonZeroCompactSayaka \
+	Watcher \
+	SayakaRevive \
+	SayakaRD2 \
+	KuroMadoka Kyouko KyoukoFA \
+	KyoukoRevive \
+	KyoukoFirewall \
+	KyoukoShuffle \
+	KyoukoImouto \
+	KamijoRevive \
+	KamijoShuffle \
+	KyoukoFADash \
+	KyoukoFARocket \
+	KyoukoSort \
+	KyoukoReviveFirstAttack \
+	Clone \
+	KRYHomu \
+	KRY2Madan \
+	KRYMadanNoButou \
+	Mami103 \
+	FastZombie\
+	Y2CShuffle \
+	Y2CAtkQb 

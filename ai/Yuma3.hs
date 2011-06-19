@@ -17,25 +17,21 @@ kyoukoMain :: LTG()
 kyoukoMain = do
   -- S (K (S (S Attack (K 255)) (K 8192))) Get
   clear 1
+  1 $< S
   1 $< Attack
+  1 $< I
   S $> 1
-  I $< 1
-  -- num 0 255
-  -- copyTo 2 0
+  num 0 512
   K $> 0
   apply0 1
-  S $> 1
   0 $< Put
-  Dbl $> 0
-  K $> 0
-  apply0 1
 
-  0 $< Put
   Dbl $> 0
   Dbl $> 0
   Dbl $> 0
   Dbl $> 0
   K $> 0  
+
   clear 3
   3 $< S
   3 $< Help
@@ -43,15 +39,20 @@ kyoukoMain = do
   S $> 3
   apply0 3
 
+  clear 2
+  2 $< Get
   clear 0
-  0 $< S
-  0 $< Get
-  0 $< I  
+  0 $< Zero
+  lazyApply 2 0
+  S $> 2
+  2 $< Succ
+  copyTo 0 2
+
   S $> 3
   apply0 3
 
-  S $> 1
   copyTo 0 3
+  S $> 1
   apply0 1
 
   copyTo 0 1
@@ -60,7 +61,6 @@ kyoukoMain = do
 
   copyTo 1 0
   1 $< Zero
-
 
   copyTo 1 0
   1 $< Zero
