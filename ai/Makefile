@@ -7,6 +7,7 @@ all: Test \
 	SayakaRD2 \
 	KuroMadoka Kyouko KyoukoFA \
 	KyoukoRevive \
+	KyoukoFirewall \
 	KyoukoShuffle \
 	KyoukoImouto \
 	KamijoRevive \
@@ -51,6 +52,11 @@ KyoukoSort: KyoukoSort.hs LTG.hs LTG/*.hs
 KyoukoRevive: KyoukoRevive.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoRevive.o
 	ghc --make -O3 KyoukoRevive.hs
+
+KyoukoFirewall: KyoukoFirewall.hs LTG.hs LTG/*.hs
+	rm -fr KyoukoFirewall.o
+	ghc --make -O3 KyoukoFirewall.hs
+
 
 KyoukoImouto: KyoukoImouto.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoImouto.o
