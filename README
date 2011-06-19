@@ -1,12 +1,17 @@
 Team: hogehoge
 
-## Team Member:
+## Team Member and their major role:
 
 - Hiroshige Hayashizaki (@akane_magica)
+  supreme tuning on LTG machine language
 - Shun Sakuraba (@chunjp)
+  the bridge of abstract and machine level;
+  wrote both commentful Haskell codes and SKIful LTG codes
 - Takayuki Muranushi (@nushio)
+  wrote the tournament system and the simulation validator
 - Hideyuki Tanaka (@tanakh)
-
+  wrote the LTG Monad and the simulator
+  
 ## Used Programming Languages:
 
 - Haskell (all purpose)
@@ -14,18 +19,29 @@ Team: hogehoge
 - Ruby (scripting)
 - Ocaml (for some searching)
 
+## The source codes
 
+   src/Makefile           The makefile
+   src/*.hs               AIs
+   src/LTG/Base.hs        Definitions for LTG cards
+   src/LTG/Exception.hs   Handles for error/recovery mechanism
+   src/LTG/Monad.hs       The LTG Monad
+   src/LTG/Simulator.hs   The built-in game simulator
+   src/LTG/SoulGems.hs    Building blocks library for AI strategies
+  
+  
 ## About Our Solution:
 
+- We implemented a DSL for programming LTG playing AIs (artificial
+  intelligences) in Haskell.
 
-
-- We implemented a DSL for programming LTG AI (artificial
-  intelligents) in Haskell.
-
-- The core of the language is the LTG Monad, with which we can
-  describe wide hierarchy of abstractness: from the raw list of
-  highly-tuned raw-level instructions, to human-readable strategic
-  instructions (such as 'attack these range' or 'summon zombie').
+- The core of the language is the LTG monad. We can write LTG AIs by
+  composing the LTG monad. When we `runLTG :: LTG a -> IO ()` the
+  monad, it returns a executable program for the LTG. With LTG Monad
+  we can describe wide hierarchy of abstractness: from the raw
+  sequence of highly-tuned raw-level instructions, to human readable
+  strategic instructions (such as 'attack these range' or 'summon
+  zombie').
 
   Such high-level library functions provides safeness, robustness and
   speed. For example, user can build complex strategies and when it
@@ -33,16 +49,63 @@ Team: hogehoge
   can safely fall back to recovery. Other functions, such as 'set a
   numeric value to the slot' will performed number construction, so
   that it re-uses partially build numbers from the slot and other
-  slotsm, and it automatically revives the target slot if it's dead.
+  slots, and it automatically revives the target slot if it's dead.
 
-  All these are seamlessly composable.
- simulatlor and integrated it with the DSL seemlessly, 
-  So that our AI can know the current and past state of the game.
+  The game simulator is integrated within the DSL, So that our AI can
+  know the current and past state of the game clearly. Also the
+  programmer can instruct the built-in simulator to record the game to
+  a file, so that we can understand how our AIs are doing.
+   
+  All of these features are seamlessly composable, and independently
+  extensible.
   
 
-- Our strategy is to send 
+- Our main strategy "Kyoko" series, "Y2CAtkQb" being the final
+  product, is to send a zombie to the opponent that issues many 'Help
+  i i n' instructions in sequence while incrementing index i. Each of
+  the instruction can kill a slot with vital in range [n .. 2.1n].
+  Generally, a single zombie issue can kill over ~50 slots.
 
+  And she's really, really fast. She can summon the first zombie in
+  136 turns and can kill a "Sitting Duck" (an AI that does nothing) in
+  186 turns. She can overwhelm most other strategies just by this
+  speed.
+  
+  The construction process of the zombie is complex, and is prone to
+  interceptions from the opponents. Thanks to the accurate simulation
+  of the game state and the error handling mechanism, our AI is robust
+  against such interceptions. If she detects an error (such as a slot
+  being used for construction is killed) she immediately fall-backs to
+  a recovery mode, revive the slots, and then re-start the
+  construction. At the second run, she uses the caching mechanism:
+  she searches for the sub-expressions of the expression she wants to
+  build, and try to re-use what she can find on the memory (most
+  possibly the immature results of previous disrupted construction.)
+  With caching, our AI can issue the second attack really fast too,
+  even when the first attack fails.
+  
+  We noticed the importance and speciality of the slot 0 at the early
+  stage of the contest. Although our AIs need to use slot 0
+  frequently, the life-time needed for Slot 0 is minimized. One of the
+  building-block function "lazyApply" applies a function on slot f1 to
+  a value on slot f2 (f1, f2 /= 0) using slot 0 as a work area. It
+  requires that slot 0 is kept alive only for several turns. The slot
+  0 is occupied about the half of the time until the zombie is ready,
+  but the use of slot 0 is in many tiny time segment, so that when the
+  construction process is interrupted, the AI goes to recovery mode
+  and then resumes the process.
+                 
+- We also wrote a team-local contest hosting system. Thanks to
+  Haskell's powerful and safe parallel programming capability, we
+  could easily write the contest system that can hold hundreds of LTG
+  match in parallel on a 64-core distributed computer system.
+  
+  The contest system used remote procedure call (RPC) library and
+  msgpack-rpc and software transactional memory (STM) library from
+  the Hackage.
+
+  
 P.S.
 
-We enjoyed the contest very much!
-Thank you for the interesting problem!
+  We enjoyed the contest very much!
+  Thank you for the interesting problem!
