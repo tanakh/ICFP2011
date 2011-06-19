@@ -17,15 +17,20 @@ debugTag::String
 debugTag = "KAMIJO"
 
 
-getMaxEnemy :: LTG Int
-getMaxEnemy = do
+speedo :: Int -> Double
+speedo x
+    | x == 0 = 0
+    | odd  x = 1 + speedo (x-1)
+    | even x = 1 + speedo (div x 2)
+  
+
 getFirstWorthEnemy ::  LTG (Maybe Int, Int)
 getFirstWorthEnemy = do  
   oppAlives <- filterM (isAlive False) [0..255]
   vitals <- mapM (getVital False) oppAlives
   let iVitals = zip oppAlives vitals
-      withUmami (i,v) = ((v,-i),(i,v))
-  return $ \(i,v)->(Just i,v)  $ snd $ maximum $ map withUmami iVitals
+      withUmami (i,v) = ((fromIntegral v * 0.5 ** speedo (255-i),-i),(i,v))
+  return $ (\(i,v)->(Just i,v))  $ snd $ maximum $ map withUmami iVitals
 
 
 

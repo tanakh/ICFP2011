@@ -9,4 +9,4 @@ main = runLTG ltgMain
 ltgMain :: LTG ()
 ltgMain = do
   forever $ do
-    I $> 0
+    nop
