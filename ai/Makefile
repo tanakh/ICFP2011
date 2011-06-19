@@ -19,12 +19,18 @@ all: Test \
 	KyoukoReviveFirstAttack \
 	Clone \
 	KRYHomu \
+	KRYMadanNoButou \
 	Mami103 \
 	KyoukoReviveYose2 \
 	FastZombie
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+
+
+KRYMadanNoButou: KRYMadanNoButou.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KRYMadanNoButou.hs
 
 
 KRYHomu: KRYHomu.hs LTG.hs LTG/*.hs
