@@ -8,6 +8,7 @@ all:\
 	Kyubey \
 	Y2CAtkQb \
 	Yuma2a \
+	Yuma2b \
         YumaAn \
 	SpyDuck SittingDuck  Random 
 
@@ -67,6 +68,9 @@ KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
 
 Yuma2a: Yuma2a.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Yuma2a.hs
+
+Yuma2b: Yuma2b.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Yuma2b.hs
 
 Kyouko: Kyouko.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Kyouko.hs
