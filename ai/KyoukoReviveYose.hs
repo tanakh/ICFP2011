@@ -260,7 +260,7 @@ keepAlive ix = do
     _ <- revive ix
     keepAlive ix
 
-ignExc :: LTG () -> LTG ()
+ignExc :: LTG a -> LTG ()
 ignExc m = do
   mb <- E.try m
   case mb of
@@ -319,7 +319,7 @@ main = runLTG $ do
         return ()
       else do
       lprint $ "Revive mode: " ++ show (head ds)
-      _ <- revive (head ds)
+      ignExc $ revive (head ds)
       lprint "Revive done"
       return ()
 
