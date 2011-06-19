@@ -60,15 +60,24 @@ traceVitalFilename :: String
       let fnCands = filter (isInfixOf ".trace") args
       case fnCands of
         []    -> return (False, "")
-        (x:_) -> return (True , x)
+        (x:_) -> do
+          writeFile x ""
+          return (True , x)
 
 traceVital :: Simulator -> IO ()
 traceVital s = when traceVitalFlag $ do 
   vc1 <- toVitalCurve $ vital $ p1State s
   vc2 <- toVitalCurve $ vital $ p2State s
   let vc = (vc1, vc2)
+      t'  = show $ turnCnt s 
+      p'  = phase   s
+      p'' = if p' then "0" else "1"
   lastVC <- readIORef lastVitalCurve
-  hPutStrLn stderr $ show vc
+  when (vc /= lastVC) $ do
+    h <- openFile traceVitalFilename AppendMode 
+    hPutStrLn h $ t' ++ " " ++ p'' ++ " " ++ show vc
+    hClose h
+    writeIORef lastVitalCurve vc
 --------------------------------------------- traceVital
 
 
