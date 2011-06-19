@@ -7,6 +7,7 @@ all:\
 	Y2CQB \
 	Kyubey \
 	Y2CAtkQb \
+	Yuma2a \
 	SpyDuck SittingDuck  Random 
 
 everything: Test \
@@ -85,6 +86,9 @@ FastZombie: FastZombie.hs LTG.hs LTG/*.hs
 
 KuroMadoka: KuroMadoka.hs LTG.hs LTG/*.hs
 	ghc --make -O3 KuroMadoka.hs
+
+Yuma2a: Yuma2a.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Yuma2a.hs
 
 Kyouko: Kyouko.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Kyouko.hs
