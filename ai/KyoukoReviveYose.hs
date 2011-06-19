@@ -102,6 +102,7 @@ kyokoAnAn f1 f2 f3 f4 f5 f7 target dmg = do
       f2 $< Copy
       num 0 f4
       lazyApply f2 0
+      0 $< Put
       S $> f2
       f2 $< Succ
   --x0 <- getField True f2; lprint x0
