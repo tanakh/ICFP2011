@@ -3,6 +3,8 @@ all:\
 	KyoukoReviveYose2 \
 	KyoukoReviveYose2C \
 	KRY2Madan \
+	MamiY2C \
+	Y2CQB \
 	Kyubey \
 	SpyDuck SittingDuck  Random 
 
@@ -34,6 +36,13 @@ everything: Test \
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+Y2CQB: Y2CQB.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Y2CQB.hs
+
+
+MamiY2C: MamiY2C.hs LTG.hs LTG/*.hs
+	ghc --make -O3 MamiY2C.hs
 
 
 Y2CShuffle: Y2CShuffle.hs LTG.hs LTG/*.hs
