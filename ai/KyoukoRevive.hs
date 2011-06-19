@@ -251,6 +251,14 @@ kyoukoMain = do
 --  attackLoopFA 1 2 18 5 0 0
 --  sittingDuck
   
+  
+ignExc :: LTG a -> LTG ()
+ignExc m = do
+  mb <- E.try m
+  case mb of
+    Left (LTGError _) -> return ()
+    Right _ -> return ()
+
 main :: IO ()
 main = runLTG $ do
   lprint debugTag
@@ -269,7 +277,7 @@ main = runLTG $ do
       return ()
       else do
       lprint "Revive mode"
-      _ <- revive (head ds)
+      ignExc $ revive (head ds)
       return ()
 
 --  futureApply 1 2 18 3
