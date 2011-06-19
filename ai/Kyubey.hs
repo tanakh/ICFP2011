@@ -1,7 +1,16 @@
 #!/usr/bin/env runhaskell
 import LTG
 
+import qualified Control.Exception.Control as E
 import Control.Monad
+
+
+ignExc :: LTG a -> LTG ()
+ignExc m = do
+  mb <- E.try m
+  case mb of
+    Left (LTGError _) -> return ()
+    Right _ -> return ()
 
 main :: IO ()
 main = runLTG ltgMain
@@ -9,7 +18,12 @@ main = runLTG ltgMain
 ltgMain :: LTG ()
 ltgMain = do
   forever $ do
-    _ <- filterM (isAlive True) [0..255]
-    as <- filterM (isAlive True) [0..255]
-    let evens = map (2*)[0..]
-    nop
+    ignExc qbMain
+    _ <- revive 0
+    return ()
+
+qbMain :: LTG ()
+qbMain = do
+  deadEvens  <- filterM (isDead  True) [0,2..128]
+  aliveEvens <- filterM (isAlive True) [0,2..128]
+  return ()
