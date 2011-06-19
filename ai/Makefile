@@ -19,6 +19,7 @@ all: Test \
 	KyoukoReviveFirstAttack \
 	Clone \
 	KRYHomu \
+	KRY2Madan \
 	KRYMadanNoButou \
 	Mami103 \
 	KyoukoReviveYose2 \
@@ -73,6 +74,11 @@ KyoukoReviveYose: KyoukoReviveYose.hs LTG.hs LTG/*.hs
 KyoukoReviveYose2: KyoukoReviveYose2.hs LTG.hs LTG/*.hs
 	rm -fr KyoukoReviveYose2.o
 	ghc --make -O3 KyoukoReviveYose2.hs
+
+
+KRY2Madan: KRY2Madan.hs LTG.hs LTG/*.hs
+	ghc --make -O3 KRY2Madan.hs
+
 
 
 KyoukoFirewall: KyoukoFirewall.hs LTG.hs LTG/*.hs
