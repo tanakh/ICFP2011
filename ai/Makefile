@@ -3,7 +3,6 @@ all:\
 	KyoukoReviveYose2 \
 	KyoukoReviveYose2C \
 	KRY2Madan \
-	CompactSayaka \
 	Kyubey \
 	SpyDuck SittingDuck  Random 
 

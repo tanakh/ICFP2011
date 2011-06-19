@@ -15,7 +15,7 @@
 ../ai/KyoukoReviveYose2
 ../ai/KyoukoReviveYose2C
 ../ai/KRY2Madan
-
+../ai/Kyubey
 
 
 #../ai/KyoukoRevive
@@ -24,7 +24,7 @@
 
   
 
-../ai/CompactSayaka
+#../ai/CompactSayaka
 #../ai/FastZombie
 #../ai/Kyouko
 #../ai/KyoukoSort
