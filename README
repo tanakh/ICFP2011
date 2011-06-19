@@ -1,6 +1,24 @@
-Member
+Team: hogehoge
 
-@chunjp
-@nushio
-@tanakh
-@xhl
+Team Member:
+
+- Hiroshige Hayashizaki (@akane_magica)
+- Shun Sakuraba (@chunjp)
+- Takayuki Muranushi (@nushio)
+- Hideyuki Tanaka (@tanakh)
+
+Used Programming Languages:
+
+- Haskell (all purpose)
+- Ruby (small scripting)
+
+About Our Solution:
+
+- We implemented a DSL of LTG in Haskell.
+- We implemented an LTG simulatlor and integrated it with the DSL seemlessly.
+- Our strategy is 
+
+P.S.
+
+We enjoyed the contest very much!
+Thank you for the interesting problem!
