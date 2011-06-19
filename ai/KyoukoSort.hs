@@ -8,9 +8,6 @@ import Data.Maybe
 import LTG 
 import LTG.SoulGems
 
-isDead :: Bool -> Int -> LTG Bool
-isDead my ix = not <$> isAlive my ix
-
 getFirstWorthEnemy :: Int -> LTG (Maybe Int)
 getFirstWorthEnemy dmg = do
   alives <- filterM 

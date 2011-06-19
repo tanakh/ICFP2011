@@ -7,9 +7,6 @@ import Data.List
 import LTG
 import LTG.SoulGems
 
-isDead :: Bool -> Int -> LTG Bool
-isDead my ix = not <$> isAlive my ix
-
 
 getVitals :: Bool -> LTG [Int]
 getVitals my = do

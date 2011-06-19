@@ -9,9 +9,6 @@ import LTG
 import LTG.SoulGems
 import System.Environment
 
-isDead :: Bool -> Int -> LTG Bool
-isDead my ix = not <$> isAlive my ix
-
 getFirstWorthEnemy :: Int -> LTG (Maybe Int)
 getFirstWorthEnemy dmg = do
   alives <- filterM 

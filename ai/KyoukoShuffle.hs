@@ -9,9 +9,6 @@ import Data.Maybe
 import LTG 
 import LTG.SoulGems
 
-isDead :: Bool -> Int -> LTG Bool
-isDead my ix = not <$> isAlive my ix
-
 #ifdef KAMIJO
 debugTag::String
 debugTag = "KAMIJO"
