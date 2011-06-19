@@ -306,7 +306,7 @@ main :: IO ()
 main = runLTG $ do
   lprint $ sort $[(speedo i, i) | i<-[0..255]]
 
-  let necks = take 9 $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
+  let necks = take 16 $ map snd $ sort $[(speedo i, i) | i<-[0..255]]
   forever $ do
     ds <- filterM (isDead True) [0..255]
     if null ds
