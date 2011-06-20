@@ -5,7 +5,7 @@ require 'fileutils'
 
 RegisterURL = 'http://www.paraiso-lang.org/Walpurgisnacht/register.txt'
 ResultFn = 'result.txt'
-ParticipantsFn = 'participants_yaoj.txt'
+ParticipantsFn = 'participants_yauj.txt'
 ParticipantsFn2 = 'participants.txt'
 Ptgz = 'p.tgz'
 
@@ -34,21 +34,22 @@ class Participant
     localdir() + Ptgz
   end
   def runpath()
-    "./yaoj_" + name
+    "./yauj_" + name
   end
   def create_runpath()
     open(runpath(), 'w') { |fp|
       fp.puts <<SHELL
 #!/bin/sh
-cd #{localdir}
-run
+cd #{localdir} $@ 
+./run
 SHELL
     }
+    sh "chmod 755 #{runpath()}"
   end
 end
 
 
-yaojParticipants = []
+yaujParticipants = []
 
 open(RegisterURL, 'r') { |fp|
   counter = 0
@@ -58,13 +59,13 @@ open(RegisterURL, 'r') { |fp|
     str = words[0..-4].join(' ')
     name = counter.to_s + "_" + str.gsub(/\W/,'')
     url = words[-1]
-    yaojParticipants << Participant::new(name, url)
+    yaujParticipants << Participant::new(name, url)
     counter +=1
   end
 }
 
 open(ParticipantsFn,'w') {|fp|
-  yaojParticipants.each {|pants|
+  yaujParticipants.each {|pants|
     fp.puts pants.runpath 
   }
   open(ParticipantsFn2, 'r') {|fp2|
@@ -74,7 +75,7 @@ open(ParticipantsFn,'w') {|fp|
   }
 }
 
-yaojParticipants.each{|pants|
+yaujParticipants.each{|pants|
   sh "rm -fr #{pants.localdir}"
   sh "mkdir #{pants.localdir}"
   sh "wget #{pants.url} -q  -O #{pants.packagepath}"
@@ -98,8 +99,10 @@ yaojParticipants.each{|pants|
       next
     end
     if ExecMode
-      sh "install" 
-      pants.create_runpath()
+      sh "./install" 
     end
   } # exit participant directory
+  if ExecMode
+    pants.create_runpath()
+  end
 } # participant loop
