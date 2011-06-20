@@ -178,7 +178,6 @@ printHoshitori = do
     banner = unlines [banner1, banner2, banner3, banner4]
 
     htmlHead = unlines ["<head>",
-                        "<meta http-equiv='Refresh' content='60'>",
                         "<title>Incubating...</title>",
                         "</head>"]
 

@@ -16,7 +16,7 @@ class AI
   attr_accessor :team, :passh, :url, :package
 end
 
-$salt=open('../hentai/salt','r').read
+$salt=open('/home/web/salt','r').read
 
 def digest(str)
   Digest::SHA512.hexdigest($salt + str)
@@ -97,16 +97,25 @@ $cgi.out() do
 #{$errmsg}
 </b></font>
 
-Here we publish our judge program we used during the ICFP contest for in-team LTG league.
-If you want to join us, please submit your teamname, your team URL, and your package.
-We are looking forward to have LTG match with many different strategies and share ideas with you soon. 
-<br>
-As programming lovers we are, we trust you,
-but for security concerns, we will reserve the right to examine and reject your package.
-Please include the source in the package, if possible. 
-<br>
-At the moment, we are working on upgrading the judge system for generating game records etc...
-As soon as we finish on the update, we will start the league.
+Good game, to every participants, and especially to judges, of ICFP
+contest 2011.  This year's problem was really interesting, and I guess
+everyone, as I am, is excited, and cannot wait to tell one's ideas,
+learn about others, how well we did, and try out new ideas that
+unfortunately we cannot implement in time.  <br>
+
+So, Here we publish our judge program we used during the ICFP contest
+for in-team LTG league. It is provided as it was, to meet the need as
+soon as possible. I appologize for those one who cannot run your
+program in this judge. If you want to join us, please submit your
+teamname, your team URL, and your package.  We are looking forward to
+have LTG match with many different strategies and share ideas with you
+soon. <br>
+
+As programming lovers we are, I trust you, but please understand that
+when harmful activities are detected, I have to shut down this form of
+judge system, and no one will benefit from that. Please include the
+source in the package, if possible.  <br>
+
 STR
           $cgi.p {
             $cgi.a({:href => 'http://www.paraiso-lang.org/Walpurgisnacht/store/scoreboard.html'}) {
@@ -117,11 +126,11 @@ STR
             $ais.map {|ai|
               $cgi.tr{
                 $cgi.td{
-                  $cgi.a({ :href => ai.url }){
-                    ai.team 
+                  $cgi.a({ :href => CGI::escapeHTML(ai.url) }){
+                    CGI::escapeHTML(ai.team)
                   } 
                 } + $cgi.td{ 
-                  ai.package 
+                  CGI::escapeHTML(ai.package) 
                 } + $cgi.td{ 
                   remove_tag = 'remove'+digest(ai.team)
                   $cgi.input({:type => 'submit', :name => remove_tag, :value => 'remove'}) 
