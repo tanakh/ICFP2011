@@ -34,7 +34,7 @@ class Participant
     localdir() + Ptgz
   end
   def runpath()
-    localdir() + 'run'
+    "./" + localdir() + 'run'
   end
 
 end
