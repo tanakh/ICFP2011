@@ -17,7 +17,7 @@ import System.Posix.Files
 import System.Process
 import System.Random
 
-resultFile :: String
+resultFile::String
 resultFile = "result.txt"
 
 
@@ -188,13 +188,6 @@ printHoshitori = do
 
 main :: IO ()
 main = do
-  results <- do
-         exist <- fileExist resultFile
-         if exist then return [] --fmap lines $ readFile resultFile
-         else return []
-  let matches :: [Match]
-      matches = map read results
-  mapM_ (recordMatch False) matches
   printHoshitori
   putStrLn "ready."
   serve port [ ("suggestMatch", fun suggestMatch),
