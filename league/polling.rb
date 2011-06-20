@@ -34,9 +34,17 @@ class Participant
     localdir() + Ptgz
   end
   def runpath()
-    "./" + localdir() + 'run'
+    "./yaoj_" + name
   end
-
+  def create_runpath()
+    open(runpath(), 'w') { |fp|
+      fp.puts <<SHELL
+#!/bin/sh
+cd #{localdir}
+run
+SHELL
+    }
+  end
 end
 
 
@@ -89,6 +97,9 @@ yaojParticipants.each{|pants|
       STDERR.puts "!! cannot recognize package for #{pants.name}"
       next
     end
-    sh "install" if ExecMode
+    if ExecMode
+      sh "install" 
+      pants.create_runpath()
+    end
   } # exit participant directory
 } # participant loop
