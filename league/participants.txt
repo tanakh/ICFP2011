@@ -7,7 +7,7 @@
 ../oldbin/KRY.1589.336aff6490e7a98b12891f7cc10ab036d213c50f
 ../oldbin/KRY2.1659.212276e5849d00fcd54ec680ace7de55978f7aa7 
 ../oldbin/Y2C.1698.e8c3d38d877cbac5bdf8b2d73948372df0c228b5 
-../oldbin/Y2CAtkQb.1965.0f91f30e1cb720768e18b1fd7d0b404f931a99a6 
+#../oldbin/Y2CAtkQb.1965.0f91f30e1cb720768e18b1fd7d0b404f931a99a6 
 
 #latest mainstream
 ../ai/Y2CAtkQb
