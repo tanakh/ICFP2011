@@ -30,7 +30,7 @@ aiSize = V.length ais
 
 ais :: Vector AI
 ais = unsafePerformIO $ do
-        ps <- fmap (map AI . filter good . lines) $ readFile "participants_yaoj.txt"     
+        ps <- fmap (map AI . filter good . lines) $ readFile "participants_yauj.txt"     
         return $ V.fromList ps
     where
       good line

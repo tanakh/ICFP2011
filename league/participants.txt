@@ -2,18 +2,7 @@
 # One AI per line.
 
 # older series omitted due to infinite loop conflict.
-../oldbin/KRY.1534.a4b9031d9fd7ef4503802e94a101b4940e86027b
-../oldbin/KRY.1569.64c01f00d26dfddb0bbf1ee830188fd4c5565ee7
-../oldbin/KRY.1589.336aff6490e7a98b12891f7cc10ab036d213c50f
-../oldbin/KRY2.1659.212276e5849d00fcd54ec680ace7de55978f7aa7 
-../oldbin/Y2C.1698.e8c3d38d877cbac5bdf8b2d73948372df0c228b5 
 
-#latest mainstream
-../ai/Y2CAtkQb
-
-# submitted by us
-../qb_final
 
 # test
-../ai/Kyubey
 ../ai/SittingDuck

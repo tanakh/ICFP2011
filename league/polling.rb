@@ -40,8 +40,8 @@ class Participant
     open(runpath(), 'w') { |fp|
       fp.puts <<SHELL
 #!/bin/sh
-cd #{localdir} $@ 
-./run
+cd #{localdir} 
+./run $@ 
 SHELL
     }
     sh "chmod 755 #{runpath()}"
