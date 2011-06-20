@@ -1,10 +1,7 @@
 # List AI's in this file.
 # One AI per line.
 
-# old series omitted due to infinite loop conflict.
-#../ai/oldbin/KR.1044.579b4ca54972edf8307e4a0b34b377735c200b89
-#../ai/oldbin/KR.1426.0791de20acbfbcdf77ff7ac420263fcce9a5e16f
-# ../ai/oldbin/KR.1471.208ad3ca3498cd59578788eba77d0a2c6ef5f3e9 
+# older series omitted due to infinite loop conflict.
 ../oldbin/KRY.1534.a4b9031d9fd7ef4503802e94a101b4940e86027b
 ../oldbin/KRY.1569.64c01f00d26dfddb0bbf1ee830188fd4c5565ee7
 ../oldbin/KRY.1589.336aff6490e7a98b12891f7cc10ab036d213c50f
@@ -12,10 +9,15 @@
 ../oldbin/Y2C.1698.e8c3d38d877cbac5bdf8b2d73948372df0c228b5 
 ../oldbin/Y2CAtkQb.1965.0f91f30e1cb720768e18b1fd7d0b404f931a99a6 
 
+#latest mainstream
+../ai/Y2CAtkQb
+
+# submitted by us
 ../qb_final
-../ai/KyoukoReviveYose
-../ai/KyoukoReviveYose2
-../ai/KyoukoReviveYose2C
+
+#../ai/KyoukoReviveYose
+#../ai/KyoukoReviveYose2
+#../ai/KyoukoReviveYose2C
 #../ai/Yuma2a
 #../ai/Yuma2b
 #../ai/YumaAn

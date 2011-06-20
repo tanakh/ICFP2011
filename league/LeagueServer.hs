@@ -134,8 +134,10 @@ printHoshitori = do
   let
     tr i = command (ais!i) : show i : nakami i
 
-    nakami i = [ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ] ++ [ketsu i]
+    nakami i = [ nonDiago i j $ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ] ++ [ketsu i]
     ketsu i = htmlTag "center" $ show(numerator i) ++ "/" ++ show(denominator i)
+
+    nonDiago i j = if i==j then const "" else id
 
     numerator   i =       sum [bd!j!i | j <- [0..aiSize-1] ]
     denominator i = 1+100*sum [mc!j!i | j <- [0..aiSize-1] ]
@@ -143,7 +145,7 @@ printHoshitori = do
     strongness :: Int -> Double    
     strongness i = (fromIntegral $ numerator i) / (fromIntegral $denominator i)
 
-    ranking = map snd $ reverse $ sort $ [(strongness i, i)| i <- [0..aiSize-1]]
+    ranking = map snd $ reverse $ sort $ [((strongness i,-i), i)| i <- [0..aiSize-1]]
 
     rankingTbl = htmlTbl $ [ [command $ ais ! ri, ketsu ri] | ri <- ranking]
 
@@ -182,7 +184,7 @@ printHoshitori = do
 
 
   writeFile "scoreboard.html" $ htmlTag "html" $ (htmlHead ++) $ htmlTag "body" $ banner ++ htmlTbl tbl
-  _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht"
+  _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/"
   return ()
 
 
