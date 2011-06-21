@@ -1,6 +1,8 @@
 #!/bin/sh
 exit 0 # Remove this to execute
 
+source /home/yauj/.bashrc
+
 ./mass-kill.sh
 
 sleep 10
