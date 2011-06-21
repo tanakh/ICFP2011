@@ -5,8 +5,10 @@ require 'open3'
 
 Prog  = ARGV.join(' ')
 
-Open3.popen3(Prog) {|stdin, stdout, stderr|
+# ENV['python']='/usr/bin/python2'
 
+#
+Open3.popen3({'python'=>'/usr/bin/python2'}, Prog) {|stdin, stdout, stderr|
 
   ti = Thread.new do
     while line = STDIN.gets
