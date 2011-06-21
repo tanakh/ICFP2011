@@ -2,6 +2,7 @@
 {-# OPTIONS -Wall #-}
 
 import Control.Concurrent.STM
+import Control.Concurrent
 import Control.Monad
 import Data.Char
 import Data.List
@@ -14,6 +15,7 @@ import Network.MessagePackRpc.Server
 import System.IO
 import System.IO.Unsafe
 import System.Posix.Files
+import System.Posix.Unistd
 import System.Process
 import System.Random
 
@@ -27,6 +29,11 @@ scoreBoard = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSi
 matchCount :: TVar (Vector (Vector Int))
 matchCount = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
 
+boardRemark :: TVar (Vector (Vector String))
+boardRemark = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize ""
+
+boardModified :: TVar Bool
+boardModified = unsafePerformIO $ newTVarIO $ True
 
 suggestMatch :: IO (String, String)
 suggestMatch = do
@@ -101,11 +108,13 @@ recordMatch isNew match = when valid $ do
   atomically $ do
     bd <- readTVar scoreBoard
     writeTVar scoreBoard $ modify2 i0 i1 (+(100*s0+1)) bd 
-
-    --mc <- readTVar matchCount
-    --writeTVar matchCount $ modify2 i0 i1 (+1) $ modify2 i1 i0 (+1) mc
+  atomically $ do
+    bd <- readTVar boardRemark
+    writeTVar boardRemark $ modify2 i0 i1 (const remark) bd 
   when isNew rec
       where
+        remark = "<br/>" ++ show (alive0 match) ++ ":" ++ show (alive0 match) ++
+                 "<br/>" ++ show (turn match)
         valid = isJust i0m && isJust i1m
         i0 = fromJust i0m
         i1 = fromJust i1m
@@ -118,79 +127,89 @@ recordMatch isNew match = when valid $ do
           hPutStrLn h $ show match
           hClose h
           let goal = matchLimit * aiSize * (aiSize-1)
-          printHoshitori
           atomically $ putTMVar recordMatchMutex (count+1)
           hPutStrLn stderr $ show count ++ " / " ++ show (matchLimit * aiSize * (aiSize-1))
           hFlush stderr
 
 printHoshitori :: IO ()
 printHoshitori = do
-  (bd,mc) <- atomically $ do
+  (b, bd,mc,brm) <- atomically $ do
+                   b <- readTVar boardModified   
                    bd <- readTVar scoreBoard
                    mc <- readTVar matchCount
-                   return (bd,mc)
-  tz <- getCurrentTimeZone 
-  ut <- getCurrentTime
-  let
-    tr i = command (ais!i) : show i : nakami i
-
-    nakami i = [ nonDiago i j $ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) | j <- [0..aiSize-1] ] ++ [ketsu i]
-    ketsu i = htmlTag "center" $ show(numerator i) ++ "/" ++ show(denominator i)
-
-    nonDiago i j = if i==j then const "" else id
-
-    numerator   i =       sum [bd!j!i | j <- [0..aiSize-1] ]
-    denominator i = 1+100*sum [mc!j!i | j <- [0..aiSize-1] ]
-
-    strongness :: Int -> Double    
-    strongness i = (fromIntegral $ numerator i) / (fromIntegral $denominator i)
-
-    ranking = map snd $ reverse $ sort $ [((strongness i,-i), i)| i <- [0..aiSize-1]]
-
-    rankingTbl = htmlTbl $ [ [command $ ais ! ri, ketsu ri] | ri <- ranking]
-
-    headline :: [String]
-    headline = "" : "" : map show [0..aiSize-1]
-    tbl :: [[String]]
-    tbl = headline : map tr [0..aiSize-1]
-
-    htmlTag :: String -> String -> String
-    htmlTag tag str = "<" ++ tag ++ ">" ++ str ++ "</" ++ tag ++ ">" 
-
-    htmlTag' :: String -> String -> String -> String
-    htmlTag' tag flag str = "<" ++ tag ++ " " ++ flag ++  ">" ++ str ++ "</" ++ tag ++ ">" 
-                      
-    htmlTd :: String -> String
-    htmlTd str = htmlTag "td" str 
-
-    htmlTr :: [String] -> String
-    htmlTr strs =  htmlTag "tr" $ unwords $ map htmlTd strs
-
-    htmlTbl :: [[String]] -> String
-    htmlTbl tbl' = htmlTag' "table" "border=1 align=center" $ unlines $ map htmlTr tbl'
-
-    localTimeStr = show $ utcToLocalTime tz ut
-
-    banner1 = htmlTag "p" $ "Last Update : " ++ localTimeStr
-    banner2 = htmlTag "center" $ htmlTag "h1" $ "ranking"
-    banner3 = htmlTag "center" $ rankingTbl
-    banner4 = "<br/>" ++ (htmlTag "center" $ htmlTag "h1" $ "league")
-    banner = unlines [banner1, banner2, banner3, banner4]
-
-    htmlHead = unlines ["<head>",
-                        "<title>Incubating...</title>",
-                        "</head>"]
-
-
-  writeFile "scoreboard.html" $ htmlTag "html" $ (htmlHead ++) $ htmlTag "body" $ banner ++ htmlTbl tbl
-  _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/"
-  return ()
-
+                   brm <- readTVar boardRemark
+                   writeTVar boardModified False
+                   return (b, bd,mc,brm)
+  if b ==False then return ()
+  else do
+    tz <- getCurrentTimeZone 
+    ut <- getCurrentTime
+    let
+        tr i = command (ais!i) : show i : nakami i
+    
+        nakami i = [ nonDiago i j $ htmlTag "center" $ show (bd!j!i) ++ "/" ++  show (mc!j!i) ++ (brm!j!i)
+                         | j <- [0..aiSize-1] ] ++ [ketsu i]
+        ketsu i = htmlTag "center" $ show(numerator i) ++ "/" ++ show(denominator i)
+    
+        nonDiago i j = if i==j then const "" else id
+    
+        numerator   i =       sum [bd!j!i | j <- [0..aiSize-1] ]
+        denominator i = 1+100*sum [mc!j!i | j <- [0..aiSize-1] ]
+    
+        strongness :: Int -> Double    
+        strongness i = (fromIntegral $ numerator i) / (fromIntegral $denominator i)
+    
+        ranking = map snd $ reverse $ sort $ [((strongness i,-i), i)| i <- [0..aiSize-1]]
+    
+        rankingTbl = htmlTbl $ [ [command $ ais ! ri, ketsu ri] | ri <- ranking]
+    
+        headline :: [String]
+        headline = "" : "" : map show [0..aiSize-1]
+        tbl :: [[String]]
+        tbl = headline : map tr [0..aiSize-1]
+    
+        htmlTag :: String -> String -> String
+        htmlTag tag str = "<" ++ tag ++ ">" ++ str ++ "</" ++ tag ++ ">" 
+    
+        htmlTag' :: String -> String -> String -> String
+        htmlTag' tag flag str = "<" ++ tag ++ " " ++ flag ++  ">" ++ str ++ "</" ++ tag ++ ">" 
+                          
+        htmlTd :: String -> String
+        htmlTd str = htmlTag "td" str 
+    
+        htmlTr :: [String] -> String
+        htmlTr strs =  htmlTag "tr" $ unwords $ map htmlTd strs
+    
+        htmlTbl :: [[String]] -> String
+        htmlTbl tbl' = htmlTag' "table" "border=1 align=center" $ unlines $ map htmlTr tbl'
+    
+        localTimeStr = show $ utcToLocalTime tz ut
+    
+        banner1 = htmlTag "p" $ "Last Update : " ++ localTimeStr ++ "<br/>" ++
+                  "<a href='http://www.paraiso-lang.org/Walpurgisnacht/'>Back to Toppage</a>"
+        banner2 = htmlTag "center" $ htmlTag "h1" $ "ranking"
+        banner3 = htmlTag "center" $ rankingTbl
+        banner4 = "<br/>" ++ (htmlTag "center" $ htmlTag "h1" $ "league")
+        banner = unlines [banner1, banner2, banner3, banner4]
+    
+        htmlHead = unlines ["<head>",
+                            "<title>Incubating...</title>",
+                            "</head>"]
+    
+    writeFile "scoreboard.html" $ htmlTag "html" $ (htmlHead ++) $ htmlTag "body" $ banner ++ htmlTbl tbl
+    _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/"
+    return ()
+  
+hoshitoriPrinter :: IO ()
+hoshitoriPrinter = forever $ do
+  sleep 10
+  printHoshitori
 
 main :: IO ()
 main = do
   printHoshitori
   putStrLn "ready."
+  forkIO hoshitoriPrinter
   serve port [ ("suggestMatch", fun suggestMatch),
                ("reportMatch" , fun reportMatch )]
 
