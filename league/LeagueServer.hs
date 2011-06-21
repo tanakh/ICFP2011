@@ -121,7 +121,7 @@ recordMatch isNew mmatch = when valid $ do
       writeTVar boardRemark $ modify2 i0 i1 (const remark) bd 
     when isNew rec
         where
-        remark = "<br/>" ++ show (alive0 match) ++ ":" ++ show (alive0 match) ++
+        remark = "<br/>" ++ show (alive0 match) ++ ":" ++ show (alive1 match) ++
                  "<br/>" ++ show (turn match)
         valid = isJust i0m && isJust i1m
         i0 = fromJust i0m
