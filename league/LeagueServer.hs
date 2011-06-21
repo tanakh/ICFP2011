@@ -51,17 +51,20 @@ suggestMatch = do
 
 reportMatch :: (String, String) -> String -> IO ()
 reportMatch (cmd0, cmd1) result = do
-  recordMatch True match
+  hPrint stderr $ "reportMatch:" ++ show mmatch
+  recordMatch True mmatch
   where
     wr = words result
     turn' = read $ last wr
     score0'
           | wr !! 1 == "draw" = 1
-          | wr !! 2 == "0"    = if turn' < 100000 then 6 else 2
+          | wr!!2=="0" && wr!!3 == "wins"   = if turn' < 100000 then 6 else 2
+          | wr!!2=="1" && wr!!3 == "loses"  = if turn' < 100000 then 6 else 2
           | otherwise         = 0
-    killRatioStr = head $ filter (elem ':') wr
+    killRatioStr = head $ filter (elem ':') wr ++ ["-1:-1"]
     [a0,a1] = map read $ words $
-              map (\c -> if isDigit c then c else ' ') killRatioStr
+              map (\c -> if isDigit c || c=='-'then c else ' ') killRatioStr
+    mmatch = if result == "" then Nothing else Just match
     match = Match {
               p0 = AI cmd0 ,
               p1 = AI cmd1 ,
@@ -74,6 +77,7 @@ reportMatch (cmd0, cmd1) result = do
 -- results are string like this
 -- !! player 0 wins by 256:0 after turn 22218
 -- !! draw by 256:256 after turn 100000
+-- !! player 1 loses by invalid output at turn 1
 
 matchLimit :: Int
 matchLimit = 1
@@ -103,21 +107,26 @@ selectMatch ratio matchCount' = if weightSum <=0 then Nothing
 recordMatchMutex :: TMVar Int
 recordMatchMutex = unsafePerformIO $ newTMVarIO 1
 
-recordMatch :: Bool -> Match -> IO ()
-recordMatch isNew match = when valid $ do  
-  atomically $ do
-    bd <- readTVar scoreBoard
-    writeTVar scoreBoard $ modify2 i0 i1 (+(100*s0+1)) bd 
-  atomically $ do
+recordMatch :: Bool -> Maybe Match -> IO ()
+recordMatch isNew mmatch = when valid $ do  
+  if not (isJust mmatch) then atomically $ do
     bd <- readTVar boardRemark
-    writeTVar boardRemark $ modify2 i0 i1 (const remark) bd 
-  when isNew rec
-      where
+    writeTVar boardRemark $ modify2 i0 i1 (const "fail") bd 
+  else do
+    atomically $ do
+      bd <- readTVar scoreBoard
+      writeTVar scoreBoard $ modify2 i0 i1 (+(100*s0+1)) bd 
+    atomically $ do
+      bd <- readTVar boardRemark
+      writeTVar boardRemark $ modify2 i0 i1 (const remark) bd 
+    when isNew rec
+        where
         remark = "<br/>" ++ show (alive0 match) ++ ":" ++ show (alive0 match) ++
                  "<br/>" ++ show (turn match)
         valid = isJust i0m && isJust i1m
         i0 = fromJust i0m
         i1 = fromJust i1m
+        match = fromJust mmatch
         i0m = aiIndex $ p0 match
         i1m = aiIndex $ p1 match
         s0 = score0 match
@@ -130,6 +139,7 @@ recordMatch isNew match = when valid $ do
           atomically $ putTMVar recordMatchMutex (count+1)
           hPutStrLn stderr $ show count ++ " / " ++ show (matchLimit * aiSize * (aiSize-1))
           hFlush stderr
+          atomically $ writeTVar boardModified True
 
 printHoshitori :: IO ()
 printHoshitori = do
@@ -140,6 +150,7 @@ printHoshitori = do
                    brm <- readTVar boardRemark
                    writeTVar boardModified False
                    return (b, bd,mc,brm)
+  hPutStrLn stderr $ "need hoshitori ?" ++ show b
   if b ==False then return ()
   else do
     tz <- getCurrentTimeZone 

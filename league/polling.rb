@@ -79,6 +79,7 @@ yaujParticipants.each{|pants|
   sh "rm -fr #{pants.localdir}"
   sh "mkdir #{pants.localdir}"
   sh "wget #{pants.url} -q  -O #{pants.packagepath}"
+  STDERR.puts "cd #{pants.localdir}"
   FileUtils.cd(pants.localdir) {
     sh "tar zxf #{Ptgz}"
     contents = `tar tf #{Ptgz}`.split(/\n/)
@@ -102,6 +103,7 @@ yaujParticipants.each{|pants|
       sh "./install" 
     end
   } # exit participant directory
+  STDERR.puts "cd ../../"
   if ExecMode
     pants.create_runpath()
   end
