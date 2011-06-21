@@ -23,8 +23,8 @@ seal cmd = "'./nostderr.rb " ++  cmd ++ "'"
 main :: IO ()
 main = do
   conn <- connect "192.168.0.1" port
-  env <- getEnvironment
-  let debianicEnv = [("python","/usr/bin/python2")] ++ filter ((/="python") . fst) env
+--  env <- getEnvironment
+--  let debianicEnv = [("python","/usr/bin/python2")] ++ filter ((/="python") . fst) env
   forever $ do
     (cmd0, cmd1) <- suggestMatch conn 
     when (length cmd0 <= 0) exitSuccess
@@ -32,7 +32,7 @@ main = do
         vs cmd0' cmd1' = do
               let cmd = "../bin/ltg -silent true match " ++ seal cmd0' ++ " " ++ seal cmd1'
               hPutStrLn stderr cmd
-              (_, _, Just herr,hdl) <- createProcess (shell cmd) {std_err = CreatePipe, env = Just debianicEnv}
+              (_, _, Just herr,hdl) <- createProcess (shell cmd) {std_err = CreatePipe {-, env = Just debianicEnv-} }
               ret <- hGetContents herr
               let result = last $ [""] ++ (filter ((=="!!").(take 2)) $ lines ret)
               _ <- length result `seq` waitForProcess hdl
