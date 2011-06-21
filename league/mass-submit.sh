@@ -1,2 +1,2 @@
-p.nodes --xp ssh {n} /home/nushio/ICFP2011/league/submit.sh 
+p.nodes --xp ssh {n} $HOME/ICFP2011/league/submit.sh 
 
