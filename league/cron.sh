@@ -11,7 +11,7 @@ cd /home/yauj/ICFP2011/league
 scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/
 
 sleep 10
-./LeagueServer.hs
+./LeagueServer.hs &
 sleep 1
 
 ./mass-submit.sh
