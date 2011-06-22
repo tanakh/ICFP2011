@@ -161,21 +161,33 @@ S (K (S (K f) Dbl) Dbl
 -- 4={10000,S(K(zombie(255)))(S(K(dec))(K(255)))}
 
 
-isYumaStarter x = case x of
+isYumaStarter x = False
+{-
+case x of
   (VApp (VApp (VFun "S") _) (VFun "get")) -> True
   _ -> False
+-}
 
-isYuma2 x = not (isYumaStarter x) && case x of
+isYuma2 x = case x of
+  (VApp _ _) -> True
+  _ -> False
+
+{-
+not (isYumaStarter x) && case x of
 --  (VApp (VApp (VFun "S") _) (VApp (VFun "zombie") _)) -> True
   (VApp (VApp (VFun "S") _) (VApp (VFun "K") _)) -> True
 --  (VApp (VApp (VFun "S") (VApp (VFun "K") _) ) _) -> True
   _ -> False
+-}
 
 -- S(S(I)(K(255)))(zombie(255))
 
-isYumaExpression x = not (isYumaStarter x) && not (isYuma2 x) && case x of
+isYumaExpression x = False
+{-
+not (isYumaStarter x) && not (isYuma2 x) && case x of
   (VApp (VApp (VFun "S") _) _) -> True
   _ -> False
+-}
 
 find :: (Value -> Bool) -> Int -> Int -> Int -> LTG ((Int, Int), Int)
 find f minNum minVital a = do -- a > 0: max numCost / a < 0: min numCost
@@ -203,14 +215,14 @@ summonOrCopy f name summon ixToCopy copy minNumToSummon minVitalToSummon summonS
   ((_,ix),_) <- find f minNumToSummon minVitalToSummon 1
   let l1 = if ix >= 0
              then
-               if canSummon then (summonScore, "Action: summon " ++ name, (summon ix)):l0  -- OK, Yuma2 found!
+	       if canSummon then (summonScore, "Action: summon ", (summon ix)):l0  -- OK, Yuma2 found!
                else l0
              else l0
 
   -- copy Yuma2
   ((cost,ix2),len) <- find f 1 1 (-1)
   let l2 = if ix2 >= 0 && ixToCopy >= 0
-             then ((if wishToSummon then 256 else 0) - len * 512 + cost,  "Action: copy " ++ name, (copy ix2)):l1
+             then ((if wishToSummon then 256 else 0) - len * 512 + cost,  "Action: copy ", (copy ix2)):l1
              else l1
 
   return l2
@@ -243,7 +255,7 @@ mamimami = do
 
   let wishToSummonYuma2         = (v0 <= 0 && f0 /= VFun "I") || v0 >= 1
 
-  l0 <- summonOrCopy isYuma2       "Yuma2"       (\ix -> (\_ -> do ix $<< Dec )) ixToCopy (\ix -> (\_ -> do copyTo ixToCopy ix)) 2 1           1000 wishToSummonYuma2        wishToSummonYuma2       l0
+  l0 <- summonOrCopy isYuma2       "Yuma2"       (\ix -> (\_ -> do ix $<< Dec )) ixToCopy (\ix -> (\_ -> do copyTo ixToCopy ix)) 2 1           1000 wishToSummonYuma2        wishToSummonYuma2       []
 
   let iter l maxv maxname maxf = case l of
                           []       -> return (maxf, maxname)
@@ -256,7 +268,7 @@ mamimami = do
                                                             num ixLive iToKill
                                                             Dec $> ixLive
                                                    ))
-  lprint (maxname ++ "\n")
+  -- lprint (maxname ++ "\n")
   maxf ()
 
 
@@ -303,23 +315,18 @@ sittingDuck = do
 main :: IO ()
 main = runLTG $ do
   forever $ do
-    lprint "0"
     mb <- E.try createYuma
     case mb of
       Left (LTGError e) -> do
-        lprint "A"
         return ()
       Right _ -> do
-        lprint "B"
         return ()
     forever $ do        
       mb2 <- E.try $ do
         mamimami
       case mb2 of
         Left (LTGError e) -> do
-          lprint "D"
           return ()
         Right _ -> do
-          lprint "E"
           return ()
 
