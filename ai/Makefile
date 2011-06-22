@@ -3,13 +3,12 @@ all:\
 	KyoukoReviveYose2 \
 	KyoukoReviveYose2C \
 	KRY2Madan \
-	MamiY2C \
-	Y2CQB \
-	Kyubey \
 	Y2CAtkQb \
+	Y2CAtkQbMadan \
 	Yuma2a \
 	Yuma2b \
         YumaAn \
+	Kyubey \
 	SpyDuck SittingDuck  Random 
 
 Clone: Clone.hs LTG.hs LTG/*.hs
@@ -21,6 +20,8 @@ YumaAn: YumaAn.hs LTG.hs LTG/*.hs
 
 Y2CAtkQb: Y2CAtkQb.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Y2CAtkQb.hs
+Y2CAtkQbMadan: Y2CAtkQbMadan.hs LTG.hs LTG/*.hs
+	ghc --make -O3 Y2CAtkQbMadan.hs
 
 
 
@@ -199,4 +200,6 @@ everything: Test \
 	Mami103 \
 	FastZombie\
 	Y2CShuffle \
-	Y2CAtkQb 
+	MamiY2C \
+	Y2CQB \
+
