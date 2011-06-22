@@ -158,9 +158,9 @@ createYuma = do
   copyTo 0 f5
   applyR0 f4
 
-  Put $> f5
-  Put $> f3
-  Put $> 0
+  Put $>> f5
+  Put $>> f3
+  Put $>> 0
 
 -- YumaExpression:                              S (S(S(attack)(K(255)))(K(I))) (S(S(S(help)(I))(K(I)))(S(get)(I)))
 -- YumaStarter: S (K YumaExpression) Get        S (K(S(S(S(attack)(K(255)))(K(I)))(S(S(S(help)(I))(K(I)))(S(get)(I))))) (get)
@@ -267,13 +267,14 @@ mamimami = do
           else do  -- live, but value not set
             ((_,ixYumaExpression),_) <- find isYumaExpression 1 1 (-1)
             if ixYumaExpression >= 0
-              then return (False,[(if wishToSummonYumaStarter0 && not wishToSummonYuma2 then 800 else (1 - 512 * 2), "Action: v[0] <- ixYumaExpression", (\_ -> do num 0 ixYumaExpression))]) -- copy YumaExpr.
+              then return (False,[(if wishToSummonYumaStarter0 && not wishToSummonYuma2 then 800 else (1 - 512 * 2), "Action: v[0] <- ixYumaExpression", (\_ -> do numR 0 ixYumaExpression))]) -- copy YumaExpr.
               -- ÅüÅü"Action: v[0] <- ixYumaExpression"
               else return (False,[])
       else do -- v[0] is dead
         return (False, [(if wishToSummonYumaStarter0 && not wishToSummonYuma2 then 800 else (1 - 512 * 2), "Action: Revive 0", (\_ -> (do
-                                num ixLive 0
-                                Revive $> ixLive
+                                clearR ixLive
+                                ixLive $<< Zero
+                                Revive $>> ixLive
                              )))])
               -- ÅüÅü"Action: Revive v[0]"
 
