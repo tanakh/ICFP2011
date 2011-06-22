@@ -100,6 +100,9 @@ yaujParticipants.each{|pants|
       STDERR.puts "!! cannot recognize package for #{pants.name}"
       next
     end
+    sh "chmod 755 install"
+    sh "chmod 755 run"
+
     if ExecMode
       sh "./install" 
     end
