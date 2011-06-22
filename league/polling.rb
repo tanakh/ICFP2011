@@ -82,7 +82,7 @@ yaujParticipants.each{|pants|
   sh "wget #{pants.url} -q  -O #{pants.packagepath}"
   STDERR.puts "cd #{pants.localdir}"
   FileUtils.cd(pants.localdir) {
-    sh "tar zxf #{Ptgz}"
+    sh "tar xf #{Ptgz}"
     contents = `tar tf #{Ptgz}`.split(/\n/)
     flag = false
     contents.each{|fn|
