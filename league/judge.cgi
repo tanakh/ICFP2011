@@ -81,6 +81,42 @@ open('register.txt', 'w') {|fp|
   }
 }
 
+officialUrl = $cgi.a({:href => 'http://www.icfpcontest.org/' }) {
+  'ICFP programming contest 2011'
+}
+problemUrl = $cgi.a({:href => 'http://www.icfpcontest.org/2011/06/task-description-contest-starts-now.html' }) {
+  "The problem"  
+}
+
+
+greetings =  <<MESSAGE
+<font color='#ff0000'><b>
+#{$errmsg}
+</b></font>
+
+Good game, to every participants, and especially to judges, of
+#{officialUrl}. #{problemUrl} was really interesting, and I
+guess you, as I am, are excited, and cannot wait to tell ones
+ideas, learn about others, how well we did, and try out new ideas that
+unfortunately we cannot implement in time.  <br/>
+
+So, Here we publish our judge program we used for in-team LTG league
+during the ICFP contest. It is provided as it was, to meet the need as
+soon as possible. I appologize for those one who cannot run your
+program in this judge. If you want to join us, please submit your
+teamname, your team URL, and your package.  We are looking forward to
+have LTG match with many different strategies and share ideas with you
+soon. <br/>
+
+As programming lovers we are, I trust you, but please understand that
+when harmful activities are detected, I have to shut down this form of
+judge system, and no one will benefit from that. Please include the
+source in the package, if possible.  <br/>
+
+MESSAGE
+
+
+
 $cgi.out() do
   $cgi.html() do
     $cgi.head() do
@@ -91,35 +127,26 @@ $cgi.out() do
     $cgi.body() do
       $cgi.form({:action => 'index.cgi', :method => 'post'}) {
         $cgi.center() do
-          $cgi.h1() {'Yet Another Unofficial Judge Registeration Form'
-          } + $cgi.p({:align => 'left'}) {(<<STR)} + 
-<font color="#ff0000"><b>
-#{$errmsg}
-</b></font>
-
-Good game, to every participants, and especially to judges, of ICFP
-contest 2011.  This year's problem was really interesting, and I guess
-everyone, as I am, is excited, and cannot wait to tell one's ideas,
-learn about others, how well we did, and try out new ideas that
-unfortunately we cannot implement in time.  <br>
-
-So, Here we publish our judge program we used during the ICFP contest
-for in-team LTG league. It is provided as it was, to meet the need as
-soon as possible. I appologize for those one who cannot run your
-program in this judge. If you want to join us, please submit your
-teamname, your team URL, and your package.  We are looking forward to
-have LTG match with many different strategies and share ideas with you
-soon. <br>
-
-As programming lovers we are, I trust you, but please understand that
-when harmful activities are detected, I have to shut down this form of
-judge system, and no one will benefit from that. Please include the
-source in the package, if possible.  <br>
-
-STR
-          $cgi.p {
+          $cgi.h1() {'Yet Another Unofficial Judge for ICFP Contest 2011'
+          } + $cgi.p({:align => 'left'}) {
+            greetings
+          } + $cgi.p({:align => 'right'}) {
+            'Takayuki Muranushi (@nushio) from team' +
+            $cgi.a({:href => 'https://github.com/tanakh/ICFP2011'}) {
+              'atomically $ save Madoka'
+            }
+          } + $cgi.p {
             $cgi.a({:href => 'http://www.paraiso-lang.org/Walpurgisnacht/store/scoreboard.html'}) {
               'league result'
+            }+'<br/>'+
+            $cgi.a({:href =>'https://github.com/tanakh/ICFP2011/wiki/League'}) {
+              'judge specification (ja)'
+            }+'<br/>'+
+            $cgi.a({:href =>'http://nushisblogger.blogspot.com/2011/06/yauj-icfpc2011-specification.html'}) {
+              'judge specification (en)'
+            }+'<br/>'+
+            $cgi.a({:href =>'http://nushisblogger.blogspot.com/'}) {
+              'blog about this'
             }
           } +
             $cgi.table({:border => '1'}) {
@@ -130,7 +157,11 @@ STR
                     CGI::escapeHTML(ai.team)
                   } 
                 } + $cgi.td{ 
-                  CGI::escapeHTML(ai.package) 
+                  packname = CGI::escapeHTML(ai.package) 
+                  $cgi.a({ :href => packname }){
+                    packname
+                  } 
+
                 } + $cgi.td{ 
                   remove_tag = 'remove'+digest(ai.team)
                   $cgi.input({:type => 'submit', :name => remove_tag, :value => 'remove'}) 
@@ -146,7 +177,7 @@ STR
                 $cgi.td({:align=>'right'}){ 'password' }+
                 $cgi.td({:align=>'right'}){ $cgi.input({:type => 'password', :name => 'password'}) }
               } + $cgi.tr{
-                $cgi.td({:align=>'right'}){ 'team homupage url' }+
+                $cgi.td({:align=>'right'}){ 'team website url' }+
                 $cgi.td({:align=>'right'}){ $cgi.input({:type => 'text', :name => 'url'}) }
               } + $cgi.tr{
                 $cgi.td({:align=>'right'}){ 'submit.tar.gz url' } +
