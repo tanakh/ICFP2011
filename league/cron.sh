@@ -2,7 +2,7 @@
 exit 0 # Remove this to execute
 
 source /home/yauj/.bashrc
-
+killall ghc # kill the server
 ./mass-kill.sh
 
 sleep 10
