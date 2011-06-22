@@ -19,7 +19,8 @@ module LTG.SoulGems (
   lazyApplyFA,
   lazyApply2FA,
   ensureAlive,
-  summonMami 
+  summonMami, 
+  prepareMagicalBullet 
 ) where
 
 import Control.Monad
@@ -375,7 +376,7 @@ ensureAlive f = do
 
 
 -- bombard area [n..(n + 124)] 
--- bombarding starts from (255 - (n + 124)) and goes backwords
+-- to start bombarding you need to create address (255 - (n + 124)) and goes backwords
 summonMami :: Int -> Int -> Int -> LTG()
 summonMami slot work n = do
   copyTo work slot
