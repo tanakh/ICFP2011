@@ -1,23 +1,27 @@
 #!/bin/sh
-killall  ghc
-killall  ltg
-killall  ruby
-sleep 10
-killall -9 ghc
-killall -9 ltg
-killall -9 ruby
+exit 0 # Remove this to execute
+
+cd $HOME/ICFP2011/league/
+
+source /home/yauj/.bashrc
+killall ghc # kill the server
+./mass-kill.sh
+
 sleep 10
 cd /home/yauj/ICFP2011/league
 ./polling.rb -X &> polling_log.txt
 scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/
+
+sleep 10
 ./LeagueServer.hs &
+sleep 1
+
+./mass-submit.sh
 sleep 10
-./LeagueClient.hs &
+./mass-submit.sh
 sleep 10
-./LeagueClient.hs &
+./mass-submit.sh
 sleep 10
-./LeagueClient.hs &
-sleep 10
-./LeagueClient.hs &
-sleep 10
+./mass-submit.sh
+
 
