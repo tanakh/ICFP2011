@@ -42,16 +42,19 @@ numCost i = 1 + (i `mod` 2) + (numCost $ i `div` 2)
 
 
 yumaf1 :: Int
-yumaf1 = 2
+yumaf1 = 1
 
 yumaf2 :: Int
-yumaf2 = 4
+yumaf2 = 2
 
 yumaf3 :: Int
 yumaf3 = 3
 
 yumaf4 :: Int
-yumaf4 = 1
+yumaf4 = 4
+
+yumaf5 :: Int
+yumaf5 = 5
 
 yumafsave :: Int
 yumafsave = 2
@@ -74,80 +77,80 @@ createYuma = do
   let f2 = yumaf2
   let f3 = yumaf3
   let f4 = yumaf4
+  let f5 = yumaf5
 
-  -- S (K (S (S Attack (K 255)) (K 8192))) Get
+  3      $<< Zero
+  Succ   $>> 3
+  4      $<< Zero
+  Succ   $>> 4
+  Succ   $>> 4
+  --5      $<< Zero
+  --Succ   $>> 5
+  --Succ   $>> 5
+  --Succ   $>> 5
+  Attack $>> 3
+  Attack $>> 4
+  --Attack $>> 5
+  -- 7+5
 
-  -- v[f1] <- S Attack (K 255)
-  clearR f1
-  f1 $<< S
-  f1 $<< Attack
-  num 0 255
-  K $>> 0
-  applyR0 f1
+  0    $<< Zero
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  Dbl  $>> 0
+  Succ $>> 0
+  -- v[0] = 255; 16
+
+  applyR0 3
+  applyR0 4
+  --applyR0 5
+  -- 8 + 4
 
   -- S (S Zombie) (K 255)
-  clearR f4
-  f4 $<< S
-  f4 $<< Zombie
-  S  $>> f4
-  applyR0 f4
+  1    $<< S
+  1    $<< Zombie
+  S    $>> 1
+  K    $>> 0
+  applyR0 1
+  0    $<< Put
 
-  0 $<< Put
+  Dbl  $>> 0
+  Dbl  $>> 0
+  Dbl  $>> 0
+  Dbl  $>> 0
+  Dbl  $>> 0
+  -- 5
 
-  -- v[f1] <- S (S Attack (K 255)) (K 255*2)
-  S   $>> f1
-  -- Dbl $>> 0
-  K   $>> 0
-  applyR0 f1
-  0 $<< Put
+  applyR0 3
+  applyR0 4
+  --applyR0 5
+  -- 8 + 4
+  copyTo 0 1
 
-  -- v[f3] <- S (S Help I) (K 255*32)
-  Dbl $>> 0
-  Dbl $>> 0
-  Dbl $>> 0
-  Dbl $>> 0
-  K $>> 0
-  clearR f3
-  f3 $<< S
-  f3 $<< Help
-  f3 $<< I
-  S  $>> f3
-  applyR0 f3
+{-
+\x -> f (Dbl x)
+S (K (S (K f) Dbl) Dbl
 
-  -- v[f3] <- (S v[f3] (S Get I))
-  clearR 0
-  0 $<< S
-  0 $<< Get
-  0 $<< I
-  S $>> f3
-  applyR0 f3
+  S f (K 255) x = (f x) 255 = Zombie 255 hoge
+  f x y = Zombie y x
+  S f g x = (f 255) (g 255)
+  S Zombie any
+  S (S Zombie) (K 255)
+  S (S Zombie) (K 255) x
+  -> S Zombie x 255
+  -> Zombie 255 (x 255)
+-}
 
-  -- S v[f1] v[f3]
-  S $>> f1
-  copyTo 0 f3
-  applyR0 f1
-
-  -- copyTo 0 f1
-
-  copyTo f2 f1
-  K $>> f2
-  S $>> f2
-  f2 $<< Get
-  --f2 $<< Zero
-
-  -- S (K (Zombie 255)) f
-  -- S f (Zombie 255)
-
-  num 0 f1
-  copyTo 178 f2
-  178 $<< Zero
-
---  copyTo 153 f2
---  num 0 f1
---  153 $<< Zero
-
-  Put $>> f3
-  -- Put $>> 0
 
 -- YumaExpression:                              S (S(S(attack)(K(255)))(K(I))) (S(S(S(help)(I))(K(I)))(S(get)(I)))
 -- YumaStarter: S (K YumaExpression) Get        S (K(S(S(S(attack)(K(255)))(K(I)))(S(S(S(help)(I))(K(I)))(S(get)(I))))) (get)
@@ -156,7 +159,6 @@ createYuma = do
 -- 1={10000,S(S(S(attack)(K(255)))(K(510)))(S(S(S(help)(I))(K(8160)))(S(get)(I)))}
 -- 2={10000,S(K(S(S(S(attack)(K(255)))(K(510)))(S(S(S(help)(I))(K(8160)))(S(get)(I)))))(get)}
 -- 4={10000,S(K(zombie(255)))(S(K(dec))(K(255)))}
--- S (S Zombie) (K 255)
 
 
 isYumaStarter x = case x of
@@ -230,7 +232,7 @@ mamimami = do
                    return ((v, -(numCost i)), i)) $ ([8..153]++[155..255])
   let ixLive = if length liveList >= 1
                  then snd $ maximum liveList
-                 else 8
+                 else 154
 
   toCopyList <- filterM (\(_,i) -> do
                    f     <- getField True i
@@ -239,59 +241,20 @@ mamimami = do
                  then snd $ maximum toCopyList
                  else (-1)
 
-  let wishToSummonYuma2         = (v0 <= 0 && f0 /= VFun "I") || v0 == 1
-  let wishToSummonYumaStarter0  = v0 > 0
-
-  (wishToSummonYumaStarter,l0) <- do
-    myf0 <- getField True 0 -- check v[0] is OK and v[v[0]] is YumaExpression
-    myv0 <- getVital True 0 -- check v[0] is OK and v[v[0]] is YumaExpression
-    ((_,ixYumaStarter),_) <- find isYumaStarter 2 (8192+512+1) 1
-    if ixYumaStarter < 0
-      then return (False, [])
-      else if myv0 >= 0 then do
-        f0ready <- case myf0 of
-          VInt iy | 0 <= iy && iy <= 255 -> do
-            myfiy <- getField True iy
-            return (isYumaExpression myfiy)
-          _ -> return False
-        if f0ready
-          then return (wishToSummonYumaStarter0,[])
-          else do  -- live, but value not set
-            ((_,ixYumaExpression),_) <- find isYumaExpression 1 1 (-1)
-            if ixYumaExpression >= 0
-              then return (False,[(if wishToSummonYumaStarter0 && not wishToSummonYuma2 then 800 else (1 - 512 * 2), "Action: v[0] <- ixYumaExpression", (\_ -> do
-                    revive 0
-                    num 0 ixYumaExpression
-                          ))]) -- copy YumaExpr.
-              -- ÅüÅü"Action: v[0] <- ixYumaExpression"
-              else return (False,[])
-      else do -- v[0] is dead
-        return (False, [(if wishToSummonYumaStarter0 && not wishToSummonYuma2 then 800 else (1 - 512 * 2), "Action: Revive 0", (\_ -> (do
-                                clearR ixLive
-                                ixLive $<< Zero
-                                Revive $>> ixLive
-                             )))])
-              -- ÅüÅü"Action: Revive v[0]"
+  let wishToSummonYuma2         = (v0 <= 0 && f0 /= VFun "I") || v0 >= 1
 
   l0 <- summonOrCopy isYuma2       "Yuma2"       (\ix -> (\_ -> do ix $<< Dec )) ixToCopy (\ix -> (\_ -> do copyTo ixToCopy ix)) 2 1           1000 wishToSummonYuma2        wishToSummonYuma2       l0
-  l0 <- summonOrCopy isYumaStarter "YumaStarter" (\ix -> (\_ -> do ix $<< Zero)) ixToCopy (\ix -> (\_ -> do copyTo ixToCopy ix)) 2 (8192+512+1) 900 wishToSummonYumaStarter0 wishToSummonYumaStarter l0
 
   let iter l maxv maxname maxf = case l of
                           []       -> return (maxf, maxname)
                           (v,name,f):tl -> do
-                                             {-
-                                             lprint name
-                                             lprint " with cost "
-                                             lprint v
-                                             lprint "\n"
-                                             -}
                                              if v > maxv then iter tl v name f else iter tl maxv maxname maxf
 
 
   (maxf, maxname) <- (iter l0 (-2000000000) "Idle" (\_ -> do
-                                                            revive 154
-                                                            num 154 iToKill
-                                                            Dec $> 154
+                                                            revive ixLive
+                                                            num ixLive iToKill
+                                                            Dec $> ixLive
                                                    ))
   lprint (maxname ++ "\n")
   maxf ()
