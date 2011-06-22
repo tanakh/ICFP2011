@@ -1,6 +1,8 @@
 #!/bin/sh
 exit 0 # Remove this to execute
 
+cd $HOME/ICFP2011/league/
+
 source /home/yauj/.bashrc
 killall ghc # kill the server
 ./mass-kill.sh
