@@ -5,6 +5,9 @@ cd $HOME/ICFP2011/league/
 
 source /home/yauj/.bashrc
 killall ghc # kill the server
+
+scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/scoreboard2.html
+
 ./mass-kill.sh
 
 sleep 10
