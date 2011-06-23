@@ -5,7 +5,7 @@ require 'fileutils'
 
 RegisterURL = 'http://www.paraiso-lang.org/Walpurgisnacht/register.txt'
 RegisterFn = 'register.txt'
-RegisterFn = 'register2.txt'
+RegisterFn2 = 'register2.txt'
 ResultFn = 'result.txt'
 ParticipantsFn = 'participants_yauj.txt'
 ParticipantsFn2 = 'participants.txt'
@@ -58,7 +58,7 @@ yaujParticipants = []
 
 
 sh "mv #{RegisterFn} #{RegisterFn2}"
-sh "wget #{RegisterURL} -O #{RegisterFn}"
+sh "wget -q #{RegisterURL} -O #{RegisterFn}"
 
 if sh("diff #{RegisterFn} #{RegisterFn2}")
   STDERR.puts "register file unchanged!"
