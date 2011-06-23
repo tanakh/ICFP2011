@@ -10,7 +10,8 @@ echo start cron at `date` > polling_log.txt
 
 
 if ls yauj.mutex ; then 
-    echo "previous contest is still running!"
+    echo "previous contest is still running!" >> polling_log.txt
+    scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/polling_log_current.txt
     exit 1
 fi
 
