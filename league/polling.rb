@@ -4,6 +4,8 @@ require 'open-uri'
 require 'fileutils'
 
 RegisterURL = 'http://www.paraiso-lang.org/Walpurgisnacht/register.txt'
+RegisterFn = 'register.txt'
+RegisterFn = 'register2.txt'
 ResultFn = 'result.txt'
 ParticipantsFn = 'participants_yauj.txt'
 ParticipantsFn2 = 'participants.txt'
@@ -15,7 +17,7 @@ ExecMode = ARGV.index('-X')
 
 def sh(str)
   STDERR.puts str
-  system(str)
+  return system(str)
 end
 
 
@@ -52,7 +54,18 @@ end
 
 yaujParticipants = []
 
-open(RegisterURL, 'r') { |fp|
+
+
+
+sh "mv #{RegisterFn} #{RegisterFn2}"
+sh "wget #{RegisterURL} -O #{RegisterFn}"
+
+if sh("diff #{RegisterFn} #{RegisterFn2}")
+  STDERR.puts "register file unchanged!"
+  exit 1
+end
+
+open(RegisterFn, 'r') { |fp|
   counter = 0
   while line = fp.gets
     words = line.split(/\s+/)
@@ -112,3 +125,6 @@ yaujParticipants.each{|pants|
     pants.create_runpath()
   end
 } # participant loop
+
+
+exit 0

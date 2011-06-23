@@ -12,16 +12,20 @@ import Data.Vector (Vector, (!), (//))
 import qualified Data.Vector as V
 import League
 import Network.MessagePackRpc.Server
+import System.Exit
 import System.IO
 import System.IO.Unsafe
 import System.Posix.Files
 import System.Posix.Unistd
+import System.Posix.Process (getProcessID)
+import System.Posix.Types (ProcessID)
 import System.Process
 import System.Random
 
 resultFile::String
 resultFile = "result.txt"
 
+serverMutexFile = "yauj.mutex"
 
 scoreBoard :: TVar (Vector (Vector Int))
 scoreBoard = unsafePerformIO $ newTVarIO $ V.replicate aiSize $ V.replicate aiSize 0
@@ -103,9 +107,12 @@ selectMatch ratio matchCount' = if weightSum <=0 then Nothing
                           in (w, (ix, iy))
 
 
-
 recordMatchMutex :: TMVar Int
-recordMatchMutex = unsafePerformIO $ newTMVarIO 1
+recordMatchMutex = unsafePerformIO $ newTMVarIO 0
+
+maxMatchCount :: Int
+maxMatchCount = (matchLimit * aiSize * (aiSize-1))
+               
 
 recordMatch :: Bool -> Maybe Match -> IO ()
 recordMatch isNew mmatch = when valid $ do  
@@ -135,23 +142,24 @@ recordMatch isNew mmatch = when valid $ do
           h <- openFile resultFile AppendMode
           hPutStrLn h $ show match
           hClose h
-          let goal = matchLimit * aiSize * (aiSize-1)
+          hPutStrLn stderr $ show (count+1) ++ " / " ++ show maxMatchCount
           atomically $ putTMVar recordMatchMutex (count+1)
-          hPutStrLn stderr $ show count ++ " / " ++ show (matchLimit * aiSize * (aiSize-1))
           hFlush stderr
           atomically $ writeTVar boardModified True
 
-printHoshitori :: IO ()
+printHoshitori :: IO Bool
 printHoshitori = do
-  (b, bd,mc,brm) <- atomically $ do
+  (b, bd,mc,brm,rmc) <- atomically $ do
                    b <- readTVar boardModified   
                    bd <- readTVar scoreBoard
                    mc <- readTVar matchCount
                    brm <- readTVar boardRemark
+                   rmc <- takeTMVar recordMatchMutex
                    writeTVar boardModified False
-                   return (b, bd,mc,brm)
+                   return (b, bd,mc,brm, rmc)
+  atomically $ putTMVar recordMatchMutex rmc
   hPutStrLn stderr $ "need hoshitori ?" ++ show b
-  if b ==False then return ()
+  if b == False then return False
   else do
     tz <- getCurrentTimeZone 
     ut <- getCurrentTime
@@ -209,18 +217,29 @@ printHoshitori = do
     
     writeFile "scoreboard.html" $ htmlTag "html" $ (htmlHead ++) $ htmlTag "body" $ banner ++ htmlTbl tbl
     _ <- system "scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/"
-    return ()
+    return (rmc >= maxMatchCount)
   
-hoshitoriPrinter :: IO ()
-hoshitoriPrinter = forever $ do
+hoshitoriPrinter :: ProcessID -> IO ()
+hoshitoriPrinter pid = do
   sleep 10
-  printHoshitori
+  done <- printHoshitori
+  if done then do
+            system $ "rm -fr " ++ serverMutexFile
+            -- League ga owatte shimatta to iunonara,
+            -- minna shinu shika naijanai!!
+            system $ "rm -fr " ++ serverMutexFile
+            system $ "kill " ++ show pid -- anatamo!!
+            exitSuccess -- watashimo !!
+            return ()
+  else hoshitoriPrinter pid
 
 main :: IO ()
 main = do
+  system $ "touch " ++ serverMutexFile
   printHoshitori
   putStrLn "ready."
-  forkIO hoshitoriPrinter
+  pid <- getProcessID
+  forkIO $ hoshitoriPrinter pid
   serve port [ ("suggestMatch", fun suggestMatch),
                ("reportMatch" , fun reportMatch )]
 
