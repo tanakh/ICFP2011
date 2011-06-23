@@ -18,10 +18,7 @@ fi
 # Backup Previous Scoreboard
 scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/scoreboard2.html
 
-# Clear the worker nodes
-./mass-kill.sh
-
-sleep 10
+sleep 1
 cd /home/yauj/ICFP2011/league
 ./polling.rb -X &>> polling_log.txt
 
@@ -31,12 +28,16 @@ if test $? -ne 0; then
     exit 1
 fi
 
-sleep 10
 
 echo ready to start league at `date` >> polling_log.txt
 
 scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/polling_log_current.txt
 scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/polling_log.txt
+
+# Clear the worker nodes
+./mass-kill.sh
+
+sleep 1
 
 ./LeagueServer.hs &
 sleep 1
