@@ -17,7 +17,7 @@ fi
 
 
 # Backup Previous Scoreboard
-scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/scoreboard2.html
+scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/2/scoreboard.html
 
 sleep 1
 cd /home/yauj/ICFP2011/league
