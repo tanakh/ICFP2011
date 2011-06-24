@@ -43,7 +43,7 @@ class Participant
       fp.puts <<SHELL
 #!/bin/sh
 cd #{localdir} 
-ulimit -t60
+ulimit -t600
 ./run $@ 
 SHELL
     }
