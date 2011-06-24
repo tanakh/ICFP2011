@@ -234,7 +234,6 @@ hoshitoriPrinter pid = do
 
 main :: IO ()
 main = do
-  system $ "touch " ++ serverMutexFile
   printHoshitori
   putStrLn "ready."
   pid <- getProcessID
