@@ -14,7 +14,7 @@ if ls yauj.mutex ; then
     scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/polling_log_current.txt
     exit 1
 fi
-
+touch yauj.mutex
 
 # Backup Previous Scoreboard
 scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/2/scoreboard.html

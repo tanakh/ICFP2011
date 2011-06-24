@@ -224,7 +224,6 @@ hoshitoriPrinter pid = do
   sleep 10
   done <- printHoshitori
   if done then do
-            system $ "rm -fr " ++ serverMutexFile
             -- League ga owatte shimatta to iunonara,
             -- minna shinu shika naijanai!!
             system $ "rm -fr " ++ serverMutexFile
