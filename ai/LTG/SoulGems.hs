@@ -389,7 +389,10 @@ prepareMagicalBullet slot work = do
   -- S (\X -> dec X) (\X -> (lazy (get slot)) (succ X)) X
   -- compiles to
   -- S dec (S (S (K get) (K slot)) succ))
+
+  ensureAlive work
   clear work
+  ensureAlive slot
   clear slot
   
   work $< Get

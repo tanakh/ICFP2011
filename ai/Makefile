@@ -9,10 +9,15 @@ all:\
 	Yuma2b \
         YumaAn \
 	Kyubey \
+	SayaMami3 \
 	SpyDuck SittingDuck  Random 
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+SayaMami3: SayaMami3.hs LTG.hs LTG/*.hs
+	ghc --make -O3 SayaMami3.hs
+
 
 YumaAn: YumaAn.hs LTG.hs LTG/*.hs
 	ghc --make -O3 YumaAn.hs
