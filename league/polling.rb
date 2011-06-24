@@ -65,6 +65,9 @@ if sh("diff #{RegisterFn} #{RegisterFn2}")
   exit 1
 end
 
+
+sh "touch yauj.mutex"
+
 open(RegisterFn, 'r') { |fp|
   counter = 0
   while line = fp.gets

@@ -8,12 +8,12 @@ source /home/yauj/.bashrc
 
 echo start cron at `date` > polling_log.txt
 
-
 if ls yauj.mutex ; then 
     echo "previous contest is still running!" >> polling_log.txt
     scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/polling_log_current.txt
     exit 1
 fi
+
 
 # Backup Previous Scoreboard
 scp scoreboard.html paraiso-lang.org:/var/www/html/Walpurgisnacht/store/2/scoreboard.html
@@ -28,9 +28,9 @@ if test $? -ne 0; then
     exit 1
 fi
 
-# Create mutex at the first point where there is no more exit path
-touch yauj.mutex
-
+# Create mutex at the first point where there is no more exit path.
+# touch yauj.mutex
+# is done within polling.rb as soon as it decides to hold the contest.
 
 echo ready to start league at `date` >> polling_log.txt
 
