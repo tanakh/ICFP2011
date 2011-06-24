@@ -71,6 +71,6 @@ sh "cp #{WorkDir}/#{ArchiveFn} ."
 sh "sha512sum #{ArchiveFn}"
 
 if $upload
-  sh "scp #{ArchiveFn} paraiso-lang.org:/var/www/html/Walpurgisnacht/#{ArchiveFn}"
+  sh "scp #{ArchiveFn} paraiso-lang.org:/var/www/html/haddock/#{ArchiveFn}"
 end
 
