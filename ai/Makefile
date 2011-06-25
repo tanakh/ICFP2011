@@ -11,10 +11,16 @@ all:\
 	Kyubey \
 	SayaMami \
 	SayaMami3 \
+	MultiThreadExample \
 	SpyDuck SittingDuck  Random 
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+
+MultiThreadExample: MultiThreadExample.hs LTG.hs LTG/*.hs
+	ghc --make -O3 MultiThreadExample.hs
+
 
 SayaMami3: SayaMami3.hs LTG.hs LTG/*.hs
 	ghc --make -O3 SayaMami3.hs

@@ -15,8 +15,6 @@ module LTG.Simulator (
   State(..),
   Value(..),
   Monitor(..),
-  Schedule(..),
-  Scheduler(..)
   ) where
 
 import qualified Control.Exception as E
@@ -81,7 +79,7 @@ traceVital s = when traceVitalFlag $ do
     hPutStrLn h $ t' ++ " " ++ p'' ++ " " ++ show vc
     hClose h
     writeIORef lastVitalCurve vc
---------------------------------------------- traceVital
+--------------------------------------------- end traceVital
 
 --------------------------------------------- simulator
 data Simulator
@@ -109,15 +107,8 @@ oppState :: Simulator -> State
 oppState Simulator { phase = True, p2State = stat } = stat
 oppState Simulator { p1State = stat } = stat
 
-data Schedule = SingleThread | MultiThread Int{-tid-} Scheduler
 
-data Scheduler 
-  = Scheduler 
-    { activeThread    :: TMVar Int
-    , sharedSimulator :: TVar Simulator
-    }
-
---------------------------------------------- simulator
+--------------------------------------------- end simulator
 
 execStep :: Hand -> Simulator -> IO (Simulator, String)
 execStep myHand@(typ, pos, name) s = do
