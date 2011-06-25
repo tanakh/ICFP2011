@@ -30,11 +30,13 @@ shootDec :: LTG ()
 shootDec = forever $ do
              num i2 255
              copyTo i3 i2
+             lprint "Dec"
              Dec $> i3
              
 shootInc :: LTG ()
 shootInc = forever $ do
              num i4 0
+             lprint "Inc"
              Inc $> i4
 
 
