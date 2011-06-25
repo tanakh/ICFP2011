@@ -17,7 +17,7 @@ reportMatch :: RpcMethod ((String, String) -> String -> IO ())
 reportMatch = method "reportMatch"
 
 seal :: String -> String
-seal cmd = "'./nostderr.rb " ++  cmd ++ "'"
+seal cmd = "'./nostderr.hs " ++  cmd ++ "'"
 --seal cmd = cmd
 
 main :: IO ()

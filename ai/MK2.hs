@@ -16,9 +16,9 @@ attackN   = 11112
 attackDmg = 10000
 helpN     =  9999
 
-i1, i2, i3, i4, i255 :: Int
+i1, i2, i3, i4, i254 :: Int
 (i1: i2: i3: i4: i5: i6: _) = [1..]
-i255 = 255
+i254 = 254
 
 
 openingSwitch :: IORef Bool
@@ -106,21 +106,29 @@ openingMove = do
   Dbl  $>> 0
   Succ $>> 0
   Dbl  $>> 0
+  -- v[0] = 254; 15
+  K $>> 0
+
+  i1 $<< K
+  i1 $<< Dec
+  S  $>> i1
+  i1 $<< Succ
+  S  $>> i1
+  S  $>> i1
+  applyR0 i1
+
+  getField True i1 >>= lprint
+  copyTo i254 i1
+
+  0    $<< Put
   Succ $>> 0
-  -- v[0] = 255; 16
+  -- v[0] = 255; 1
+
 
   applyR0 i2
   applyR0 i3
   --applyR0 5
   -- 8 
-
-  -- S (S Dec) (K 255)
-  i1   $<< S
-  i1   $<< Dec
-  S    $>> i1
-  K    $>> 0
-  applyR0 i1
-  0    $<< Put
 
   Dbl  $>> 0
   Dbl  $>> 0
@@ -128,7 +136,10 @@ openingMove = do
   Dbl  $>> 0
   Dbl  $>> 0
   -- 5
-  copyTo i255 i1
+  getField True 0  >>= lprint
+  getField True i2 >>= lprint
+  getField True i3 >>= lprint
+
   applyR0 i2
   applyR0 i3
   --applyR0 5
@@ -145,8 +156,7 @@ discipline :: LTG ()
 discipline = do
   forever $ do
     ensureAlive i1
-    --lprint "Kora <3"
-    i1 $<< Get
+    i254 $<< Get
 
 {- Oshikattawane! Tiro - - - -}
 pumpUp :: LTG ()

@@ -11,11 +11,16 @@ all:\
 	Kyubey \
 	SayaMami \
 	MamisanKawaii \
+	MK2 \
 	MultiThreadExample \
 	SpyDuck SittingDuck  Random 
 
 Clone: Clone.hs LTG.hs LTG/*.hs
 	ghc --make -O3 Clone.hs
+
+
+MK2: MK2.hs LTG.hs LTG/*.hs
+	ghc --make -O3 MK2.hs
 
 
 MultiThreadExample: MultiThreadExample.hs LTG.hs LTG/*.hs
