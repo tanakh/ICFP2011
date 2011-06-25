@@ -33,8 +33,8 @@ main :: IO ()
 main = runLTGs
        [(isOpening                   , openingMove ),
         (mamitta                     , bikunbikun  ),
-        (enemyWeak                   , madanNoButou),
         (isAlive False 0             , discipline  ),
+        (enemyWeak                   , madanNoButou),
         ((<55000) <$> getVital True 0, pumpUp      ),
         (return True                 , shoot       )
        ]
