@@ -29,14 +29,69 @@ import LTG.Monad
 import LTG.Simulator
 
 import Data.Maybe
+import Data.Bits
 
 -- ################################################################
 -- Functions that do NOT require v[0]
+
+numOfBits :: Int -> Int
+numOfBits 0 = 0
+numOfBits n = 1 + numOfBits (n `div` 2)
+
+numCost :: Int -> Int
+numCost 0 = 1
+numCost 1 = 2
+numCost i = 1 + (i `mod` 2) + (numCost $ i `div` 2)
+
+numStep :: Int -> Int -> (Int, Card)
+numStep from to =
+  if from > to
+    then (100000, Put)
+    else
+      if from == to
+      then (0, I)
+      else if from == 0
+        then
+          let (steps,_) = numStep 1 to in
+          (steps+1,Succ)
+        else
+          -- from < to
+          let fromBits = numOfBits from in
+          let toBits   = numOfBits to   in
+          -- fromBits <= toBits
+          let b        = toBits - fromBits in
+          let toHead   = shiftR to b in
+          let toTail   = (to .&. ((shiftL 1 b)-1)) + (shiftL 1 b) in
+          if toHead > from
+            then ((toHead - from) + numCost toTail - 2, Succ)
+            else if toHead < from
+              then -- b >= 1
+                let toHead2   = shiftR to (b-1) in
+                let toTail2   = (to .&. ((shiftL 1 (b-1))-1)) + (shiftL 1 (b-1)) in
+                ((toHead2 - from) + numCost toTail2 - 2, Succ)
+              else (numCost toTail - 2, Dbl)
+
 -- v[field] <- n
 num :: Int -> Int -> LTG ()
 num ix n = do
   f <- getField True ix
   case f of
+    VInt cur | cur     == n -> return () -- do Nothing
+
+-- new version by xhl
+    VInt cur           -> do
+      let (step,nextCardFromLeft) = numStep cur n
+      -- lprint $ (show cur) ++ " " ++ (show n) ++ " -> " ++ (show nextCardFromLeft) ++ " " ++ (show step)
+      if step > 1 + numCost n
+        then do
+          clear ix
+          ix $< Zero
+          num_iter n
+        else do
+          nextCardFromLeft $> ix
+          num ix n
+{-
+-- original version
     VInt cur | cur     == n -> return () -- do Nothing
     VInt cur | cur + 1 == n -> do
       Succ $> ix
@@ -54,6 +109,7 @@ num ix n = do
       Dbl $> ix
     VInt 0 -> 
       num_iter n
+-}
     _ -> do
       clear ix
       ix $< Zero
