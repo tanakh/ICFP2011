@@ -95,7 +95,7 @@ open(ParticipantsFn,'w') {|fp|
 yaujParticipants.each{|pants|
   sh "rm -fr #{pants.localdir}"
   sh "mkdir #{pants.localdir}"
-  sh "wget #{pants.url} -q  -O #{pants.packagepath}"
+  sh "wget -T180 #{pants.url} -q  -O #{pants.packagepath}"
   STDERR.puts "cd #{pants.localdir}"
   FileUtils.cd(pants.localdir) {
     sh "tar xf #{Ptgz}"
