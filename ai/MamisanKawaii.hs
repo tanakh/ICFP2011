@@ -235,13 +235,9 @@ enemyWeak = do
 
 {- Sokkou de kimesasete morauwayo! -}
 madanNoButou :: LTG()
-madanNoButou = forever $ do
-  let weapon = VApp (VApp (VFun "S") (VFun "dec")) (VApp (VApp (VFun "S") (VApp (VApp (VFun "S") (VApp (VFun "K") (VFun "get"))) (VApp (VFun "K") (VInt 1)))) (VFun "succ"))
-  f <- getField True i5
-  if (f/=weapon) then do
-                   lprint "buki tsukuruyo"
-                   clear 0 >> prepareMagicalBullet i5 i6
-  else do
+madanNoButou = do
+  prepareMagicalBullet i5 i6
+  forever $ do
     lprint "utuyo"
     alives <- fmap V.fromList $ mapM (isAlive False) [0..255] 
     vitals <- fmap V.fromList $ mapM (getVital False) [0..255] 
