@@ -63,6 +63,13 @@ type LTG = StateT (Schedule, Simulator) IO
 infix 1 $<
 infix 1 $>
 
+yield :: LTG ()
+yield = do
+  sch <- getSchedule
+  case sch of
+    SingleThread -> return ()
+    _ -> undefined
+
 putHand :: Hand -> LTG ()
 putHand h @ (t, s, c) = do
   liftIO $ do
@@ -81,6 +88,8 @@ putHand h @ (t, s, c) = do
   unless (null msg) $ do
     liftIO $ exitSuccess
   putSimulator ns
+  yield
+
 
 readHand :: IO Hand
 readHand = do
@@ -188,7 +197,11 @@ getState my = do
   return $ if my then myState s else oppState s
 
 getSimulator :: LTG Simulator
-getSimulator = fmap snd get
+getSimulator = snd <$> get
+
+getSchedule :: LTG Schedule
+getSchedule = fst <$> get
+
 
 putSimulator :: Simulator -> LTG ()
 putSimulator s = do
