@@ -10,7 +10,7 @@ all:\
         YumaAn \
 	Kyubey \
 	SayaMami \
-	SayaMami3 \
+	MamisanKawaii \
 	MultiThreadExample \
 	SpyDuck SittingDuck  Random 
 
@@ -22,8 +22,8 @@ MultiThreadExample: MultiThreadExample.hs LTG.hs LTG/*.hs
 	ghc --make -O3 MultiThreadExample.hs
 
 
-SayaMami3: SayaMami3.hs LTG.hs LTG/*.hs
-	ghc --make -O3 SayaMami3.hs
+MamisanKawaii: MamisanKawaii.hs LTG.hs LTG/*.hs
+	ghc --make -O3 MamisanKawaii.hs
 
 
 SayaMami: SayaMami.hs LTG.hs LTG/*.hs
