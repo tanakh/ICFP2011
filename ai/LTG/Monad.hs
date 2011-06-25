@@ -42,7 +42,7 @@ runLTG ltg = do
   
   let ltg' = f teban
   
-  siml <- newSimulator
+  siml <- newSimulator 
   flip evalStateT siml $ do
     er <- E.try ltg'
     case er of

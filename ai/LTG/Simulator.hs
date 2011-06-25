@@ -14,11 +14,14 @@ module LTG.Simulator (
   get13, get23, get33,
   State(..),
   Value(..),
-  Monitor(..)
+  Monitor(..),
+  Schedule(..),
+  Scheduler(..)
   ) where
 
 import qualified Control.Exception as E
 import Control.Monad
+import Control.Concurrent.STM
 import Data.List
 import Data.IORef
 import qualified Data.Vector.Mutable as MV
@@ -80,13 +83,13 @@ traceVital s = when traceVitalFlag $ do
     writeIORef lastVitalCurve vc
 --------------------------------------------- traceVital
 
-
+--------------------------------------------- simulator
 data Simulator
   = Simulator
-    { turnCnt :: !Int
-    , phase   :: !Bool -- sente turn : True, gote turn : False
-    , p1State :: State -- sente state
-    , p2State :: State -- gote  state
+    { turnCnt  :: !Int
+    , phase    :: !Bool -- sente turn : True, gote turn : False
+    , p1State  :: State -- sente state
+    , p2State  :: State -- gote  state
     }
 
 newSimulator :: IO Simulator
@@ -105,6 +108,16 @@ myState Simulator { p2State = stat } = stat
 oppState :: Simulator -> State
 oppState Simulator { phase = True, p2State = stat } = stat
 oppState Simulator { p1State = stat } = stat
+
+data Schedule = SingleThread | MultiThread Int{-tid-} Scheduler
+
+data Scheduler 
+  = Scheduler 
+    { activeThread    :: TMVar Int
+    , sharedSimulator :: TVar Simulator
+    }
+
+--------------------------------------------- simulator
 
 execStep :: Hand -> Simulator -> IO (Simulator, String)
 execStep myHand@(typ, pos, name) s = do
