@@ -74,7 +74,7 @@ main = do
     (shell $ unwords args) {std_in = CreatePipe, std_out = CreatePipe, std_err = CreatePipe }
   _ <- forkIO $ trash procErr
   pid <- getProcessID
-  forkIO $ killer pid 6.0
+  forkIO $ killer pid 60.0
   play phase procIn procOut
   _ <- waitForProcess hdl
   return ()
