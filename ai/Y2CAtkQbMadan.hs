@@ -332,7 +332,7 @@ main = runLTG $ do
                          else kyoukoMain
     if null ds
       then do
-      turn <- turnCnt <$> get
+      turn <- getTurnCnt
       if turn >= 100000 - 1536
         then do
         lprint "yose mode"

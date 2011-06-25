@@ -3,7 +3,6 @@ import LTG
 
 import Control.Applicative
 import Control.Monad
-import Control.Monad.State
 
 main :: IO ()
 main = runLTG ltgMain
@@ -22,7 +21,7 @@ spy label my dataRecord isImportant = do
   let addrMons = zip [0..255] mons
       info = filter ( isImportant . dataRecord . snd ) addrMons
       prettyInfo = map (\(i,m) -> (i, dataRecord m)) info
-  t <- turnCnt <$> get
+  t <- getTurnCnt
   lprint $ "turn" ++ show t ++ " : (addr, " ++ label ++ ") = " ++ show prettyInfo
 
 

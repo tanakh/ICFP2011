@@ -9,6 +9,8 @@ module LTG.Monad (
   findAlive,
   isAlive,
   isDead,
+  getTurnCnt, 
+  getPhase,
   getVital,
   getField,
   getMonitor,
@@ -16,7 +18,8 @@ module LTG.Monad (
   getHistoryLength,
   getHistoryReverse,
   getState,
-  
+  getSimulator, 
+
   nop, 
   lerror, lprint,
   ) where
@@ -43,7 +46,7 @@ runLTG ltg = do
   let ltg' = f teban
   
   siml <- newSimulator 
-  flip evalStateT siml $ do
+  flip evalStateT (SingleThread,siml) $ do
     er <- E.try ltg'
     case er of
       Left (LTGError msg) -> do
@@ -55,7 +58,7 @@ runLTG ltg = do
     f "0" = ltg
     f "1" = getHand >> ltg
 
-type LTG = StateT Simulator IO
+type LTG = StateT (Schedule, Simulator) IO
 
 infix 1 $<
 infix 1 $>
@@ -73,11 +76,11 @@ putHand h @ (t, s, c) = do
       putStrLn c
     hFlush stdout
   
-  s <- get
+  s <- getSimulator
   (ns, msg) <- liftIO $ execStep h s
   unless (null msg) $ do
     liftIO $ exitSuccess
-  put ns
+  putSimulator ns
 
 readHand :: IO Hand
 readHand = do
@@ -96,9 +99,9 @@ getHand :: LTG ()
 getHand = do
   h <- liftIO readHand
   
-  s <- get
+  s <- getSimulator
   (ns, msg) <- liftIO $ execStep h s
-  put ns
+  putSimulator ns
   
   unless (null msg) $ do
     liftIO $ exitSuccess
@@ -140,6 +143,13 @@ isAlive my ix = do
 isDead :: Bool -> Int -> LTG Bool
 isDead my ix = not <$> isAlive my ix
 
+
+getTurnCnt :: LTG Int
+getTurnCnt = turnCnt <$> getSimulator
+
+getPhase :: LTG Bool
+getPhase = phase <$> getSimulator
+
 getVital :: Bool -> Int -> LTG Int
 getVital my ix = do
   st <- getState my
@@ -172,13 +182,19 @@ getHistoryLength my = do
   st <- getState my
   liftIO $ readIORef (historyLength st) 
 
-
-  
-
 getState :: Bool -> LTG State
 getState my = do
-  s <- get
+  s <- getSimulator
   return $ if my then myState s else oppState s
+
+getSimulator :: LTG Simulator
+getSimulator = fmap snd get
+
+putSimulator :: Simulator -> LTG ()
+putSimulator s = do
+  (sch, _) <- get
+  put (sch, s)
+
 
 nop :: LTG ()
 nop = do

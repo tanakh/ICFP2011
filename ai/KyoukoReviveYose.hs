@@ -294,7 +294,7 @@ main = runLTG $ do
     ds <- filterM (isDead True) [0..255]
     if null ds
       then do
-      turn <- turnCnt <$> get
+      turn <- turnCnt <$> getSimulator
       if turn >= 100000 - 1536
         then do
         lprint "yose mode"
