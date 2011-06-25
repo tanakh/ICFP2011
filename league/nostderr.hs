@@ -13,31 +13,30 @@ import System.Posix.Unistd (usleep)
 import System.Process
 
 
-turn :: TVar Int
-turn = unsafePerformIO $ newTVarIO 0
-{-# NOINLINE turn #-}
+lastTime :: TVar UTCTime
+lastTime = unsafePerformIO $ do
+             t <- getCurrentTime
+             newTVarIO t
+{-# NOINLINE lastTime #-}
+isTimeout :: TVar Bool
+isTimeout = unsafePerformIO $ newTVarIO False
+{-# NOINLINE isTimeout #-}
 
-killer :: ProcessID -> Int -> Int -> IO ()
-killer pid t usec = do
-  usleep usec
-  t' <- atomically $ readTVar turn
-  if (t==t') 
-  then do 
-    _ <- system $ "kill " ++ show pid
-    return ()
-  else return ()
 
-timeout :: Int -> IO a -> IO a
-timeout usec m = do
-  pid <- getProcessID
-  t <- atomically $ readTVar turn
-  forkIO $ killer pid t usec
-  ret <- m
-  atomically $ do
-    t' <- readTVar turn
-    writeTVar turn (t'+1)
-  return ret
-
+killer :: ProcessID -> NominalDiffTime -> IO ()
+killer pid dt = 
+  forever $ do
+    (t,b)  <- atomically $ do
+                t <- readTVar lastTime
+                b <- readTVar isTimeout
+                return (t,b)
+    t' <- getCurrentTime
+    if (b && (t' `diffUTCTime` t) > dt) 
+    then do 
+      _ <- system $ "kill " ++ show pid
+      return ()
+    else return ()
+    usleep 10000
 
 trash :: Handle -> IO ()
 trash hdl = forever $ hGetLine hdl >> return ()
@@ -50,19 +49,21 @@ getHands procIn = do
 
 putHands :: Handle -> IO ()
 putHands procOut = do
-  tz <- getCurrentTimeZone 
-  ut <- getCurrentTime
-
-  --hPutStrLn stderr $ "hajimea" ++ (show $ utcToLocalTime tz ut)
+  t <- getCurrentTime
+  atomically $ do
+    writeTVar lastTime t
+    writeTVar isTimeout True
   replicateM_ 3 $ hGetLine procOut >>= hPutStrLn stdout
+  atomically $ do
+    writeTVar isTimeout False
   hFlush stdout
-  --hPutStrLn stderr $ "owar"
+
 
 play :: Int -> Handle -> Handle -> IO ()
 play phase procIn procOut = do
   when (phase==1) $ getHands procIn
   forever $ do
-    timeout (60*10^(6::Int)) $ putHands procOut
+    putHands procOut
     getHands procIn
 
 main :: IO ()
@@ -72,6 +73,8 @@ main = do
   (Just procIn, Just procOut, Just procErr, hdl) <- createProcess 
     (shell $ unwords args) {std_in = CreatePipe, std_out = CreatePipe, std_err = CreatePipe }
   _ <- forkIO $ trash procErr
+  pid <- getProcessID
+  forkIO $ killer pid 6.0
   play phase procIn procOut
   _ <- waitForProcess hdl
   return ()
