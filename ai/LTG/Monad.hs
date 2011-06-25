@@ -145,13 +145,14 @@ runLTGs ltgs0 = do
               }
   tvs <- newTVarIO schdr
 
-  forM (zip [1..] $ map snd ltgs) (\(tid, ltg) -> forkIO $ runLTGThread tvs tid (waitWake >> ltg))
-  runLTGThread tvs masterTID (waitWake >> ltgPrefix teban >> masterThread)
+  forM (zip [1..] $ map snd ltgs) (\(tid, ltg) -> forkIO $ runLTGThread tvs tid ltg)
+  runLTGThread tvs masterTID (ltgPrefix teban >> masterThread)
 
 
 runLTGThread :: TVar Scheduler -> Int -> LTG a -> IO ()
 runLTGThread tvs tid ltg = do
   flip evalStateT (MultiThread tvs tid , error "undefined state") $ do
+                     waitWake
                      er <- E.try ltg
                      case er of
                        Left (LTGError msg) -> do
@@ -226,7 +227,7 @@ getHand = do
 right, ($<) :: Int -> Card -> LTG ()
 right s c = do
   v <- getVital True s
-  when (v <= 0) $ lerror "dead card apply"
+  when (v <= 0) $ lerror $ "dead card apply "++ show s
   putHand (2, s, cardName c)
   getHand
 
@@ -235,7 +236,7 @@ right s c = do
 left, ($>) :: Card -> Int -> LTG ()
 left c s = do
   v <- getVital True s
-  when (v <= 0) $ lerror "dead card apply"
+  when (v <= 0) $ lerror $ "dead card apply " ++ show s
   putHand (1, s, cardName c)
   getHand
 
