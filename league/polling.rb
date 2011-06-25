@@ -58,7 +58,7 @@ yaujParticipants = []
 
 
 sh "mv #{RegisterFn} #{RegisterFn2}"
-sh "wget -q #{RegisterURL} -O #{RegisterFn}"
+sh "wget -T180 -q #{RegisterURL} -O #{RegisterFn}"
 
 if sh("diff #{RegisterFn} #{RegisterFn2}")
   STDERR.puts "register file unchanged!"
