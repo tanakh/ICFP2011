@@ -11,6 +11,26 @@ import System.IO.Unsafe
 import System.Random
 
 
+{-
+  Watashi Tomoe Mami
+  Mitakiharachu- no 3nensei
+  Soshite QB to Keiyaku shita
+  Mahoushoujo yo <3
+ -}
+
+main :: IO ()
+main = runLTGs
+       [(isOpening                   , openingMove ),
+        (mamitta                     , bikunbikun  ),
+        (isAlive False 0             , discipline  ),
+        (enemyWeak                   , madanNoButou),
+        ((<55000) <$> getVital True 0, pumpUp      ),
+        (return True                 , shoot       )
+       ]
+
+
+
+-------- utilities --------
 attackN, attackDmg, helpN :: Int
 attackN   = 11112
 attackDmg = 10000
@@ -60,19 +80,7 @@ getEasyInt x =
     twos = map (2^) [(0::Int)..]
     threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
 
-
--------- Tomoe Mami --------
-
-main :: IO ()
-main = runLTGs
-       [(isOpening                   , openingMove ),
-        (mamitta                     , bikunbikun  ),
-        (isAlive False 0             , discipline  ),
-        (enemyWeak                   , madanNoButou),
-        ((<55000) <$> getVital True 0, pumpUp      ),
-        (return True                 , shoot       )
-       ]
-
+-------- end utilities --------
 
 
 {- Mazuha chotto hitoshigoto

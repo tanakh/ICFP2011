@@ -11,4 +11,4 @@ import LTG.Base
 import LTG.Exception
 import LTG.Monad
 import LTG.Simulator
-import  LTG.SoulGems
+import LTG.SoulGems
