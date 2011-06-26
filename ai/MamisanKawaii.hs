@@ -11,13 +11,6 @@ import System.IO.Unsafe
 import System.Random
 
 
-{-
-  Watashi Tomoe Mami
-  Mitakiharachu- no 3nensei
-  Soshite QB to Keiyaku shita
-  Mahoushoujo yo <3
- -}
-
 main :: IO ()
 main = runLTGs
        [(isOpening                   , openingMove ),
@@ -160,7 +153,16 @@ openingMove = do
 
   liftIO $ writeIORef openingSwitch False
 
+{-
+  Jikoshoukai ga madadattawane!
+  Watashi Tomoe Mami
+  Mitakiharachu- no 3nensei
+  Soshite QB to Keiyaku shita
+  Mahoushoujo yo <3
+ -}
+
   forever nop
+
 
 
 {- Otonashiku shite ireba
@@ -285,7 +287,7 @@ verbose = do
   lprint $ show f4 ++ " $ "  ++ show f0
 
 
----- Demo jishin no kousoku mahou ga yaburareruto ....
+---- Demo tanomi no kousoku mahou ga yaburareruto ....
 
 {- Mamisan no heya ano toki no mama 
    Jikan ga tomacchatta mitai ...   
