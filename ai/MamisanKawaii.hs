@@ -16,28 +16,9 @@ attackN   = 11112
 attackDmg = 10000
 helpN     =  9999
 
-i1, i2, i3, i4, i255 :: Int
+i1, i2, i3, i4, i254 :: Int
 (i1: i2: i3: i4: i5: i6: _) = [1..]
-i255 = 255
-
-
-openingSwitch :: IORef Bool
-openingSwitch = unsafePerformIO $ newIORef True
-{-# NOINLINE openingSwitch #-}
-
-isOpening :: LTG Bool
-isOpening = liftIO $ readIORef openingSwitch
-{-# NOINLINE isOpening #-}
-
-main :: IO ()
-main = runLTGs
-       [(isOpening                   , openingMove ),
-        (mamitta                     , bikunbikun  ),
-        (isAlive False 0             , discipline  ),
-        (enemyWeak                   , madanNoButou),
-        ((<55000) <$> getVital True 0, pumpUp      ),
-        (return True                 , shoot       )
-       ]
+i254 = 254
 
 
 infix 1 $<<
@@ -80,8 +61,30 @@ getEasyInt x =
     threep = 1 : map (\n -> 3*(2^n)) [(0::Int)..]
 
 
-{- Ikki ni Kimesasete
-   Morauwayo ! -}
+-------- Tomoe Mami --------
+main :: IO ()
+main = runLTGs
+       [(isOpening                   , openingMove ),
+        (mamitta                     , bikunbikun  ),
+        (isAlive False 0             , discipline  ),
+        (enemyWeak                   , madanNoButou),
+        ((<55000) <$> getVital True 0, pumpUp      ),
+        (return True                 , shoot       )
+       ]
+
+
+
+{- Mazuha chotto hitoshigoto
+   Katazukechatte iikasira? -}
+
+openingSwitch :: IORef Bool
+openingSwitch = unsafePerformIO $ newIORef True
+{-# NOINLINE openingSwitch #-}
+
+isOpening :: LTG Bool
+isOpening = liftIO $ readIORef openingSwitch
+{-# NOINLINE isOpening #-}
+
 openingMove :: LTG ()
 openingMove = do
   i2     $<< Zero
@@ -106,21 +109,30 @@ openingMove = do
   Dbl  $>> 0
   Succ $>> 0
   Dbl  $>> 0
+  -- v[0] = 254; 15
+  K $>> 0
+
+  i1 $<< K
+  i1 $<< Dec
+  S  $>> i1
+  i1 $<< Succ
+  S  $>> i1
+  S  $>> i1
+  applyR0 i1
+          
+  -- S (S (S (K Dec) Succ)) (K 254)
+  getField True i1 >>= lprint
+  copyTo i254 i1
+
+  0    $<< Put
   Succ $>> 0
-  -- v[0] = 255; 16
+  -- v[0] = 255; 1
+
 
   applyR0 i2
   applyR0 i3
   --applyR0 5
   -- 8 
-
-  -- S (S Dec) (K 255)
-  i1   $<< S
-  i1   $<< Dec
-  S    $>> i1
-  K    $>> 0
-  applyR0 i1
-  0    $<< Put
 
   Dbl  $>> 0
   Dbl  $>> 0
@@ -128,7 +140,10 @@ openingMove = do
   Dbl  $>> 0
   Dbl  $>> 0
   -- 5
-  copyTo i255 i1
+  getField True 0  >>= lprint
+  getField True i2 >>= lprint
+  getField True i3 >>= lprint
+
   applyR0 i2
   applyR0 i3
   --applyR0 5
@@ -144,9 +159,8 @@ openingMove = do
 discipline :: LTG ()
 discipline = do
   forever $ do
-    ensureAlive i1
-    --lprint "Kora <3"
-    i1 $<< Get
+    ensureAlive i254 -- jishin manman ni miete hontou ha kowai shinchou na mamisan kawaiiyo
+    i254 $<< Get     -- mamisan ai no muchi
 
 {- Oshikattawane! Tiro - - - -}
 pumpUp :: LTG ()
@@ -163,7 +177,7 @@ pumpUp =
       num i3 helpN
       copyTo 0 i3
 
-      debug
+      verbose
       applyR0 i4
     else do
       ensureAlive i4
@@ -173,7 +187,7 @@ pumpUp =
       v0 <- getVital True 0
       num 0 (getEasyInt v0)
 
-      debug
+      verbose
       applyR0 i4
         where        
           f i = do
@@ -196,7 +210,7 @@ shoot =
       num i2 attackN
       copyTo 0 i2
 
-      debug
+      verbose
       applyR0 i4
     else do
       ensureAlive i4
@@ -209,7 +223,7 @@ shoot =
 
       f4 <- getField True i4 
       f0 <- getField True 0
-      debug
+      verbose
       applyR0 i4
         where        
           f i = do
@@ -217,7 +231,9 @@ shoot =
               return (v, numCost i, i)
 
 
-{- Atoha zako bakkarine! -}
+
+{- Atoha zako bakkarino youne! -}
+
 enemyWeakSwitch :: IORef Bool
 enemyWeakSwitch = unsafePerformIO $ newIORef False
 {-# NOINLINE enemyWeakSwitch #-}
@@ -233,12 +249,11 @@ enemyWeak = do
      return ret
 
 
-{- Sokkou de kimesasete morauwayo! -}
+{- Souto kimareba sokkou de katadukeruwayo! -}
 madanNoButou :: LTG()
 madanNoButou = do
   prepareMagicalBullet i5 i6
   forever $ do
-    lprint "utuyo"
     alives <- fmap V.fromList $ mapM (isAlive False) [0..255] 
     vitals <- fmap V.fromList $ mapM (getVital False) [0..255] 
     let range i = [i .. endPoint i]
@@ -252,13 +267,15 @@ madanNoButou = do
   
 
 
-debug = do
+verbose = do
   f4 <- getField True i4 
   f0 <- getField True 0
   lprint $ show f4 ++ " $ "  ++ show f0
 
 
-
+{- Mamisan no heya ano toki no mama 
+   Jikan ga tomacchatta mitai ...   
+   flag tateppanashide shinjatta ... -}
 mamitta :: LTG Bool
 mamitta = isOpening
 
@@ -274,3 +291,8 @@ bikunbikun =
     else do
       _ <- revive (head deadEvens)
       return ()
+
+{-
+  By the way, Mamisan does not use zombie at all.
+  If she learns the truth of Puella Magi she will ...
+-}
