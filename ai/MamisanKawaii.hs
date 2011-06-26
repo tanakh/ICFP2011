@@ -62,6 +62,7 @@ getEasyInt x =
 
 
 -------- Tomoe Mami --------
+
 main :: IO ()
 main = runLTGs
        [(isOpening                   , openingMove ),
@@ -159,8 +160,11 @@ openingMove = do
 discipline :: LTG ()
 discipline = do
   forever $ do
-    ensureAlive i254 -- jishin manman ni miete hontou ha kowai shinchou na mamisan kawaiiyo
+    ensureAlive i254 -- jishin manman ni miete hontou ha kowai shinchou demo dokoka cover shikiretenai mamisan kawaiiyo
     i254 $<< Get     -- mamisan ai no muchi
+
+
+---- Kousoku mahou ga tooreba ika Mamisan musou
 
 {- Oshikattawane! Tiro - - - -}
 pumpUp :: LTG ()
@@ -272,6 +276,8 @@ verbose = do
   f0 <- getField True 0
   lprint $ show f4 ++ " $ "  ++ show f0
 
+
+---- Demo jishin no kousoku mahou ga yaburareruto ....
 
 {- Mamisan no heya ano toki no mama 
    Jikan ga tomacchatta mitai ...   
