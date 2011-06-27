@@ -48,9 +48,3 @@ sleep 1
 ./mass-submit.sh
 sleep 10
 ./mass-submit.sh
-sleep 10
-./mass-submit.sh
-sleep 10
-./mass-submit.sh
-
-
