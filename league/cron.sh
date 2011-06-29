@@ -42,7 +42,7 @@ scp polling_log.txt paraiso-lang.org:/var/www/html/Walpurgisnacht/store/polling_
 
 sleep 1
 
-./LeagueServer.hs &
+./LeagueServer &
 sleep 1
 
 ./mass-submit.sh
